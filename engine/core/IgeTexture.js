@@ -136,18 +136,19 @@ var IgeTexture = IgeEventingClass.extend({
 
 		if (ige.isClient) {
 			// Increment the texture load count
-			ige.textureLoadStart(imageUrl, this);
+			//ige.textureLoadStart(imageUrl, this);
+			console.log('image load', ige._textureImageStore[imageUrl]);
 
 			// Check if the image url already exists in the image cache
 			if (!ige._textureImageStore[imageUrl]) {
 				// Image not in cache, create the image object
-				image = ige._textureImageStore[imageUrl] = this.image = this._originalImage = new Image();
+				image = ige._textureImageStore[imageUrl] = this.image = this._originalImage = {} //new Image();
 				image._igeTextures = image._igeTextures || [];
 
 				// Add this texture to the textures that are using this image
 				image._igeTextures.push(this);
 
-				image.onload = function () {
+				//image.onload = function () {
 					// Mark the image as loaded
 					image._loaded = true;
 
@@ -180,7 +181,7 @@ var IgeTexture = IgeEventingClass.extend({
 						// Mark texture as loaded
 						item._textureLoaded();
 					}
-				};
+				//};
 
 				image.onerror = function () {
 					if (self.callback) {
@@ -236,7 +237,7 @@ var IgeTexture = IgeEventingClass.extend({
 				self.callback();
 			}
 			// Inform the engine that this image has loaded
-			ige.textureLoadEnd(self.image.src, self);
+			//ige.textureLoadEnd(self.image.src, self);
 		}, 5);
 	},
 
@@ -253,7 +254,7 @@ var IgeTexture = IgeEventingClass.extend({
 		var self = this;
 		var scriptElem;
 
-		ige.textureLoadStart(scriptUrl, this);
+		//ige.textureLoadStart(scriptUrl, this);
 
 		if (ige.isClient) {
 			scriptElem = document.createElement('script');
@@ -278,7 +279,7 @@ var IgeTexture = IgeEventingClass.extend({
 
 				self._loaded = true;
 				self.emit('loaded');
-				ige.textureLoadEnd(scriptUrl, self);
+				//ige.textureLoadEnd(scriptUrl, self);
 			};
 
 			scriptElem.addEventListener('error', function () {

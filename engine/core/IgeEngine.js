@@ -814,21 +814,21 @@ var IgeEngine = IgeEntity.extend({
 	/**
 	 * Adds one to the number of textures currently loading.
 	 */
-	textureLoadStart: function (url, textureObj) {
-		this._texturesLoading++;
+	/*textureLoadStart: function (url, textureObj) {
+		/*this._texturesLoading++;
 		this._texturesTotal++;
 
 		this.updateProgress();
 
 		this.emit('textureLoadStart', textureObj);
-	},
+	},*/
 
 	/**
 	 * Subtracts one from the number of textures currently loading and if no more need
 	 * to load, it will also call the _allTexturesLoaded() method.
 	 */
-	textureLoadEnd: function (url, textureObj) {
-		var self = this;
+	//textureLoadEnd: function (url, textureObj) {
+		/*var self = this;
 
 		if (!textureObj._destroyed) {
 			// Add the texture to the _textureStore array
@@ -851,8 +851,8 @@ var IgeEngine = IgeEntity.extend({
 				console.log('all textures loaded (why is this being called twice?)');
 				self._allTexturesLoaded();
 			}, 100);
-		}
-	},
+		}*/
+	//},
 
 	/**
 	 * Returns a texture from the texture store by it's url.

@@ -28,6 +28,7 @@ var IgeTiledComponent = IgeClass.extend({
 
 		if (typeof (url) === 'string') {
 			if (ige.isClient) {
+				console.log('loadJson isClient')
 				scriptElem = document.createElement('script');
 				scriptElem.src = url;
 				scriptElem.onload = function () {
@@ -81,6 +82,7 @@ var IgeTiledComponent = IgeClass.extend({
 
 		// Define the function to call when all textures have finished loading
 		allTexturesLoadedFunc = function () {
+			console.log('allTexturesLoadedFunc')
 			// Create a map for each layer
 			for (i = 0; i < layerCount; i++) {
 				layer = layerArray[i];
@@ -145,6 +147,7 @@ var IgeTiledComponent = IgeClass.extend({
 		};
 
 		if (ige.isClient) {
+			console.log('onLoadFunc', textures, tileSetCount, tileSetItem)
 			onLoadFunc = function (textures, tileSetCount, tileSetItem) {
 				return function () {
 					var i, cc;
@@ -185,8 +188,10 @@ var IgeTiledComponent = IgeClass.extend({
 
 			// TODO remove image loading or entire IgeTiledComponent
 
+			console.log('tileSetCount1', tileSetCount);
 			// Load the tile sets as textures
 			while (tileSetCount--) {
+				console.log('tileSetCount2', tileSetCount);
 				// Load the image into memory first so we can read the total width and height
 				image = new Image();
 
