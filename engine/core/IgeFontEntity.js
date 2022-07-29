@@ -239,8 +239,8 @@ var IgeFontEntity = IgeUiEntity.extend({
 			this._nativeFont = val;
 
 			// Assign the native font smart texture
-			var tex = new IgeTexture(IgeFontSmartTexture);
-			this.texture(tex);
+			//var tex = new IgeTexture(IgeFontSmartTexture);
+			//this.texture(tex);
 
 			// Set the flag indicating we are using a native font
 			this._nativeMode = true;

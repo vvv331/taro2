@@ -7,6 +7,7 @@ var Cursor = IgeEntity.extend({
 		var self = this;
 
 		if (ige.isClient) {
+			console.log('cursor texture', `${ige.map.mapUrl}/spritesheet/baseball_bat.png`);
 			var tex = new IgeTexture(`${ige.map.mapUrl}/spritesheet/baseball_bat.png`);
 			self.depth(10)
 				.layer(20)

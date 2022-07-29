@@ -118,9 +118,9 @@ var IgeTiledComponent = IgeClass.extend({
 					tileSetCount = tileSetArray.length;
 
 					if (ige.isClient) {
-						for (k = 0; k < tileSetCount; k++) {
+						/*for (k = 0; k < tileSetCount; k++) {
 							maps[i].addTexture(textures[k]);
-						}
+						}*/
 					}
 
 					// Loop through the layer data and paint the tiles
@@ -160,7 +160,7 @@ var IgeTiledComponent = IgeClass.extend({
 						tileSetItem.tileheight = ige.scaleMapDetails.originalTileHeight;
 					}
 
-					var cs = new IgeCellSheet(imageUrl, this.width * scaleFactor.x / tileSetItem.tilewidth, this.height * scaleFactor.y / tileSetItem.tileheight, ige.scaleMapDetails.shouldScaleTilesheet)
+					/*var cs = new IgeCellSheet(imageUrl, this.width * scaleFactor.x / tileSetItem.tilewidth, this.height * scaleFactor.y / tileSetItem.tileheight, ige.scaleMapDetails.shouldScaleTilesheet)
 						.id(tileSetItem.name)
 						.on('loaded', function () {
 							if (ige.scaleMapDetails.shouldScaleTilesheet && (imageUrl.includes('tilesheet') || tileSetCount === 0)) {
@@ -174,7 +174,7 @@ var IgeTiledComponent = IgeClass.extend({
 								textureCellLookup[this._tiledStartingId + i] = this;
 							}
 
-							textures.push(this);
+							textures.push(this);*/
 
 							tileSetsLoaded++;
 
@@ -182,7 +182,7 @@ var IgeTiledComponent = IgeClass.extend({
 								// All textures loaded, fire processing function
 								allTexturesLoadedFunc();
 							}
-						});
+						//});
 				};
 			};
 

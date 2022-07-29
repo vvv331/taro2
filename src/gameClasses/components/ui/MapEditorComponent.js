@@ -328,7 +328,8 @@ var MapEditorComponent = IgeEntity.extend({
 			ige.mapEditor.texture.translateTo(width / 2, height / 2, 0);
 		};
 
-		ige.client.tilesheetTexture = new IgeTexture(ige.game.data.map.tilesets[0].image, callbackForTexture);
+		console.log('mapeditor tilesheettexture', ige.game.data.map.tilesets[0].image, callbackForTexture)
+		//ige.client.tilesheetTexture = new IgeTexture(ige.game.data.map.tilesets[0].image, callbackForTexture);
 	},
 	mapShortcuts: function (e, char) {
 		if (!ige.game.data.isDeveloper) return;

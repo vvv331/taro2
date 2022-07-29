@@ -16,8 +16,9 @@ var IgeTileMap2d = IgeEntity.extend({
 		var self = this;
 
 		if (!ige.isServer) {
-			var tex = new IgeTexture(IgeTileMap2dSmartTexture);
-			self.texture(tex);
+			console.log('smart texture');
+			//var tex = new IgeTexture(IgeTileMap2dSmartTexture);
+			//self.texture(tex);
 		}
 
 		self.map = new IgeMap2d();
