@@ -25,19 +25,20 @@ var MapComponent = IgeEntity.extend({
 				ige.addComponent(IgeTiledComponent)
 					.tiled.loadJson(data, function (IgeLayerArray, IgeLayersById) {
 
-						data.tilewidth = Number(data.tilewidth);
+						/*data.tilewidth = Number(data.tilewidth);
 						data.tileheight = Number(data.tileheight);
 						data.width = Number(data.width);
-						data.height = Number(data.height);
+						data.height = Number(data.height);*/
 
 						if (ige.physics) {
+							console.log('IgeLayersById.walls', IgeLayersById.walls);
 							ige.physics.staticsFromMap(IgeLayersById.walls);
 						}
 
 						// We can add all our layers to our main scene by looping the
 						// array or we can pick a particular layer via the layersById
 						// object. Let's give an example:
-						if (mode === 'sandbox') {
+						/*if (mode === 'sandbox') {
 							var mapHeight = ige.game.data.map.height * ige.game.data.map.tileheight;
 							var mapWidth = ige.game.data.map.width * ige.game.data.map.tilewidth;
 							// changed to Region from RegionUi
@@ -51,7 +52,7 @@ var MapComponent = IgeEntity.extend({
 								.height(mapHeight)
 								.width(mapWidth)
 								.bounds2d(mapWidth, mapHeight, 0);
-						}
+						}*/
 						ige.client.mapLoaded.resolve();
 					});
 			});

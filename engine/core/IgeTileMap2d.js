@@ -15,11 +15,11 @@ var IgeTileMap2d = IgeEntity.extend({
 
 		var self = this;
 
-		if (!ige.isServer) {
-			console.log('smart texture');
+		//if (!ige.isServer) {
+		//	console.log('smart texture');
 			//var tex = new IgeTexture(IgeTileMap2dSmartTexture);
 			//self.texture(tex);
-		}
+		//}
 
 		self.map = new IgeMap2d();
 		self._adjustmentMatrix = new IgeMatrix2d();

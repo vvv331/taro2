@@ -24,10 +24,10 @@ var IgeTiledComponent = IgeClass.extend({
 	 */
 	loadJson: function (url, callback) {
 		var self = this;
-		var scriptElem;
+		//var scriptElem;
 
 		if (typeof (url) === 'string') {
-			if (ige.isClient) {
+			/*if (ige.isClient) {
 				console.log('loadJson isClient')
 				scriptElem = document.createElement('script');
 				scriptElem.src = url;
@@ -38,7 +38,7 @@ var IgeTiledComponent = IgeClass.extend({
 				document.getElementsByTagName('head')[0].appendChild(scriptElem);
 			} else {
 				IgeTiledComponent.prototype.log('URL-based Tiled data is only available client-side. If you want to load Tiled map data on the server please include the map file in your ServerConfig.js file and then specify the map\'s data object instead of the URL.', 'error');
-			}
+			}*/
 		} else {
 			self._processData(url, callback);
 		}
@@ -58,11 +58,11 @@ var IgeTiledComponent = IgeClass.extend({
 		var layer;
 		var layerType;
 		var layerData;
-		var layerDataCount;
+		//var layerDataCount;
 		var maps = [];
 		var layersById = {};
 		var tileSetArray = data.tilesets;
-		var tileSetCount = tileSetArray ? tileSetArray.length : 0;
+		/*var tileSetCount = tileSetArray ? tileSetArray.length : 0;
 		var tileSetItem;
 		var tileSetsTotal = tileSetCount;
 		var tileSetsLoaded = 0;
@@ -71,14 +71,10 @@ var IgeTiledComponent = IgeClass.extend({
 		var currentCell;
 		var onLoadFunc;
 		var image;
-		var textures = [];
+		var textures = [];*/
 		var allTexturesLoadedFunc;
 		var i; var k; var x; var y; var z;
-		var ent;
-
-		if (ige.isClient) {
-			ige.layersById = layersById;
-		}
+		//var ent;
 
 		// Define the function to call when all textures have finished loading
 		allTexturesLoadedFunc = function () {
@@ -117,12 +113,6 @@ var IgeTiledComponent = IgeClass.extend({
 					layersById[layer.name] = maps[i];
 					tileSetCount = tileSetArray.length;
 
-					if (ige.isClient) {
-						/*for (k = 0; k < tileSetCount; k++) {
-							maps[i].addTexture(textures[k]);
-						}*/
-					}
-
 					// Loop through the layer data and paint the tiles
 					layerDataCount = layerData.length;
 
@@ -146,64 +136,7 @@ var IgeTiledComponent = IgeClass.extend({
 			callback(maps, layersById);
 		};
 
-		if (ige.isClient) {
-			console.log('onLoadFunc', textures, tileSetCount, tileSetItem)
-			onLoadFunc = function (textures, tileSetCount, tileSetItem) {
-				return function () {
-					var i, cc;
-
-					var imageUrl = tileSetItem.image;
-					var scaleFactor = ige.scaleMapDetails.scaleFactor;
-
-					if (imageUrl.includes('tilesheet') || tileSetCount === 0) {
-						tileSetItem.tilewidth = ige.scaleMapDetails.originalTileWidth;
-						tileSetItem.tileheight = ige.scaleMapDetails.originalTileHeight;
-					}
-
-					/*var cs = new IgeCellSheet(imageUrl, this.width * scaleFactor.x / tileSetItem.tilewidth, this.height * scaleFactor.y / tileSetItem.tileheight, ige.scaleMapDetails.shouldScaleTilesheet)
-						.id(tileSetItem.name)
-						.on('loaded', function () {
-							if (ige.scaleMapDetails.shouldScaleTilesheet && (imageUrl.includes('tilesheet') || tileSetCount === 0)) {
-								this.resize(this._sizeX * scaleFactor.x, this._sizeY * scaleFactor.y);
-							}
-							cc = this.cellCount();
-
-							this._tiledStartingId = tileSetItem.firstgid;
-							// Fill the lookup array
-							for (i = 0; i < cc; i++) {
-								textureCellLookup[this._tiledStartingId + i] = this;
-							}
-
-							textures.push(this);*/
-
-							tileSetsLoaded++;
-
-							if (tileSetsLoaded === tileSetsTotal) {
-								// All textures loaded, fire processing function
-								allTexturesLoadedFunc();
-							}
-						//});
-				};
-			};
-
-			// TODO remove image loading or entire IgeTiledComponent
-
-			console.log('tileSetCount1', tileSetCount);
-			// Load the tile sets as textures
-			while (tileSetCount--) {
-				console.log('tileSetCount2', tileSetCount);
-				// Load the image into memory first so we can read the total width and height
-				image = new Image();
-
-				tileSetItem = tileSetArray[tileSetCount];
-				image.onload = onLoadFunc(textures, tileSetCount, tileSetItem);
-
-				image.src = tileSetItem.image;
-			}
-		} else {
-			// We're on the server so no textures are actually loaded
-			allTexturesLoadedFunc();
-		}
+		allTexturesLoadedFunc();
 	}
 });
 
