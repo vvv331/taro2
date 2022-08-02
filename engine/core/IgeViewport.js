@@ -9,6 +9,7 @@ var IgeViewport = IgeEntity.extend([
 	IgeViewport: true,
 
 	init: function (options) {
+		console.log('IGE VIEWPORT')
 		var width, height;
 
 		this._alwaysInView = true;

@@ -376,11 +376,11 @@ const Client = IgeEventingClass.extend({
 			const tileWidth = ige.scaleMapDetails.tileWidth;
 			const tileHeight = ige.scaleMapDetails.tileHeight;
 
-			ige.client.vp1.camera.translateTo(
+			/*ige.client.vp1.camera.translateTo(
 				(ige.map.data.width * tileWidth) / 2,
 				(ige.map.data.height * tileHeight) /2,
 				0
-			);
+			);*/
 
 			ige.addComponent(AdComponent);
 
@@ -464,22 +464,22 @@ const Client = IgeEventingClass.extend({
 					.mount(this.mainScene);
 
 				// moving this up here so we can give sandbox the map pan component below
-				this.vp1 = new IgeViewport()
+				/*this.vp1 = new IgeViewport()
 					.id('vp1')
 					.autoSize(true)
 					.scene(this.rootScene)
 					.drawBounds(false)
-					.mount(ige);
+					.mount(ige);*/
 
 				// sandbox check for minimap
 				if (mode == 'sandbox') {
 					//
-					ige.addComponent(MapEditorComponent)
-						.mapEditor.createMiniMap();
+					/*ige.addComponent(MapEditorComponent)
+						.mapEditor.createMiniMap();*/
 					//
 					// sandbox also gets a second viewport
 					// moved the code under a duplicate conditional
-					this.vp2 = new IgeViewport()
+					/*this.vp2 = new IgeViewport()
 						.id('vp2')
 						.layer(100)
 						.drawBounds(true)
@@ -490,16 +490,16 @@ const Client = IgeEventingClass.extend({
 						.bottom(0)
 						.right(0)
 						.scene(this.tilesheetScene)
-						.mount(ige);
+						.mount(ige);*/
 
 					// sandbox also gets map pan components
-					this.vp1.addComponent(MapPanComponent)
+					/*this.vp1.addComponent(MapPanComponent)
 						.mapPan.enabled(true);
 
 					this.vp2.addComponent(MapPanComponent)
 						.mapPan.enabled(true);
 
-					ige.client.vp1.drawBounds(true);
+					ige.client.vp1.drawBounds(true);*/
 					//
 				} else if (mode == 'play') {
 					//
@@ -511,7 +511,7 @@ const Client = IgeEventingClass.extend({
 				}
 
 				// moved this down here
-				ige._selectedViewport = this.vp1;
+				//ige._selectedViewport = this.vp1;
 
 				this.igeEngineStarted.resolve();
 			}
