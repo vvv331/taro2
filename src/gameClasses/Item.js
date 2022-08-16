@@ -408,6 +408,8 @@ var Item = IgeEntityPhysics.extend({
 												entity.inflictDamage(damageData);
 											}
 
+											// we should throw in onCollision event here with the position of the collision
+
 											return 1.0;
 										};
 
