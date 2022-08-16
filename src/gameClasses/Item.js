@@ -281,6 +281,16 @@ var Item = IgeEntityPhysics.extend({
 				});
 
 				if (ige.physics && self._stats.type == 'weapon') {
+
+					var damageData = {
+						targetsAffected: this._stats.damage.targetsAffected,
+						sourceUnitId: owner.id(),
+						sourceItemId: self.id(),
+						sourcePlayerId: owner.getOwner().id(),
+						unitAttributes: this._stats.damage.unitAttributes,
+						playerAttributes: this._stats.damage.playerAttributes
+					};
+
 					if (self._stats.isGun) {
 						if (self._stats.bulletStartPosition) {
 							var rotate = this._rotate.z;
@@ -318,7 +328,7 @@ var Item = IgeEntityPhysics.extend({
 									translate: bulletStartPosition
 								};
 
-								if (self.projectileData && (ige.isServer || (ige.isClient && !self._stats.projectileStreamMode))) {
+								if (this._stats.bulletType == 'projectile' && self.projectileData && (ige.isServer || (ige.isClient && !self._stats.projectileStreamMode))) {
 									defaultData.velocity = {
 										deployMethod: self._stats.deployMethod,
 										x: Math.cos(rotate + Math.radians(-90)) * self._stats.bulletForce,
@@ -333,33 +343,21 @@ var Item = IgeEntityPhysics.extend({
 											sourceItemId: self.id(),
 											sourceUnitId: (owner) ? owner.id() : undefined,
 											defaultData: defaultData,
-											damageData: {
-												targetsAffected: this._stats.damage.targetsAffected,
-												sourceUnitId: owner.id(),
-												sourceItemId: self.id(),
-												sourcePlayerId: owner.getOwner().id(),
-												unitAttributes: this._stats.damage.unitAttributes,
-												playerAttributes: this._stats.damage.playerAttributes
-											}
+											damageData: damageData
 										});
 
 									var projectile = new Projectile(data);
 									ige.game.lastCreatedProjectileId = projectile.id();
-								}
-								if (this._stats.bulletType == 'raycast') {
-									// starting from unit center position
-									var raycastStartPosition = {
-										x: owner._translate.x + (Math.cos(this._rotate.z + Math.radians(-90))) + (Math.cos(this._rotate.z)),
-										y: owner._translate.y + (Math.sin(this._rotate.z + Math.radians(-90))) + (Math.sin(this._rotate.z))
-									};
+
+								} else if (this._stats.bulletType == 'raycast') {
 
 									if (self._stats.currentBody && (self._stats.currentBody.type == 'spriteOnly' || self._stats.currentBody.type == 'none')) {
 										var unitAnchorX = (self._stats.currentBody.unitAnchor != undefined) ? self._stats.currentBody.unitAnchor.x : 0;
 										var unitAnchorY = (self._stats.currentBody.unitAnchor != undefined) ? self._stats.currentBody.unitAnchor.y : 0;
 
 										var endPosition = {
-											x: (owner._translate.x + unitAnchorX) + (this._stats.bulletDistance * Math.cos(owner._rotate.z + Math.radians(-90))),
-											y: (owner._translate.y + unitAnchorY) + (this._stats.bulletDistance * Math.sin(owner._rotate.z + Math.radians(-90)))
+											x: bulletStartPosition.x + (this._stats.bulletDistance * Math.cos(owner._rotate.z + Math.radians(-90))),
+											y: bulletStartPosition.y + (this._stats.bulletDistance * Math.sin(owner._rotate.z + Math.radians(-90)))
 										};
 									} else {
 										var endPosition = {
@@ -376,6 +374,7 @@ var Item = IgeEntityPhysics.extend({
 										def.m_normals = [];
 
 										def.ReportFixture = function (fixture, point, normal, fraction) {
+											
 											var fixtureList = fixture.m_body.m_fixtureList;
 											var entity = fixtureList && fixtureList.igeId && ige.$(fixtureList.igeId);
 											if (entity) {
@@ -401,6 +400,14 @@ var Item = IgeEntityPhysics.extend({
 											def.m_normals.push(normal);
 											// By returning 1, we instruct the caller to continue without clipping the
 											// ray.
+											if (entity._category == 'unit') {
+												var triggeredBy = {unitId: owner.id()};											
+												ige.game.lastAttackingUnitId = owner.id();
+												ige.game.lastAttackedUnitId = entity.id();
+												ige.trigger.fire('unitTouchesProjectile', triggeredBy);
+												entity.inflictDamage(damageData);
+											}
+
 											return 1.0;
 										};
 
@@ -409,17 +416,16 @@ var Item = IgeEntityPhysics.extend({
 
 									var callback = raycastMultipleCallback();
 
-									// ige.physics.world().rayCast(, callback.ReportFixture);
-									ige.physics.world().rayCast(
-										callback.ReportFixture,
+									ige.physics.rayCast(
 										{
-											x: raycastStartPosition.x / self.scaleRatio,
-											y: raycastStartPosition.y / self.scaleRatio
+											x: bulletStartPosition.x / self.scaleRatio,
+											y: bulletStartPosition.y / self.scaleRatio	
 										},
 										{
 											x: endPosition.x / self.scaleRatio,
 											y: endPosition.y / self.scaleRatio
-										}
+										},
+										callback.ReportFixture
 									);
 
 									// if (!self._stats.penetration) {
@@ -429,8 +435,25 @@ var Item = IgeEntityPhysics.extend({
 										itemId: self.id()
 									});
 								}
+
 								self.raycastTargets = [];
 
+								if (self.raycastTargets.length > 0) {
+									var triggeredBy = {
+										unitId: owner.id()
+									};
+									
+									self.raycastTargets.forEach(function(target) {
+										console.log(target)
+										if (target && target._category=='unit') {
+											ige.game.lastAttackingUnitId = entityB._stats.sourceUnitId;
+											ige.game.lastAttackedUnitId = entityA.id();
+											ige.trigger.fire('unitTouchesProjectile', triggeredBy);
+										}
+									});
+								}								
+
+								
 								if (self._stats.recoilForce) {
 									// apply recoil on its owner if item itself doesn't have physical body
 									if (self._stats.currentBody == undefined || self._stats.currentBody.type == 'none' || self._stats.currentBody.type == 'spriteOnly') {
@@ -459,14 +482,6 @@ var Item = IgeEntityPhysics.extend({
 								height: hitboxData.width * 2 // width is used as a radius
 							};
 
-							var damageData = {
-								targetsAffected: this._stats.damage.targetsAffected,
-								sourceUnitId: owner.id(),
-								sourceItemId: self.id(),
-								sourcePlayerId: owner.getOwner().id(),
-								unitAttributes: this._stats.damage.unitAttributes,
-								playerAttributes: this._stats.damage.playerAttributes
-							};
 							// console.log(owner._translate.x, owner._translate.y, hitbox);                                              //////////Hitbox log
 
 							entities = ige.physics.getBodiesInRegion(hitbox);

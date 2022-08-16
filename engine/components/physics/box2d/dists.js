@@ -26,7 +26,7 @@ var dists = {
 			component.b2PolygonShape = planck.Polygon;
 			component.b2CircleShape = planck.Circle;
 			// component.b2DebugDraw = planck.DebugDraw; // DebugDraw doesn't exist in planckjs
-
+			
 			component.createWorld = function (id, options) {
 				component._world = new component.b2World(this._gravity, this._sleep);
 				component._world.setContinuousPhysics(false);
@@ -49,6 +49,10 @@ var dists = {
 
 			component._sleep = true;
 			component._gravity = new component.b2Vec2(0, 0);
+		},
+
+		rayCast: function (self, from, to, callback) {
+			self._world.rayCast(from, to, callback);
 		},
 
 		getmxfp: function (body) {
