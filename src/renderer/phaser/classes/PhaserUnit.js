@@ -23,7 +23,7 @@ var PhaserUnit = /** @class */ (function (_super) {
         _this.gameObject = gameObject;
         var containerSize = Math.max(_this.sprite.displayHeight, _this.sprite.displayWidth);
         gameObject.setSize(containerSize, containerSize);
-        _this.scene.renderedEntities.push(_this.gameObject);
+        _this.toggleRender(true);
         Object.assign(_this.evtListeners, {
             flip: entity.on('flip', _this.flip, _this),
             follow: entity.on('follow', _this.follow, _this),
@@ -212,8 +212,7 @@ var PhaserUnit = /** @class */ (function (_super) {
         });
     };
     PhaserUnit.prototype.destroy = function () {
-        var _this = this;
-        this.scene.renderedEntities = this.scene.renderedEntities.filter(function (item) { return item !== _this.gameObject; });
+        this.toggleRender(false);
         ige.client.off('zoom', this.zoomEvtListener);
         this.zoomEvtListener = null;
         if (this.scaleTween) {

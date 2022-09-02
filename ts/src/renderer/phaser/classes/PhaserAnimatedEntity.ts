@@ -56,9 +56,26 @@ class PhaserAnimatedEntity extends PhaserEntity {
 		this.sprite.setScale(data.x, data.y);
 	}
 
+	protected toggleRender (on: boolean): void {
+		let renderedEntities = this.scene.renderedEntities;
+
+		if (on) {
+			renderedEntities.push(this.gameObject);
+
+		} else {
+
+			renderedEntities = renderedEntities.filter(
+				entity => {
+					entity !== this.gameObject;
+				});
+		}
+
+	}
+
 	protected destroy (): void {
 
 		this.sprite = null;
+		this.toggleRender(false);
 
 		super.destroy();
 	}

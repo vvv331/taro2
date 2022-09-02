@@ -910,6 +910,14 @@ var Item = IgeEntityPhysics.extend({
 						}
 						break;
 					case 'slotIndex':
+						var owner = self.getOwnerUnit();
+						if (ige.isClient && owner) {
+							// don't render item when item is in backpack
+							const inBackpack = newValue >= owner._stats.inventorySize;
+
+							this.emit('backpack', inBackpack);
+
+						}
 						break;
 				}
 			}

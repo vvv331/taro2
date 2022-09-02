@@ -49,8 +49,21 @@ var PhaserAnimatedEntity = /** @class */ (function (_super) {
     PhaserAnimatedEntity.prototype.scale = function (data) {
         this.sprite.setScale(data.x, data.y);
     };
+    PhaserAnimatedEntity.prototype.toggleRender = function (on) {
+        var _this = this;
+        var renderedEntities = this.scene.renderedEntities;
+        if (on) {
+            renderedEntities.push(this.gameObject);
+        }
+        else {
+            renderedEntities = renderedEntities.filter(function (entity) {
+                entity !== _this.gameObject;
+            });
+        }
+    };
     PhaserAnimatedEntity.prototype.destroy = function () {
         this.sprite = null;
+        this.toggleRender(false);
         _super.prototype.destroy.call(this);
     };
     return PhaserAnimatedEntity;

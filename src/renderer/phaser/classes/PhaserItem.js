@@ -18,15 +18,28 @@ var PhaserItem = /** @class */ (function (_super) {
     function PhaserItem(scene, entity) {
         var _this = _super.call(this, scene, entity, "item/".concat(entity._stats.itemTypeId)) || this;
         _this.sprite.visible = false;
-        _this.scene.renderedEntities.push(_this.sprite);
         _this.gameObject = _this.sprite;
         var _a = entity._translate, x = _a.x, y = _a.y;
         _this.gameObject.setPosition(x, y);
+        _this.inBackpack = false;
+        _this.toggleRender(!_this.inBackpack);
+        Object.assign(_this.evtListeners, {
+            backpack: entity.on('backpack', _this.backpack, _this),
+        });
         return _this;
     }
+    PhaserItem.prototype.backpack = function (inBackpack) {
+        //
+        this.inBackpack = inBackpack;
+        if (this.inBackpack) {
+            this.hide();
+        }
+        else {
+            this.show();
+        }
+        this.toggleRender(!this.inBackpack);
+    };
     PhaserItem.prototype.destroy = function () {
-        var _this = this;
-        this.scene.renderedEntities = this.scene.renderedEntities.filter(function (item) { return item !== _this.sprite; });
         _super.prototype.destroy.call(this);
     };
     return PhaserItem;

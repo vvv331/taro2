@@ -10,15 +10,17 @@ class PhaserProjectile extends PhaserAnimatedEntity {
 		super(scene, entity, `projectile/${entity._stats.type}`);
 
 		this.sprite.visible = false;
-		this.scene.renderedEntities.push(this.sprite);
+
 		this.gameObject = this.sprite;
 
 		const { x, y } = entity._translate;
 		this.gameObject.setPosition(x, y);
+
+		this.toggleRender(true);
 	}
 
 	protected destroy (): void {
-		this.scene.renderedEntities = this.scene.renderedEntities.filter(item => item !== this.sprite);
+
 		super.destroy();
 	}
 }

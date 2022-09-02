@@ -26,7 +26,8 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		this.gameObject = gameObject as Phaser.GameObjects.Container & Hidden;
 		const containerSize = Math.max(this.sprite.displayHeight, this.sprite.displayWidth);
 		gameObject.setSize(containerSize, containerSize);
-		this.scene.renderedEntities.push(this.gameObject);
+
+		this.toggleRender(true);
 
 		Object.assign(this.evtListeners, {
 			flip: entity.on('flip', this.flip, this),
@@ -254,7 +255,7 @@ class PhaserUnit extends PhaserAnimatedEntity {
 
 	protected destroy (): void {
 
-		this.scene.renderedEntities = this.scene.renderedEntities.filter(item => item !== this.gameObject);
+		this.toggleRender(false);
 		ige.client.off('zoom', this.zoomEvtListener);
 		this.zoomEvtListener = null;
 
