@@ -63,7 +63,6 @@ var PhaserAnimatedEntity = /** @class */ (function (_super) {
     };
     PhaserAnimatedEntity.prototype.destroy = function () {
         this.sprite = null;
-        this.toggleRender(false);
         _super.prototype.destroy.call(this);
     };
     return PhaserAnimatedEntity;

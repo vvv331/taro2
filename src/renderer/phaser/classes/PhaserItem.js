@@ -40,6 +40,7 @@ var PhaserItem = /** @class */ (function (_super) {
         this.toggleRender(!this.inBackpack);
     };
     PhaserItem.prototype.destroy = function () {
+        this.toggleRender(false);
         _super.prototype.destroy.call(this);
     };
     return PhaserItem;

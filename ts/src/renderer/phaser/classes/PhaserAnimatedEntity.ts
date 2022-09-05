@@ -75,7 +75,6 @@ class PhaserAnimatedEntity extends PhaserEntity {
 	protected destroy (): void {
 
 		this.sprite = null;
-		this.toggleRender(false);
 
 		super.destroy();
 	}

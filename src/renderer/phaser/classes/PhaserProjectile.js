@@ -25,6 +25,7 @@ var PhaserProjectile = /** @class */ (function (_super) {
         return _this;
     }
     PhaserProjectile.prototype.destroy = function () {
+        this.toggleRender(false);
         _super.prototype.destroy.call(this);
     };
     return PhaserProjectile;

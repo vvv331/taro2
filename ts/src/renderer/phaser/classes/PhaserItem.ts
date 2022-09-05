@@ -39,6 +39,7 @@ class PhaserItem extends PhaserAnimatedEntity {
 
 	protected destroy (): void {
 
+		this.toggleRender(false);
 		super.destroy();
 	}
 }
