@@ -31,7 +31,7 @@ var ClientNetworkEvents = {
 				}
 			} else {
 				// if user's current browser tab isn't this game.
-
+				console.log('inactive tab entity stream');
 				// merging data
 				if (ige.client.inactiveTabEntityStream[entityId] === undefined) {
 					ige.client.inactiveTabEntityStream[entityId] = [];

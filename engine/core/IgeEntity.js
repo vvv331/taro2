@@ -139,6 +139,21 @@ var IgeEntity = IgeObject.extend({
 		} else if (ige.isClient) {
 			self._stats.stateId = stateId;
 
+			if (this._category === 'item') {
+
+				const body = this._stats.states[stateId].body;
+				console.log(`body ${this._id}: ${body}\n\t`, this._stats.bodies[body]);
+				const bodyData = this._stats.bodies[body];
+				if (bodyData) {
+					this.emit('size', {
+						width: bodyData.width,
+						height: bodyData.height
+					});
+				} else {
+					console.trace();
+				}
+			}
+
 			if (newState.sound) {
 				for (var soundId in newState.sound) {
 					var sound = newState.sound[soundId];

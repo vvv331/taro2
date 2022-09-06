@@ -210,9 +210,9 @@ var Item = IgeEntityPhysics.extend({
 			return;
 
 		if (newOwner) {
-			if (newOwner._stats.currentItemIndex !== this._stats.slotIndex) {
-				this.setState('unselected');
-			}
+			// if (newOwner._stats.currentItemIndex !== this._stats.slotIndex) {
+			// 	this.setState('unselected');
+			// }
 
 			if (ige.isServer) {
 				this.streamUpdateData([{ ownerUnitId: newOwner.id() }]);

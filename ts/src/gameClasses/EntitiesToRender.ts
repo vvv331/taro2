@@ -8,6 +8,7 @@ class EntitiesToRender {
 	}
 
 	updateAllEntities (/*timeStamp*/): void {
+
 		var currentTime = Date.now();
 
 		if (!ige.lastTickTime) ige.lastTickTime = currentTime;

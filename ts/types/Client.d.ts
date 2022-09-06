@@ -7,6 +7,8 @@ declare class Client extends IgeEventingClass {
 	rendererLoaded: JQueryDeferred<void>;
 	playerJoined: JQueryDeferred<void>;
 
+	inactiveTabEntityStream: any[];
+
 	isZooming: boolean;
 
 	constructor(options?: object);
