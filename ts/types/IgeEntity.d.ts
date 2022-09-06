@@ -12,6 +12,7 @@ declare class IgeEntity extends IgeObject {
 	_depth: number;
 	_layer: number;
 
+	currentFollowUnit: any;
 	angleToTarget: number;
 	tween: TweenComponent;
 

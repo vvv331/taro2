@@ -31,6 +31,13 @@ class PhaserRenderer extends Phaser.Game {
 				crossOrigin: 'anonymous'
 			},
 			plugins: {
+				scene: [
+					{
+						key: 'PhaserRaycaster',
+						plugin: PhaserRaycaster,
+						mapping: 'raycasterPlugin'
+					}
+				],
 				global: [{
 					key: 'virtual-joystick',
 					plugin: rexvirtualjoystickplugin,

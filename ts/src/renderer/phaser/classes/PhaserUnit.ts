@@ -11,6 +11,8 @@ class PhaserUnit extends PhaserAnimatedEntity {
 	private zoomEvtListener: EvtListener;
 	private scaleTween: Phaser.Tweens.Tween;
 
+	ray: any;
+
 	constructor (
 		scene: GameScene,
 		entity: Unit
@@ -27,6 +29,7 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		const containerSize = Math.max(this.sprite.displayHeight, this.sprite.displayWidth);
 		gameObject.setSize(containerSize, containerSize);
 		this.scene.renderedEntities.push(this.gameObject);
+		//this.scene.raycaster.mapGameObjects(this.gameObject);
 
 		Object.assign(this.evtListeners, {
 			flip: entity.on('flip', this.flip, this),
@@ -42,6 +45,16 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		});
 
 		this.zoomEvtListener = ige.client.on('zoom', this.scaleElements, this);
+
+		this.scene.events.on('update', this.update, this);
+		this.scene.raycaster.mapGameObjects(this.gameObject);
+	}
+
+	update () {
+		if (this.ray) {
+			let intersections = this.ray.castCircle();
+			this.ray.setOrigin(this.gameObject.x, this.gameObject.y);
+		}
 	}
 
 	protected updateTexture (usingSkin) {
@@ -121,6 +134,13 @@ class PhaserUnit extends PhaserAnimatedEntity {
 			return;
 		}
 		camera.startFollow(this.gameObject, false, 0.05, 0.05);
+
+		if (ige.client.myPlayer.currentFollowUnit === this.entity.id()) {
+			this.ray = this.scene.raycaster.createRay();
+			this.ray.setOrigin(this.gameObject.x, this.gameObject.y);
+			let intersections = this.ray.castCircle();
+			console.log('intersections', intersections);
+		}
 	}
 
 	private getLabel (): Phaser.GameObjects.Text {

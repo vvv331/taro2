@@ -24,6 +24,7 @@ var PhaserUnit = /** @class */ (function (_super) {
         var containerSize = Math.max(_this.sprite.displayHeight, _this.sprite.displayWidth);
         gameObject.setSize(containerSize, containerSize);
         _this.scene.renderedEntities.push(_this.gameObject);
+        //this.scene.raycaster.mapGameObjects(this.gameObject);
         Object.assign(_this.evtListeners, {
             flip: entity.on('flip', _this.flip, _this),
             follow: entity.on('follow', _this.follow, _this),
@@ -37,8 +38,16 @@ var PhaserUnit = /** @class */ (function (_super) {
             'render-chat-bubble': entity.on('render-chat-bubble', _this.renderChat, _this),
         });
         _this.zoomEvtListener = ige.client.on('zoom', _this.scaleElements, _this);
+        _this.scene.events.on('update', _this.update, _this);
+        _this.scene.raycaster.mapGameObjects(_this.gameObject);
         return _this;
     }
+    PhaserUnit.prototype.update = function () {
+        if (this.ray) {
+            var intersections = this.ray.castCircle();
+            this.ray.setOrigin(this.gameObject.x, this.gameObject.y);
+        }
+    };
     PhaserUnit.prototype.updateTexture = function (usingSkin) {
         if (usingSkin) {
             this.sprite.anims.stop();
@@ -101,6 +110,12 @@ var PhaserUnit = /** @class */ (function (_super) {
             return;
         }
         camera.startFollow(this.gameObject, false, 0.05, 0.05);
+        if (ige.client.myPlayer.currentFollowUnit === this.entity.id()) {
+            this.ray = this.scene.raycaster.createRay();
+            this.ray.setOrigin(this.gameObject.x, this.gameObject.y);
+            var intersections = this.ray.castCircle();
+            console.log('intersections', intersections);
+        }
     };
     PhaserUnit.prototype.getLabel = function () {
         if (!this.label) {

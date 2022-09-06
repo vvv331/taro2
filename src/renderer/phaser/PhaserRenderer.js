@@ -42,6 +42,13 @@ var PhaserRenderer = /** @class */ (function (_super) {
                 crossOrigin: 'anonymous'
             },
             plugins: {
+                scene: [
+                    {
+                        key: 'PhaserRaycaster',
+                        plugin: PhaserRaycaster,
+                        mapping: 'raycasterPlugin'
+                    }
+                ],
                 global: [{
                         key: 'virtual-joystick',
                         plugin: rexvirtualjoystickplugin,

@@ -87,6 +87,7 @@ var GameScene = /** @class */ (function (_super) {
         this.load.tilemapTiledJSON('map', this.patchMapData(data.map));
         this.load.bitmapFont('Arial_24px_bold_black', '/assets/fonts/Arial_24px_bold_black_0.png', '/assets/fonts/Arial_24px_bold_black.fnt');
         this.load.bitmapFont('Arial_24px_bold_white', '/assets/fonts/Arial_24px_bold_white_0.png', '/assets/fonts/Arial_24px_bold_white.fnt');
+        this.load.scenePlugin('PhaserRaycaster');
     };
     GameScene.prototype.loadEntity = function (key, data, skin) {
         var _this = this;
@@ -177,6 +178,9 @@ var GameScene = /** @class */ (function (_super) {
         Object.values(this.textures.list).forEach(function (val) {
             val.setFilter(Phaser.Textures.FilterMode.NEAREST);
         });
+        this.raycasterPlugin = this['raycasterPlugin'];
+        this.raycaster = this.raycasterPlugin.createRaycaster({ debug: true });
+        //console.log(this.raycaster);
     };
     GameScene.prototype.setZoomSize = function (height) {
         // backward compatible game scaling on average 16:9 screen

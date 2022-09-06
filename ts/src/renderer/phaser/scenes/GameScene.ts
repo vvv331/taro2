@@ -5,6 +5,9 @@ class GameScene extends PhaserScene {
 	entityLayers: Phaser.GameObjects.Layer[] = [];
 	renderedEntities: (Phaser.GameObjects.GameObject & Phaser.GameObjects.Components.Visible & Hidden)[] = [];
 
+	raycasterPlugin: any;
+	raycaster: any;
+
 	constructor() {
 		super({ key: 'Game' });
 	}
@@ -112,6 +115,8 @@ class GameScene extends PhaserScene {
 			'/assets/fonts/Arial_24px_bold_white_0.png',
 			'/assets/fonts/Arial_24px_bold_white.fnt'
 		);
+
+		this.load.scenePlugin('PhaserRaycaster');
 	}
 
 	loadEntity (key: string, data: EntityData, skin = false): void {
@@ -233,6 +238,9 @@ class GameScene extends PhaserScene {
 		Object.values(this.textures.list).forEach(val => {
 			val.setFilter(Phaser.Textures.FilterMode.NEAREST);
 		  });
+		this.raycasterPlugin = this['raycasterPlugin'];
+		this.raycaster = this.raycasterPlugin.createRaycaster({debug: true});
+		//console.log(this.raycaster);
 	}
 
 	private setZoomSize (height: number): void {

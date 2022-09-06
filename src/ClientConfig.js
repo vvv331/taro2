@@ -56,6 +56,8 @@ var igeClientConfig = {
 		/* Phaser */
 		'renderer/phaser/phaser-taro.min.js',
 		'../node_modules/phaser3-rex-plugins/dist/rexvirtualjoystickplugin.min.js',
+		//'https://cdn.jsdelivr.net/npm/phaser-raycaster@0.10.4/dist/phaser-raycaster.min.js',
+		'../node_modules/phaser-raycaster/dist/phaser-raycaster.min.js',
 		'renderer/phaser/enums/FlipMode.js',
 		'renderer/phaser/enums/TileLayer.js',
 		'renderer/phaser/enums/EntityLayer.js',
