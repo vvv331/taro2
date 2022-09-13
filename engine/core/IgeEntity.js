@@ -4197,13 +4197,13 @@ var IgeEntity = IgeObject.extend({
 								this._stats.currentItemIndex = newValue;
 
 								// need this if item data is processed before unit data
-								let selectedItem = this._stats.itemIds[newValue];
+								const selectedItemId = this._stats.itemIds[newValue];
 
-								if (selectedItem) {
-									// in case of pure number ID
-									selectedItem = selectedItem.toString();
+								// selectedItemId can be undefined
+								if (selectedItemId && ige.$(selectedItemId)) {
+
 									// tell client this item is selected
-									ige.$(selectedItem).setState('selected');
+									ige.$(selectedItemId).setState('selected');
 								}
 							}
 							break;
