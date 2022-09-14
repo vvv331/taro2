@@ -1524,7 +1524,7 @@ var Unit = IgeEntityPhysics.extend({
 			}
 			self.updateTexture();
 		} else if (ige.isServer) {
-			const requestedPurchasable = owner._stats.allPurchasables.find((purchasable) => equipPurchasable._id === purchasable._id);
+			const requestedPurchasable = owner._stats.allPurchasables ? owner._stats.allPurchasables.find((purchasable) => equipPurchasable._id === purchasable._id) : null;
 			if (!requestedPurchasable || !requestedPurchasable.image) {
 				// requested purchasable does not exist or player does not have access to it.
 				return;
