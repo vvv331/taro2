@@ -564,6 +564,8 @@ var IgeNetIoServer = {
 						});
 						return;
 					}
+					
+					self.lastUploads[socket._remoteAddress] = self.lastUploads[socket._remoteAddress] || [];
 
 					self.uploadPerSecond[socket._remoteAddress] += JSON.stringify(data).length;
 					self.lastUploads[socket._remoteAddress].push(data);
