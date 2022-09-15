@@ -59,7 +59,7 @@ var IgeNetIoServer = {
 				let ups = self.uploadPerSecond[ip];
 				var socket = self._socketByIp[ip]
 				
-				if (ups > 500) {
+				if (socket && ups > 6000) {
 					var player = ige.game.getPlayerByIp(ip);
 					
 					ige.server.bannedIps.push(ip);
