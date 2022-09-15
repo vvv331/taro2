@@ -10,6 +10,24 @@ var ActionComponent = IgeEntity.extend({
 	run: function (actionList, vars) {
 		var self = this;
 
+		// prevent recursive/infinite action calls consuming CPU
+		var now = Date.now();						
+		var tickDelta = now - ige.now;
+		if (tickDelta > 350) {
+			global.rollbar.log("engineStep is taking longer than 350ms", {
+				query: 'engineFreeze',
+				tickDelta: tickDelta,
+				masterServer: global.myIp,
+				gameTitle: ige.game.data.defaultData.title,
+				commandsFromLastTick: ige.network.commandCount						
+			});
+			
+			var errorMsg = ige.script.errorLog("engineTick is taking longer than 350ms (took"+tickDelta+"ms)");
+			console.log(errorMsg);
+
+			// ige.server.unpublish(errorMsg); // not publishing yet cuz TwoHouses will get unpub. loggin instead.
+		}
+		
 		if (actionList == undefined || actionList.length <= 0)
 			return;
 
@@ -888,7 +906,6 @@ var ActionComponent = IgeEntity.extend({
 
 					case 'while':
 						var loopCounter = 0;
-
 						while (ige.condition.run(action.conditions, vars)) {
 							var brk = self.run(action.actions, vars);
 							if (brk == 'break' || vars.break) {
@@ -906,7 +923,7 @@ var ActionComponent = IgeEntity.extend({
 								var errorMsg = ige.script.errorLog('infinite loop detected');
 								console.log(errorMsg);
 								ige.server.unpublish(errorMsg);
-							}
+							}							
 						}
 						break;
 					case 'for':
