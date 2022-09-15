@@ -202,7 +202,7 @@ var ActionComponent = IgeEntity.extend({
 									ige.game.data.variables[varName].value = newValue;
 								}
 							} catch (err) {
-								console.error(err)
+								console.error('sendPostRequest', ige.game.data.defaultData.title, url, err);
 								if (ige.game.data.variables.hasOwnProperty(varName)) {
 									ige.game.data.variables[varName].value = 'error';
 								}
