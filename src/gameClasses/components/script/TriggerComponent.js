@@ -9,6 +9,8 @@ var TriggerComponent = IgeEntity.extend({
 		}
 
 		this._registerTriggeredScripts();
+
+		this.triggerProfiler = {}
 	},
 
 	// map trigger events, so we don't have to iterate through all scripts to find corresponding scripts
@@ -224,6 +226,18 @@ var TriggerComponent = IgeEntity.extend({
 		// if (triggerName === 'projectileTouchesWall') console.log("trigger fire", triggerName, triggeredBy)
 
 		if (ige.isServer || (ige.isClient && ige.physics)) {
+
+			if (ige.isServer) {
+				var now = Date.now();		
+				var lastTriggerRunTime = now - this.lastTriggerRanAt;
+				
+				if (this.lastTrigger)
+					this.triggerProfiler[this.lastTrigger] = lastTriggerRunTime;
+
+				this.lastTrigger = triggerName;
+				this.lastTriggerRanAt = now;
+			}
+
 			let scriptIds = this.triggeredScripts[triggerName]
 			for (i in scriptIds) {
 				let scriptId = scriptIds[i]

@@ -4,41 +4,57 @@ var ActionComponent = IgeEntity.extend({
 
 	init: function () {
 		this.entityCategories = ['unit', 'item', 'projectile', 'region', 'wall'];
-		this.profiler = {}
+		this.lastAction = undefined;
+		this.actionProfiler = {}
 	},
 
 	// entity can be either trigger entity, or entity in loop
 	run: function (actionList, vars) {
 		var self = this;
 
-		// prevent recursive/infinite action calls consuming CPU
-		var now = Date.now();						
-		var tickDelta = now - ige.now;
-		if (tickDelta > 2000) {
-			global.rollbar.log("engineStep is taking longer than 2000ms", {
-				query: 'engineFreeze',
-				tickDelta: tickDelta,
-				masterServer: global.myIp,
-				gameTitle: ige.game.data.defaultData.title,
-				clientCommands: ige.network.commandCount						
-			});
-			
-			var errorMsg = ige.script.errorLog("engineTick is taking longer than 2000ms (took"+tickDelta+"ms)");
-			console.log(errorMsg);
-
-			// ige.server.unpublish(errorMsg); // not publishing yet cuz TwoHouses will get unpub. loggin instead.
-		}
-		
 		if (actionList == undefined || actionList.length <= 0)
 			return;
 
 		for (var i = 0; i < actionList.length; i++) {
 			var action = actionList[i];
-
+			
 			// if action is disabled
 			if (!action || action.disabled == true || (ige.isClient && ige.physics && !action.runOnClient)) {
 				continue;
 			}
+
+			var now = Date.now();		
+			var lastActionRunTime = now - this.lastActionRanAt;
+			var tickDelta = now - ige.now;
+
+			// prevent recursive/infinite action calls consuming CPU
+			if (tickDelta > 1000 && !ige.engineLagReported) {
+				var rollbarData = {
+					query: 'engineFreeze',
+					tickDelta: tickDelta,
+					masterServer: global.myIp,
+					gameTitle: ige.game.data.defaultData.title,
+					clientCommands: ige.network.commandCount,
+					actionProfiler: this.actionProfiler,
+					lastAction: action.type,
+					triggerProfiler: ige.trigger.triggerProfiler
+				};
+
+				global.rollbar.log("engineStep is taking longer than 1000ms", rollbarData);
+				
+				var errorMsg = ige.script.errorLog("engineTick is taking longer than 1000ms (took"+tickDelta+"ms)");
+				console.log(errorMsg, rollbarData);
+				ige.engineLagReported = true;
+				// ige.server.unpublish(errorMsg); // not publishing yet cuz TwoHouses will get unpub. loggin instead.
+			}
+
+			if (this.lastAction)
+				this.actionProfiler[this.lastAction] = lastActionRunTime;
+
+			this.lastAction = action.type;
+			this.lastActionRanAt = now;			
+			
+
 			var params = {};
 			var entity = ige.variable.getValue(action.entity, vars);
 			ige.script.currentActionName = action.type;

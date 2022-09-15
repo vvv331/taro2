@@ -1862,6 +1862,7 @@ var IgeEngine = IgeEntity.extend({
 
 		ige.gameLoopTickHasExecuted = false;
 		ige.physicsTickHasExecuted = false;
+		ige.engineLagReported = false;
 
 		et = new Date().getTime();
 		ige._tickTime = et - ige.now;
