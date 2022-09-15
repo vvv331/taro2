@@ -25,13 +25,13 @@ var ActionComponent = IgeEntity.extend({
 
 			var now = Date.now();		
 			var lastActionRunTime = now - this.lastActionRanAt;
-			var tickDelta = now - ige.now;
+			var engineTickDelta = now - ige.now;
 
 			// prevent recursive/infinite action calls consuming CPU
-			if (tickDelta > 1000 && !ige.engineLagReported) {
+			if (engineTickDelta > 1000 && !ige.engineLagReported) {
 				var rollbarData = {
 					query: 'engineFreeze',
-					tickDelta: tickDelta,
+					engineTickDelta: engineTickDelta,
 					masterServer: global.myIp,
 					gameTitle: ige.game.data.defaultData.title,
 					clientCommands: ige.network.commandCount,
@@ -42,14 +42,22 @@ var ActionComponent = IgeEntity.extend({
 
 				global.rollbar.log("engineStep is taking longer than 1000ms", rollbarData);
 				
-				var errorMsg = ige.script.errorLog("engineTick is taking longer than 1000ms (took"+tickDelta+"ms)");
+				var errorMsg = ige.script.errorLog("engineTick is taking longer than 1000ms (took"+engineTickDelta+"ms)");
 				console.log(errorMsg);
 				ige.engineLagReported = true;
 				// ige.server.unpublish(errorMsg); // not publishing yet cuz TwoHouses will get unpub. loggin instead.
 			}
 
-			if (this.lastAction)
-				this.actionProfiler[this.lastAction] = lastActionRunTime;
+			if (this.lastAction) {
+				if (this.actionProfiler[this.lastAction]) {
+					var count = this.actionProfiler[this.lastAction].count;					
+					this.actionProfiler[this.lastAction].count++;					
+					this.actionProfiler[this.lastAction].avgTime = ((this.actionProfiler[this.lastAction].avgTime * count) + lastActionRunTime ) / (count + 1)
+					this.actionProfiler[this.lastAction].totalTime += lastActionRunTime					 
+				} else {
+					this.actionProfiler[this.lastAction] = {count: 1, avgTime: lastActionRunTime, totalTime: lastActionRunTime}
+				}
+			}
 
 			this.lastAction = action.type;
 			this.lastActionRanAt = now;			

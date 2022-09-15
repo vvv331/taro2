@@ -231,9 +231,17 @@ var TriggerComponent = IgeEntity.extend({
 				var now = Date.now();		
 				var lastTriggerRunTime = now - this.lastTriggerRanAt;
 				
-				if (this.lastTrigger)
-					this.triggerProfiler[this.lastTrigger] = lastTriggerRunTime;
-
+				if (this.lastTrigger) {
+					if (this.triggerProfiler[this.lastTrigger]) {
+						var count = this.triggerProfiler[this.lastTrigger].count;					
+						this.triggerProfiler[this.lastTrigger].count++;					
+						this.triggerProfiler[this.lastTrigger].avgTime = ((this.triggerProfiler[this.lastTrigger].avgTime * count) + lastTriggerRunTime ) / (count + 1)
+						this.triggerProfiler[this.lastTrigger].totalTime += lastTriggerRunTime					 
+					} else {
+						this.triggerProfiler[this.lastTrigger] = {count: 1, avgTime: lastTriggerRunTime, totalTime: lastTriggerRunTime}
+					}
+				}
+	
 				this.lastTrigger = triggerName;
 				this.lastTriggerRanAt = now;
 			}
