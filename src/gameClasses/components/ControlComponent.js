@@ -352,8 +352,10 @@ var ControlComponent = IgeEntity.extend({
 						ige.client.myPlayer.control.input.mouse.x = self.newMousePosition[0];
 						ige.client.myPlayer.control.input.mouse.y = self.newMousePosition[1];
 					}
-					if (self.sendPlayerInput)
+					if (self.sendPlayerInput) {
 						ige.network.send('playerMouseMoved', self.newMousePosition);
+					}
+						
 				}
 				self.lastMousePosition = self.newMousePosition;
 			}
@@ -363,11 +365,12 @@ var ControlComponent = IgeEntity.extend({
 			if (ige.physics && ige.game.cspEnabled && unit) {
 				var x = unit._translate.x.toFixed(0);
 				var y = unit._translate.y.toFixed(0);
-				if (self.sendPlayerInput || self.lastPositionSent == undefined || self.lastPositionSent[0] != x || self.lastPositionSent[1] != y) {
+				if (self.sendPlayerInput && (self.lastPositionSent == undefined || self.lastPositionSent[0] != x || self.lastPositionSent[1] != y)) {
 					var pos = [x, y];
 					ige.network.send('playerUnitMoved', pos);
 					// console.log(x, y)
 					self.lastPositionSent = pos;
+					
 				}
 			}
 
