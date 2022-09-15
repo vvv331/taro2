@@ -4,6 +4,7 @@ var ActionComponent = IgeEntity.extend({
 
 	init: function () {
 		this.entityCategories = ['unit', 'item', 'projectile', 'region', 'wall'];
+		this.profiler = {}
 	},
 
 	// entity can be either trigger entity, or entity in loop
@@ -13,16 +14,16 @@ var ActionComponent = IgeEntity.extend({
 		// prevent recursive/infinite action calls consuming CPU
 		var now = Date.now();						
 		var tickDelta = now - ige.now;
-		if (tickDelta > 350) {
-			global.rollbar.log("engineStep is taking longer than 350ms", {
+		if (tickDelta > 2000) {
+			global.rollbar.log("engineStep is taking longer than 2000ms", {
 				query: 'engineFreeze',
 				tickDelta: tickDelta,
 				masterServer: global.myIp,
 				gameTitle: ige.game.data.defaultData.title,
-				commandsFromLastTick: ige.network.commandCount						
+				clientCommands: ige.network.commandCount						
 			});
 			
-			var errorMsg = ige.script.errorLog("engineTick is taking longer than 350ms (took"+tickDelta+"ms)");
+			var errorMsg = ige.script.errorLog("engineTick is taking longer than 2000ms (took"+tickDelta+"ms)");
 			console.log(errorMsg);
 
 			// ige.server.unpublish(errorMsg); // not publishing yet cuz TwoHouses will get unpub. loggin instead.

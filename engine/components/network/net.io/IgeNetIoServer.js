@@ -564,6 +564,8 @@ var IgeNetIoServer = {
 				}
 
 				socket.on('message', function (data) {
+					self.uploadPerSecond[socket._remoteAddress] += JSON.stringify(data).length;
+					
 					if (data.type === 'ping') {
 						socket.send({
 							type: 'pong',
@@ -573,7 +575,6 @@ var IgeNetIoServer = {
 						});
 						return;
 					}
-					self.uploadPerSecond[socket._remoteAddress] += JSON.stringify(data).length;
 					
 					self._onClientMessage.apply(self, [data, socket.id]);
 				});
