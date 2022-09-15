@@ -81,7 +81,7 @@ var IgeNetIoServer = {
 						playerName: playerName,
 						ip: ip,
 						uploadPerSecond: ups,
-						data: self.lastUploads[socket.id]						
+						lastUploads: self.lastUploads[socket._remoteAddress]						
 					};
 
 					global.rollbar.log("user banned for sending over 10 kBps", logData);
@@ -93,7 +93,7 @@ var IgeNetIoServer = {
 				self.uploadPerSecond[ip] = 0;
 
 				if (socket) {
-					self.lastUploads[socket.id] = [];
+					self.lastUploads[socket._remoteAddress] = [];
 				}
 			}
 		}, 1000)
@@ -573,7 +573,10 @@ var IgeNetIoServer = {
 					// track all commands being sent from client
 					var commandName = 'unknown'
 					if (typeof data[0] === 'string') {		
-						var commandName = data[0];
+						var code = data[0];
+						if (code.charCodeAt(0) != undefined) {
+							commandName = ige.network._networkCommandsIndex[code.charCodeAt(0)]
+						}
 					}				
 
 					self.commandCount[commandName] = self.commandCount[commandName] || 0;
