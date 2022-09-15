@@ -20,6 +20,7 @@ var IgeNetIoServer = {
 		this.clientIds = [];
 		this.uploadPerSecond = [];
 		this.lastUploads = [];
+		this.commandCount = {};
 
 		this.snapshot = [];
 		this.sendQueue = {};
@@ -91,7 +92,7 @@ var IgeNetIoServer = {
 				if (socket) {
 					self.lastUploads[socket.id] = [];
 				}
-			}			
+			}
 		}, 1000)
 
 		return this._entity;
@@ -634,7 +635,7 @@ var IgeNetIoServer = {
    */
 	_onClientMessage: function (data, clientId) {
 		var self = this;
-		// added by Jaeyun to prevent error
+		
 		if (typeof data[0] === 'string') {
 			if (data[0].charCodeAt(0) != undefined) {
 				var ciDecoded = data[0].charCodeAt(0);
@@ -643,6 +644,9 @@ var IgeNetIoServer = {
 				self.lastUploads[clientId] = self.lastUploads[clientId] || [];
 				self.lastUploads[clientId].push({command: commandName, data});
 				
+				self.commandCount[commandName] = self.commandCount[commandName] || 0;
+				self.commandCount[commandName]++;
+
 				if (this._networkCommands[commandName]) {
 					this._networkCommands[commandName](data[1], clientId);
 				}

@@ -1676,6 +1676,21 @@ var IgeEngine = IgeEntity.extend({
 				self._tickDelta = self._tickStart - self.lastTick;
 				// console.log("wtf tick", self._tickStart, self.lastTick, self._tickDelta)
 			}
+
+			
+			if (self._tickDelta > 150) {
+				console.log("engine is freezing", ige.network.commandCount)
+				global.rollbar.log("engineStep is taking longer than 150ms", {
+					query: 'engineFreeze',
+					masterServer: global.myIp,
+					gameTitle: ige.game.data.defaultData.title,
+					commandsFromLastTick: ige.network.commandCount						
+				});
+			}
+
+			ige.network.commandCount = {};
+
+			
 			ige.now = Date.now();
 
 			timeElapsed = ige.now - ige._lastGameLoopTickAt;
