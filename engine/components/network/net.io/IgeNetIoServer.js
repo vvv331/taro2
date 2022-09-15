@@ -20,7 +20,9 @@ var IgeNetIoServer = {
 		this.clientIds = [];
 		this.uploadPerSecond = [];
 		this.lastUploads = [];
-		this.commandCount = {};
+		this.commandCount = {
+			connection: 0
+		};
 
 		this.snapshot = [];
 		this.sendQueue = {};
@@ -60,7 +62,7 @@ var IgeNetIoServer = {
 				let ups = self.uploadPerSecond[ip];
 				var socket = self._socketByIp[ip]
 				
-				if (socket && ups > 6000) {
+				if (socket && ups > 10000) {
 					var player = ige.game.getPlayerByIp(ip);
 					
 					ige.server.bannedIps.push(ip);
@@ -72,7 +74,7 @@ var IgeNetIoServer = {
 						playerName = player._stats.name
 					}
 
-					global.rollbar.log("user banned for sending over 10 kBps", {
+					var logData = {
 						query: 'banUser',
 						masterServer: global.myIp,
 						gameTitle: ige.game.data.defaultData.title,
@@ -80,10 +82,11 @@ var IgeNetIoServer = {
 						ip: ip,
 						uploadPerSecond: ups,
 						data: self.lastUploads[socket.id]						
-					});
-					
-					console.log("banning user", playerName, "(ip: ", ip,"for spamming network commands (sending ", ups, " bytes per second)")
+					};
 
+					global.rollbar.log("user banned for sending over 10 kBps", logData);
+					
+					console.log("banning user", playerName, "(ip: ", ip,"for spamming network commands (sending ", ups, " bytes per second)", logData)
 				}
 				
 				// console.log(self.uploadPerSecond[ip]);
@@ -494,8 +497,17 @@ var IgeNetIoServer = {
    * @param {Object} socket The client socket object.
    * @private
    */
-	 _onClientConnect: function (socket) {
+	 _onClientConnect: function (socket) {		
 		var self = this;
+
+		if (self.uploadPerSecond[socket._remoteAddress] == undefined) {
+			self.uploadPerSecond[socket._remoteAddress] = 0;
+			self.lastUploads[socket._remoteAddress] = [];
+		}
+		self.commandCount["connection"]++;
+
+		self.uploadPerSecond[socket._remoteAddress] += 1500; // add 1500 bytes as connection cost
+		self.lastUploads[socket._remoteAddress].push({command: "connect request"});
 
 		var remoteAddress = socket._remoteAddress;
 		console.log('client is attempting to connect', remoteAddress);
@@ -538,13 +550,6 @@ var IgeNetIoServer = {
 				);
 				this._socketById[socket.id] = socket;
 				this._socketByIp[socket._remoteAddress] = socket;
-				
-				if (self.uploadPerSecond[socket._remoteAddress] == undefined) {
-					self.uploadPerSecond[socket._remoteAddress] = 0;
-					self.lastUploads[socket.id] = [];
-				} else {
-					self.uploadPerSecond[socket._remoteAddress] += 1500; // add 1500 bytes as connection cost
-				}
 
 				this.clientIds.push(socket.id);
 				self._socketById[socket.id].start = Date.now();
@@ -564,7 +569,18 @@ var IgeNetIoServer = {
 				}
 
 				socket.on('message', function (data) {
+					
+					// track all commands being sent from client
+					var commandName = 'unknown'
+					if (typeof data[0] === 'string') {		
+						var commandName = data[0];
+					}				
+
+					self.commandCount[commandName] = self.commandCount[commandName] || 0;
+					self.commandCount[commandName]++;
 					self.uploadPerSecond[socket._remoteAddress] += JSON.stringify(data).length;
+					self.lastUploads[socket._remoteAddress] = self.lastUploads[socket._remoteAddress] || [];
+					self.lastUploads[socket._remoteAddress].push({command: commandName, data});
 					
 					if (data.type === 'ping') {
 						socket.send({
@@ -641,12 +657,6 @@ var IgeNetIoServer = {
 			if (data[0].charCodeAt(0) != undefined) {
 				var ciDecoded = data[0].charCodeAt(0);
 				var commandName = this._networkCommandsIndex[ciDecoded];
-				
-				self.lastUploads[clientId] = self.lastUploads[clientId] || [];
-				self.lastUploads[clientId].push({command: commandName, data});
-				
-				self.commandCount[commandName] = self.commandCount[commandName] || 0;
-				self.commandCount[commandName]++;
 
 				if (this._networkCommands[commandName]) {
 					this._networkCommands[commandName](data[1], clientId);
@@ -717,7 +727,7 @@ var IgeNetIoServer = {
 
 		delete ige.server.clients[socket.id];
 		delete this.uploadPerSecond[socket._remoteAddress]
-		delete this.lastUploads[socket.id]
+		delete this.lastUploads[socket._remoteAddress]
 		delete this._socketById[socket.id];
 		delete this._socketByIp[socket._remoteAddress];
 

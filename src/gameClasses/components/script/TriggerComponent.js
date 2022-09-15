@@ -226,7 +226,7 @@ var TriggerComponent = IgeEntity.extend({
 		// if (triggerName === 'projectileTouchesWall') console.log("trigger fire", triggerName, triggeredBy)
 
 		if (ige.isServer || (ige.isClient && ige.physics)) {
-
+			
 			if (ige.isServer) {
 				var now = Date.now();		
 				var lastTriggerRunTime = now - this.lastTriggerRanAt;

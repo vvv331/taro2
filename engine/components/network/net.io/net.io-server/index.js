@@ -613,7 +613,10 @@ NetIo.Server = NetIo.EventingClass.extend({
 				response.end();
 			});
 			this._socketServerHttps = new this._websocket.Server({
-			    server: this._httpsServer
+			    server: this._httpsServer,
+				verifyClient: function() {
+					console.log("wtf")
+				}
 			});
 			// this._socketServerHttps = new this._websocket.WebSocketServer({
 			// 	server: this._httpsServer

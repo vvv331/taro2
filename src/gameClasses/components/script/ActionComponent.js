@@ -43,7 +43,7 @@ var ActionComponent = IgeEntity.extend({
 				global.rollbar.log("engineStep is taking longer than 1000ms", rollbarData);
 				
 				var errorMsg = ige.script.errorLog("engineTick is taking longer than 1000ms (took"+engineTickDelta+"ms)");
-				console.log(errorMsg);
+				console.log(errorMsg, rollbarData);
 				ige.engineLagReported = true;
 				// ige.server.unpublish(errorMsg); // not publishing yet cuz TwoHouses will get unpub. loggin instead.
 			}

@@ -1740,6 +1740,10 @@ var IgeEngine = IgeEntity.extend({
 				}
 			}
 
+			ige.engineLagReported = false;
+			ige.action.actionProfiler = {}
+			ige.trigger.triggerProfiler = {}
+
 			if (!ige.gameLoopTickHasExecuted) {
 				return;
 			}
@@ -1862,10 +1866,7 @@ var IgeEngine = IgeEntity.extend({
 
 		ige.gameLoopTickHasExecuted = false;
 		ige.physicsTickHasExecuted = false;
-		ige.engineLagReported = false;
-		ige.action.actionProfiler = {}
-		ige.trigger.triggerProfiler = {}
-
+		
 		et = new Date().getTime();
 		ige._tickTime = et - ige.now;
 		// console.log(ige._tickTime, ige._tickTime, 1000/self._fpsRate)
