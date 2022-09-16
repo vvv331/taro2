@@ -551,18 +551,16 @@ var Server = IgeClass.extend({
 							// send only if developer client is connect
 							if (ige.isServer && self.developerClientIds.length) {
 
-								ige.variable.devLogs.status = ige.server.getStatus();
+								ige.script.variable.devLogs.status = ige.server.getStatus();
 								const sendErrors = Object.keys(ige.script.errorLogs).length;
 
 								self.developerClientIds.forEach(
 									id => {
-										ige.network.send('devLogs', ige.variable.devLogs, id);
+										ige.network.send('devLogs', ige.script.variable.devLogs, id);
 
 										if (sendErrors) {
 											ige.network.send('errorLogs', ige.script.errorLogs, id);
 										}
-
-										console.log(`VariableComponent: sending devLogs to ${id}`);
 									});
 
 								if (sendErrors) {
