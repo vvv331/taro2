@@ -131,10 +131,12 @@ var GameComponent = IgeEntity.extend({
 			}
 			player._stats.isUserAdmin = isUserAdmin;
 			player._stats.isUserMod = isUserMod;
+
 			// if User/Admin has access to game then show developer logs
 			if (isOwner || isInvitedUser || isUserAdmin) {
 				GameComponent.prototype.log(`owner connected. _id: ${data._id}`);
 				ige.server.developerClientIds.push(data.clientId);
+
 			}
 		}
 
