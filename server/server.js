@@ -570,7 +570,6 @@ var Server = IgeClass.extend({
 											ige.network.send('errorLogs', ige.script.errorLogs, id);
 										}
 
-										console.log(`VariableComponent: sending devLogs to ${id}`);
 									});
 
 								if (sendErrors) {
