@@ -98,6 +98,7 @@ var Server = IgeClass.extend({
 		self.logTriggers = {
 
 		};
+		self.developerClientIds = [];
 
 		ige.env = process.env.ENV || 'production';
 		self.config = config[ige.env];
@@ -556,12 +557,22 @@ var Server = IgeClass.extend({
 						// send dev logs to developer every second
 						var logInterval = setInterval(function () {
 							// send only if developer client is connect
-							if (ige.isServer && ((self.developerClientId && ige.server.clients[self.developerClientId]) || process.env.ENV == 'standalone')) {
-								ige.variable.devLogs.status = ige.server.getStatus();
-								ige.network.send('devLogs', ige.variable.devLogs, self.developerClientId);
+							if (ige.isServer && self.developerClientIds.length) {
 
-								if (ige.script.errorLogs != {}) {
-									ige.network.send('errorLogs', ige.script.errorLogs, self.developerClientId);
+								ige.variable.devLogs.status = ige.server.getStatus();
+								const sendErrors = Object.keys(ige.script.errorLogs).length;
+
+								self.developerClientIds.forEach(
+									id => {
+										ige.network.send('devLogs', ige.variable.devLogs, id);
+
+										if (sendErrors) {
+											ige.network.send('errorLogs', ige.script.errorLogs, id);
+										}
+
+									});
+
+								if (sendErrors) {
 									ige.script.errorLogs = {};
 								}
 							}
