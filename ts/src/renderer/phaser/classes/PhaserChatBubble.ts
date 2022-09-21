@@ -27,6 +27,9 @@ class PhaserChatBubble extends Phaser.GameObjects.Container {
 		text.setOrigin(0.5);
 		this.add(text);
 
+		// needs to be created with the correct scale of the client
+		this.setScale(1 / this.scene.cameras.main.zoom);
+
 		scene.add.existing(this);
 
 		this.showMessage(chatText);
