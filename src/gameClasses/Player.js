@@ -340,18 +340,17 @@ var Player = IgeEntity.extend({
 	},
 
 	remove: function () {
-		if (this._stats.controlledBy == 'human' && ige.script) // do not send trigger for neutral player
+		if (this._stats.controlledBy == 'human') // do not send trigger for neutral player
 		{
 			ige.trigger.fire('playerLeavesGame', { playerId: this.id() });
+			// session is in second
+			ige.clusterClient && ige.clusterClient.emit('log-session-duration', (Date.now() - this._stats.jointsOn) / 1000);
+			if (this.variables && this.variables.progression != undefined && this.variables.progression.value != undefined) {
+				ige.clusterClient && ige.clusterClient.emit('log-progression', this.variables.progression.value);
+			}
+			this.streamDestroy();
+			this.destroy();
 		}
-
-		// session is in second
-		ige.clusterClient && ige.clusterClient.emit('log-session-duration', (Date.now() - this._stats.jointsOn) / 1000);
-		if (this.variables && this.variables.progression != undefined && this.variables.progression.value != undefined) {
-			ige.clusterClient && ige.clusterClient.emit('log-progression', this.variables.progression.value);
-		}
-		this.streamDestroy();
-		this.destroy();
 	},
 
 	updateVisibility: function (playerId) {
