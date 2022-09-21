@@ -25,6 +25,8 @@ var PhaserChatBubble = /** @class */ (function (_super) {
         text.setCenterAlign();
         text.setOrigin(0.5);
         _this.add(text);
+        // needs to be created with the correct scale of the client
+        _this.setScale(1 / _this.scene.cameras.main.zoom);
         scene.add.existing(_this);
         _this.showMessage(chatText);
         return _this;
