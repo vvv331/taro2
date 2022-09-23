@@ -18,14 +18,11 @@ var ActionComponent = IgeEntity.extend({
 		for (var i = 0; i < actionList.length; i++) {
 			var action = actionList[i];
 
-			// if CSP is enabled, then server will pause streaming
-			// the server side is still running (e.g. creating entities), but it won't be streamed to the client			
+			// if CSP is enabled, then server will not stream any entity that's created during this action			
 			if (ige.isServer) {
 				if (ige.game.cspEnabled) {
 					if(action.runOnClient) {
 						ige.network.pause();
-					} else {
-						ige.network.resume();
 					}
 				} 
 
@@ -2644,6 +2641,11 @@ var ActionComponent = IgeEntity.extend({
 			} catch (e) {
 				console.log(e);
 				self._script.errorLog(e); // send error msg to client
+			}
+
+			// resume entity-streaming in case network was paused from a cspEnabled action
+			if (ige.network.isPaused) {
+				ige.network.resume();
 			}
 		}
 	}
