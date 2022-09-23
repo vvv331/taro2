@@ -88,16 +88,16 @@ var MobileControlsScene = /** @class */ (function (_super) {
         ige.mobileControls.on('visible', function (value) {
             _this.scene.setVisible(value);
         });
-        if (scale.fullscreen.available) {
+        /* if (scale.fullscreen.available) {
             scale.fullscreenTarget =
                 document.getElementById('game-div');
-            document.body.addEventListener('touchstart', function () {
-                _this.enterFullscreen();
+            document.body.addEventListener('touchstart', () => {
+                this.enterFullscreen();
             }, true);
-            document.body.addEventListener('touchend', function () {
-                _this.enterFullscreen();
+            document.body.addEventListener('touchend', () => {
+                this.enterFullscreen();
             }, true);
-        }
+        } */
     };
     MobileControlsScene.prototype.preload = function () {
         this.load.image('mobile-button-up', this.patchAssetUrl('https://cache.modd.io/asset/spriteImage/1549614640644_button1.png'));
