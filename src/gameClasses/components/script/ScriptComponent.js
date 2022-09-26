@@ -34,6 +34,7 @@ var ScriptComponent = IgeEntity.extend({
 
 			// look for matching trigger within the script's triggers
 			if (script && script.triggers) {
+				console.log(script.triggers);
 				for (j = 0; j < script.triggers.length; j++) {
 					var trigger = script.triggers[j];
 					if (this.triggeredScripts[trigger.type] == undefined) {
@@ -82,6 +83,9 @@ var ScriptComponent = IgeEntity.extend({
 	
 	/* trigger and run all of the corresponding script(s) */
 	trigger: function (triggerName, triggeredBy) {
+		if (triggerName !== 'frameTick' && triggerName !== 'secondTick') {
+			console.log(this._entity._category || 'global', triggerName, triggeredBy);
+		}
 		
 		
 		if (ige.isServer) {
