@@ -124,6 +124,15 @@ var GameScene = /** @class */ (function (_super) {
                     // correction for 0-based indexing
                     animationFrames.push(frames_1[i] - 1);
                 }
+                if (animationFrames.length === 0) {
+                    // avoid crash by giving it frame 0 if no frame data provided
+                    animationFrames.push(0);
+                }
+                if (typeof animation.loopCount === 'string') {
+                    // avoid crash where 'infinite' loop count is set via loopCount === ''
+                    // we could do falsy check but then we would catch loopCount === 0 as well
+                    animation.loopCount = 0;
+                }
                 _this.anims.create({
                     key: "".concat(key, "/").concat(animationsKey),
                     frames: _this.anims.generateFrameNumbers(key, {
