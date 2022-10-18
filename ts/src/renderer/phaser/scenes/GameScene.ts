@@ -162,6 +162,17 @@ class GameScene extends PhaserScene {
 					animationFrames.push(frames[i] - 1);
 				}
 
+				if (animationFrames.length === 0) {
+					// avoid crash by giving it frame 0 if no frame data provided
+					animationFrames.push(0);
+				}
+
+				if (typeof animation.loopCount === 'string') {
+					// avoid crash where 'infinite' loop count is set via loopCount === ''
+					// we could do falsy check but then we would catch loopCount === 0 as well
+					animation.loopCount = 0;
+				}
+
 				this.anims.create({
 					key: `${key}/${animationsKey}`,
 					frames: this.anims.generateFrameNumbers(key, {
