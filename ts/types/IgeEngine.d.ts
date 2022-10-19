@@ -52,6 +52,7 @@ declare class IgeEngine extends IgeClass {
 	constructor(options: object);
 
 	createFrontBuffer (autoSize: boolean, dontScale?: boolean): void
+	updateCurrentTime (): void;
 	engineStep (): void;
 
 	physics: {

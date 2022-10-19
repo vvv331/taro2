@@ -8,9 +8,9 @@ class EntitiesToRender {
 	}
 
 	updateAllEntities (/*timeStamp*/): void {
-		var currentTime = Date.now();
+		ige.updateCurrentTime();
 
-		if (!ige.lastTickTime) ige.lastTickTime = currentTime;
+		if (!ige.lastTickTime) ige.lastTickTime = ige._currentTime;
 
 		for (var entityId in this.trackEntityById) {
 			var entity = ige.$(entityId);
@@ -118,7 +118,7 @@ class EntitiesToRender {
 		}
 
 		ige.triggersQueued = [];
-		ige.lastTickTime = currentTime;
+		ige.lastTickTime = ige._currentTime;
 
 		if (ige.gameLoopTickHasExecuted) {
 			ige.gameLoopTickHasExecuted = false;

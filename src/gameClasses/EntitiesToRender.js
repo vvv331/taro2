@@ -4,9 +4,9 @@ var EntitiesToRender = /** @class */ (function () {
         ige.client.on('tick', this.frameTick, this);
     }
     EntitiesToRender.prototype.updateAllEntities = function ( /*timeStamp*/) {
-        var currentTime = Date.now();
+        ige.updateCurrentTime();
         if (!ige.lastTickTime)
-            ige.lastTickTime = currentTime;
+            ige.lastTickTime = ige._currentTime;
         for (var entityId in this.trackEntityById) {
             var entity = ige.$(entityId);
             if (entity) {
@@ -94,7 +94,7 @@ var EntitiesToRender = /** @class */ (function () {
             }
         }
         ige.triggersQueued = [];
-        ige.lastTickTime = currentTime;
+        ige.lastTickTime = ige._currentTime;
         if (ige.gameLoopTickHasExecuted) {
             ige.gameLoopTickHasExecuted = false;
         }

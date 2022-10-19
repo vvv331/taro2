@@ -1499,7 +1499,7 @@ var IgeEngine = IgeEntity.extend({
 	 * delta internally in the method.
 	 * @returns {Number}
 	 */
-	 incrementTime: function () {
+	 updateCurrentTime: function () {
 		const now = new Date().getTime();
 		
 		if (!this._pause) {
@@ -1646,7 +1646,7 @@ var IgeEngine = IgeEntity.extend({
 		var unbornIndex;
 		var unbornEntity;
 
-		self.incrementTime();
+		self.updateCurrentTime();
 		timeStamp = Math.floor(self._currentTime);
 
 		if (timeStamp - self.lastSecond >= 1000) {
