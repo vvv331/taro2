@@ -688,8 +688,6 @@ const Client = IgeEventingClass.extend({
 	// not much here except definitions
 	defineNetworkEvents: function () {
 		//
-		ige.network.define('makePlayerSelectUnit', this._onMakePlayerSelectUnit);
-		ige.network.define('makePlayerCameraTrackUnit', this._onMakePlayerCameraTrackUnit);
 		ige.network.define('changePlayerCameraPanSpeed', this._onChangePlayerCameraPanSpeed);
 
 		ige.network.define('hideUnitFromPlayer', this._onHideUnitFromPlayer);

@@ -603,7 +603,6 @@ var Server = IgeClass.extend({
 		ige.network.define('joinGame', self._onJoinGameWrapper);
 		ige.network.define('gameOver', self._onGameOver);
 
-		ige.network.define('makePlayerSelectUnit', self._onPlayerSelectUnit);
 		ige.network.define('playerUnitMoved', self._onPlayerUnitMoved);
 		ige.network.define('playerKeyDown', self._onPlayerKeyDown);
 		ige.network.define('playerKeyUp', self._onPlayerKeyUp);
@@ -622,7 +621,6 @@ var Server = IgeClass.extend({
 		ige.network.define('swapInventory', self._onSwapInventory);
 
 		// bullshit that's necessary for sending data to client
-		ige.network.define('makePlayerCameraTrackUnit', self._onSomeBullshit);
 		ige.network.define('changePlayerCameraPanSpeed', self._onSomeBullshit);
 
 		ige.network.define('hideUnitFromPlayer', self._onSomeBullshit);

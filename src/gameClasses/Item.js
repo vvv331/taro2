@@ -876,8 +876,7 @@ var Item = IgeEntityPhysics.extend({
 		// this was preventing isBeingUsed from streaming hence preventing other players' projectiles from showing
 		// if (ige.isServer && ige.network.isPaused) 
 		// 	return;
-
-		IgeEntity.prototype.streamUpdateData.call(this, queuedData);
+		// IgeEntity.prototype.streamUpdateData.call(this, queuedData);
 		// ige.devLog("Item streamUpdateData ", data)
 		for (var i = 0; i < queuedData.length; i++) {
 			var data = queuedData[i];
@@ -937,6 +936,7 @@ var Item = IgeEntityPhysics.extend({
 							ige.itemUi.updateItemQuantity(self);
 						}
 						break;
+
 					case 'description':
 						var owner = self.getOwnerUnit();
 						if (ige.isClient && ige.client.selectedUnit == owner) {
@@ -944,6 +944,7 @@ var Item = IgeEntityPhysics.extend({
 						}
 
 						break;
+
 					case 'name':
 						var owner = self.getOwnerUnit();
 						if (ige.isClient && ige.client.selectedUnit == owner) {
@@ -958,16 +959,17 @@ var Item = IgeEntityPhysics.extend({
 							ige.itemUi.updateItemSlot(this, this._stats.slotIndex);
 						}
 						break;
+
 					case 'inventorySlotColor':
 						var owner = self.getOwnerUnit();
 						if (ige.isClient && ige.client.selectedUnit == owner) {
 							owner.inventory.update();
 						}
 						break;
-					case 'slotIndex':
-						break;
+
 					case 'isBeingUsed':
 						// ignore stream for my unit's item use
+						var owner = self.getOwnerUnit();
 						if (ige.isClient && owner != ige.client.selectedUnit) {
 							this._stats.isBeingUsed = newValue;							
 						}
@@ -984,6 +986,9 @@ var Item = IgeEntityPhysics.extend({
 						}
 						break;
 
+					default:
+						IgeEntity.prototype.streamUpdateData.call(this, data);
+						break;
 				}
 			}
 		}

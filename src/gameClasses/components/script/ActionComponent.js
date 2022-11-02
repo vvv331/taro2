@@ -484,7 +484,7 @@ var ActionComponent = IgeEntity.extend({
 						var player = self._script.variable.getValue(action.player, vars);
 						var unit = self._script.variable.getValue(action.unit, vars);
 						if (player && unit) {
-							player.selectUnit(unit.id());
+							player.selectUnit(unit);
 						}
 
 						break;

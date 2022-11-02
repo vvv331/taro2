@@ -158,55 +158,52 @@ var Player = IgeEntity.extend({
 	// 1. camera track (if this is the only unit)
 	// 2. update inventory
 	// 3. update attribute bars
-	selectUnit: function (unitId) {
+	selectUnit: function (unit) {
 		var self = this;
-		self._stats.selectedUnitId = unitId;
-
-		if (ige.isServer && self._stats.clientId) {
-			ige.network.send('makePlayerSelectUnit', { unitId: unitId }, self._stats.clientId);
-		}
-
-		if (ige.isClient) {
-			var unit = ige.$(unitId);
-
-			if (self._stats.clientId == ige.network.id() && unit && unit._category == 'unit') {
-
-				if (unit.inventory) {
-					unit.inventory.createInventorySlots();
-				}
-				if (unit.unitUi) {
-					unit.unitUi.updateAllAttributeBars();
-				}
-
-				if (unit && unit.inventory) {
-					unit.inventory.updateBackpackButton();
-				}
-
-				unit.renderMobileControl();
-				ige.client.selectedUnit = unit;
-				ige.client.eventLog.push([ige._currentTime, `my unit selected ${unitId}`]);
+		
+		if (unit && unit._category == 'unit') {
+			self._stats.selectedUnitId = unit.id();
+			
+			if (ige.isServer && self._stats.clientId) {
+				this.streamUpdateData([{selectedUnitId: unit.id()}])
 			}
+	
+			if (ige.isClient) {
+				if (self._stats.clientId == ige.network.id()) {
+	
+					if (unit.inventory) {
+						unit.inventory.createInventorySlots();
+					}
+					if (unit.unitUi) {
+						unit.unitUi.updateAllAttributeBars();
+					}
+	
+					if (unit && unit.inventory) {
+						unit.inventory.updateBackpackButton();
+					}
+	
+					unit.renderMobileControl();
+					ige.client.selectedUnit = unit;
+					ige.client.eventLog.push([ige._currentTime, `my unit selected ${unitId}`]);
+				}
+			}
+
 		}
+		
+
+		
 	},
 
 	cameraTrackUnit: function (unit) {
-		if (unit) {
+		console.log("cameraTrackUnitcameraTrackUnit!!!!")
+				
+		if (unit && unit._category == 'unit') {
 			// self._stats.selectedUnitId = unit.id()
 			if (ige.isServer && this._stats.clientId) {
-				ige.network.send(
-					'makePlayerCameraTrackUnit',
-					{ unitId: unit.id() },
-					this._stats.clientId
-				);
-
-			} else if (
-				ige.isClient &&
-				this._stats.clientId == ige.network.id()
-				&& unit
-				&& unit._category == 'unit'
-			) {
-				ige.client.myPlayer.currentFollowUnit = unit._id;
-
+				this.streamUpdateData([{trackedUnitId: unit.id()}])
+			} else if (ige.isClient && this._stats.clientId == ige.network.id()) {
+				ige.client.myPlayer._stats.trackedUnitId = unit._id;
+				console.log("following!!!!")
 				unit.emit('follow');
 			}
 		}
@@ -227,7 +224,7 @@ var Player = IgeEntity.extend({
 		if (this._stats.unitIds) {
 			var unit = ige.$(this._stats.unitIds[0]);
 			if (unit) {
-				this.selectUnit(unit.id());
+				this.selectUnit(unit);
 			}
 		}
 	},
@@ -241,7 +238,7 @@ var Player = IgeEntity.extend({
 		return ige
 			.$$('unit')
 			.filter(function (unit) {
-				return unit._stats && unit._stats.ownerId == self.id();
+				return unit._stats && unit._stats.ownerPlayerId == self.id();
 			})
 			.reduce(function (partialUnits, unit) {
 				partialUnits[unit._id] = unit;
@@ -416,8 +413,8 @@ var Player = IgeEntity.extend({
 	streamUpdateData: function (queuedData) {
 		var self = this;
 		var oldStats = JSON.parse(JSON.stringify(self._stats));
-		IgeEntity.prototype.streamUpdateData.call(this, queuedData);
-
+		// IgeEntity.prototype.streamUpdateData.call(this, queuedData);
+		console.log("player streamUpdateData", queuedData)
 		for (var i = 0; i < queuedData.length; i++) {
 			var data = queuedData[i];
 			for (attrName in data) {
@@ -427,20 +424,6 @@ var Player = IgeEntity.extend({
 					var playerTypeData = ige.game.getAsset('playerTypes', newValue);
 					if (playerTypeData) {
 						playerTypeData.playerTypeId = newValue;
-
-						if (ige.isClient) {
-							// change color of label of all units that belongs to updating player
-							self.redrawUnits(function (unit) {
-								// dont update color if unitType of my unit is changed on my screen as it will be always Lime
-								var isMyPlayerUpdated = self._stats.clientId === ige.network.id();
-								// update color of all units that belongs to player whose playerType just changed
-								var ownerPlayer = unit.getOwner();
-								var unitBelongsToUpdatingPlayer = ownerPlayer && ownerPlayer.id() === self.id();
-
-								return !isMyPlayerUpdated && unitBelongsToUpdatingPlayer;
-							}, ['nameLabel']);
-						}
-
 						self.updatePlayerType(playerTypeData);
 					}
 				}
@@ -458,41 +441,87 @@ var Player = IgeEntity.extend({
 					}
 				}
 				if (ige.isClient) {
-					if (attrName === 'name') {
-						// update here
-						if (typeof refreshUserName == 'function') {
-							refreshUserName(newValue);
-						}
-					}
-					if (attrName === 'equiped') {
-						var unit = self.getSelectedUnit();
-						if (unit) {
-							unit.equipSkin();
-						}
-					} else if (attrName === 'unEquiped') {
-						var unit = self.getSelectedUnit();
-						if (unit) {
-							unit.unEquipSkin(null, false, newValue);
-						}
-					}
+					switch (attrName) {
+						case 'playerTypeId': 
+							// change color of label of all units that belongs to updating player
+							self.redrawUnits(function (unit) {
+								// dont update color if unitType of my unit is changed on my screen as it will be always Lime
+								var isMyPlayerUpdated = self._stats.clientId === ige.network.id();
+								// update color of all units that belongs to player whose playerType just changed
+								var ownerPlayer = unit.getOwner();
+								var unitBelongsToUpdatingPlayer = ownerPlayer && ownerPlayer.id() === self.id();
 
-					if (self._stats.clientId == ige.network.id()) {
-						if (attrName === 'mapData') {
-							ige.developerMode.updateClientMap(data);
-						}
-						if (attrName === 'attributes') {
-							ige.playerUi.updatePlayerAttributesDiv(self._stats.attributes);
-						}
-						if (attrName === 'coins') {
-							ige.playerUi.updatePlayerCoin(newValue);
-						}
-						if (attrName === 'playerJoinedAgain') {
-							self.hideMenu();
-						}
-						if (attrName === 'banChat') {
-							self.setChatMute(newValue);
-						}
-						if (attrName === 'playerJoined') {
+								return !isMyPlayerUpdated && unitBelongsToUpdatingPlayer;
+							}, ['nameLabel']);
+							break;
+						case 'name':
+							// update here
+							if (typeof refreshUserName == 'function') {
+								refreshUserName(newValue);
+							}
+							break;
+
+						case 'equiped':
+							var unit = self.getSelectedUnit();
+							if (unit) {
+								unit.equipSkin();
+							}
+							break;
+
+						case 'unEquiped': 
+							var unit = self.getSelectedUnit();
+							if (unit) {
+								unit.unEquipSkin(null, false, newValue);
+							}
+							break;
+
+						case 'mapData':
+							if (self._stats.clientId == ige.network.id()) {
+								ige.developerMode.updateClientMap(data);
+							}
+							break;
+
+						case 'attributes':
+							if (self._stats.clientId == ige.network.id()) {
+								ige.playerUi.updatePlayerAttributesDiv(self._stats.attributes);
+							}
+							break;
+						
+						case 'coins':
+							if (self._stats.clientId == ige.network.id()) {
+								ige.playerUi.updatePlayerCoin(newValue);
+							}
+							break;
+
+						case 'playerJoinedAgain':
+							if (self._stats.clientId == ige.network.id()) {
+								self.hideMenu();
+							}
+							break;
+
+						case 'selectedUnitId':
+							var unit = ige.$(newValue)
+							if (unit) {
+								this.selectUnit(unit);
+							}
+							
+							break;
+						
+						case 'trackedUnitId':
+							// this unit was queued to be tracked by a player's camera
+							var unit = ige.$(newValue)
+							console.log("cameraTrackUnit")
+							if (unit) {
+								this.cameraTrackUnit(unit);
+							}
+							break;
+						case 'banChat':
+							if (self._stats.clientId == ige.network.id()) {
+								self.setChatMute(newValue);
+							}
+							break;
+						
+						case 'playerJoined':
 							// console.log('received player.playerJoined');
 							ige.client.eventLog.push([ige._currentTime, 'playerJoined received']);
 							// render name labels of all other units
@@ -501,53 +530,13 @@ var Player = IgeEntity.extend({
 							self._stats.receivedJoinGame = data.receivedJoinGame;
 							ige.client.eventLog.push([ige._currentTime - ige.client.eventLogStartTime, '\'playerJoined\' received from server']);
 							self._stats.processedJoinGame = data.processedJoinGame;
-							var streamingDiff = `${Date.now() - data.streamedOn}ms`;
-
-							window.joinGameSent.end = Date.now();
-							window.joinGameSent.completed = window.joinGameSent.end - window.joinGameSent.start;
-
-							console.log(
-								`JoinGame took ${window.joinGameSent.completed}ms to join player` +
-								`, client to gs: ${self._stats.receivedJoinGame - window.joinGameSent.start}ms` +
-								`, gs loading player data: ${self._stats.totalTime}ms` +
-								`, gs processed request for: ${self._stats.processedJoinGame}ms` +
-								`, gs to client: ${streamingDiff
-								}, client sent on: ${window.joinGameSent.start
-								}, server sent back on: ${data.streamedOn}`
-							);
-
-							if (window.joinGameSent.completed > 7000) {
-								$.post('/api/log', {
-									event: 'rollbar',
-									text: `${Date.now()}:- JoinGame took ${window.joinGameSent.completed}ms to join player` +
-										`, client to gs: ${self._stats.receivedJoinGame - window.joinGameSent.start}ms` +
-										`, gs loading player data: ${self._stats.totalTime}ms` +
-										`, gs processed request for: ${self._stats.processedJoinGame}ms` +
-										`, gs to client: ${streamingDiff
-										}, client sent on: ${window.joinGameSent.start
-										}, server sent back on: ${data.streamedOn}`
-								});
-							}
-							if (self._stats.processedJoinGame > 7000) {
-								$.post('/api/log', {
-									event: 'rollbar',
-									text: `${Date.now()}JoinGame took ${window.joinGameSent.completed}ms to create player` +
-										`, client to gs: ${self._stats.receivedJoinGame - window.joinGameSent.start}ms` +
-										`, gs loading player data: ${self._stats.totalTime}ms` +
-										`, gs processed request for: ${self._stats.processedJoinGame}ms` +
-										`, gs to client: ${streamingDiff
-										}, client sent on: ${window.joinGameSent.start
-										}, server sent back on: ${data.streamedOn}`
-								});
-							}
-
 							self.hideMenu();
 							clearTimeout(window.errorLogTimer);
-						}
-					}
+							break;
 
-					if (attrName === 'banChat' && (ige.game.data.isDeveloper || (ige.client.myPlayer && ige.client.myPlayer._stats.isUserMod))) {
-						ige.menuUi.kickPlayerFromGame();
+						default:
+							IgeEntity.prototype.streamUpdateData.call(this, data);
+							break;
 					}
 				}
 			}

@@ -2486,7 +2486,7 @@ var IgeEntity = IgeObject.extend({
 			if (ige.entitiesToRender.trackEntityById[entityId]) {
 				if (
 					ige.client.myPlayer &&
-					ige.client.myPlayer.currentFollowUnit == this.id()
+					ige.client.myPlayer._stats.trackedUnitId == this.id()
 				) {
 					ige.client.emit('stop-follow');
 				}
@@ -4070,226 +4070,218 @@ var IgeEntity = IgeObject.extend({
 	// 	return data;
 	// },
 
+	processStreamData: function(data) {
+		for (attrName in data) {
+			var newValue = data[attrName];
+			console.log(this._category, this.id(), attrName, newValue)
+			switch (attrName) {
+				case 'attributes':
+					// only on client side to prevent circular recursion
+					if (ige.isClient) {
+						var attributesObject = _.cloneDeep(this._stats.attributes);
+						if (attributesObject) {
+							for (var attributeTypeId in data.attributes) {
+								var attributeData = attributesObject[attributeTypeId];
+
+								if (attributeData) {
+									var newAttributeValue = data.attributes[attributeTypeId];
+									var oldAttributeValue = attributeData.value;
+
+									attributeData.hasChanged = newAttributeValue !== oldAttributeValue;
+									attributeData.value = newAttributeValue;
+									attributeData.type = attributeTypeId;
+
+									this.attribute.update(attributeTypeId, attributeData.value);
+
+									if (this._category === 'unit') {
+										this.updateAttributeBar(attributeData);
+									}
+								}
+								// update attribute if entity has such attribute
+							}
+						}
+					} else if (ige.isServer) {
+						for (var attributeTypeId in data.attributes) {
+							// prevent attribute being passed to client if it is invisible
+							if (this._stats.attributes && this._stats.attributes[attributeTypeId]) {
+								var attribute = this._stats.attributes[attributeTypeId];
+								if (
+									((attribute.isVisible && typeof attribute.isVisible === 'boolean' && attribute.isVisible == false) || // will be deprecated.
+										(attribute.isVisible && attribute.isVisible.constructor === Array && attribute.isVisible.length == 0)) &&
+									attributeTypeId !== ige.game.data.settings.scoreAttributeId
+								) {
+									delete data[attrName];
+								}
+							}
+						}
+					}
+					break;
+
+				case 'attributesMax':
+					if (this._stats.attributes) {
+						// only on client side to prevent circular recursion
+						for (var attributeTypeId in data.attributesMax) {
+							if (this._stats.attributes && this._stats.attributes[attributeTypeId]) {
+								this._stats.attributes[attributeTypeId].max = data.attributesMax[attributeTypeId];
+							}
+
+							// update attribute if entity has such attribute
+							if (ige.isClient) {
+								if (this._category === 'unit') {
+									// this.updateAttributeBar(this._stats.attributes[attributeTypeId]);
+									this.unitUi && this.unitUi.updateAttributeBar(this._stats.attributes[attributeTypeId]);
+								}
+							}
+						}
+					}
+					break;
+
+				case 'attributesMin':
+					// only on client side to prevent circular recursion
+					for (var attributeTypeId in data.attributesMin) {
+						if (this._stats.attributes && this._stats.attributes[attributeTypeId]) {
+							this._stats.attributes[attributeTypeId].min = data.attributesMin[attributeTypeId];
+
+							// update attribute if entity has such attribute
+							if (ige.isClient) {
+								if (this._category === 'unit') {
+									this.updateAttributeBar(this._stats.attributes[attributeTypeId]);
+									this.unitUi && this.unitUi.updateAttributeBar(this._stats.attributes[attributeTypeId]);
+								}
+							}
+						}
+					}
+					break;
+
+				case 'attributesRegenerateRate':
+					// only on client side to prevent circular recursion
+					for (var attributeTypeId in data.attributesRegenerateRate) {
+						if (this._stats.attributes && this._stats.attributes[attributeTypeId]) {
+							this._stats.attributes[attributeTypeId].regenerateSpeed = data.attributesRegenerateRate[attributeTypeId];
+						}
+					}
+					break;
+
+				case 'depth':
+					if (ige.isClient) {
+						this.depth(data.depth);
+					}
+					break;
+
+				case 'flip':
+					// ignore flip command from server for my own unit, because it's already done locally
+					if (ige.isClient && this != ige.client.selectedUnit && !(this._category == 'item' && this.getOwnerUnit() == ige.client.selectedUnit)) {
+						this.flip(newValue);
+					}
+					break;
+
+				default:
+					this._stats[attrName] = newValue;
+					break;
+			}
+
+			if (ige.isServer) {
+				// keys that will stream even if its new value is same as the previous value
+				var forceStreamKeys = ['anim', 'coin', 'stateId', 'ownerId', 'name', 'slotIndex', 'newItemId', 'quantity', 'spriteOnly', 'setFadingText', 'playerJoinedAgain', 'use', 'hidden'];
+				if (typeof this.queueStreamData === 'function') {
+					if (forceStreamKeys.includes(attrName)) {
+						// console.log("queueStreamData", attrName, data[attrName])
+						var streamData = {};
+						streamData[attrName] = data[attrName];
+						this.queueStreamData(streamData);
+					}
+				}
+			} else if (ige.isClient) {
+				switch (attrName) {
+
+					case 'anim':
+						var animationId = newValue;
+						this.applyAnimationById(animationId);
+						break;
+
+					case 'stateId':
+
+						var stateId = newValue;
+						this.setState(stateId);
+
+						if (this._category == 'item') {
+							var owner = this.getOwnerUnit();
+							// update state only iff it's not my unit's item
+							if (owner == ige.client.selectedUnit) {
+								// don't repeat whip-out tween for my own unit as it has already been executed from unit.changeItem()
+							} else if (stateId == 'selected') {
+								this.applyAnimationForState(stateId);
+
+								// whip-out the new item using tween
+								let customTween = {
+									type: 'swing',
+									keyFrames: [[0, [0, 0, -1.57]], [100, [0, 0, 0]]]
+								};
+								this.tween.start(null, this._rotate.z, customTween);
+
+							}
+
+							const bodyId = this._stats.states[stateId].body;
+							// make sure item always has proper size defined by state
+							if (
+								// accommodate legacy 'unSelected'
+								this._stats.states[stateId] &&
+								bodyId &&
+								this._stats.bodies[bodyId] &&
+								// old single condition
+								bodyId !== 'none'
+							) {
+
+								this.emit(
+									'size',
+									{
+										width: this._stats.currentBody.width,
+										height: this._stats.currentBody.height
+									}
+								);
+							}
+							// unmount item when item is in backpack
+							if (owner && this._stats.slotIndex >= owner._stats.inventorySize) {
+								this.unMount();
+							}
+
+						} else {
+							this.updateLayer();
+							this.applyAnimationForState(newValue);
+							this._scaleTexture();
+							this.scaleDimensions(this._stats.width, this._stats.height);
+						}
+
+						break;
+					case 'effect':
+						// don't use streamed effect call for my own unit or its items
+						if (this == ige.client.selectedUnit || (this._category == 'item' && this.getOwnerUnit() == ige.client.selectedUnit))
+							return;
+						this.playEffect(newValue);
+						break;
+					case 'hideUnit':
+						this.hide();
+						break;
+					case 'showUnit':
+						this.show();
+						break;
+					case 'hideNameLabel':
+						this.emit('hide-label');
+						break;
+					case 'showNameLabel':
+						this.emit('show-label');
+						break;
+
+				}
+			}
+		}
+	},
+
 	streamUpdateData: function (queuedData) {
-		var oldStats = {};
 		if (queuedData != undefined) {
 			for (var i = 0; i < queuedData.length; i++) {
 				var data = queuedData[i];
-				for (attrName in data) {
-					var newValue = data[attrName];
-					// console.log(this._category, this.id(), attrName, newValue)
-					switch (attrName) {
-						case 'attributes':
-							// only on client side to prevent circular recursion
-							if (ige.isClient) {
-								var attributesObject = _.cloneDeep(this._stats.attributes);
-								if (attributesObject) {
-									for (var attributeTypeId in data.attributes) {
-										var attributeData = attributesObject[attributeTypeId];
-
-										if (attributeData) {
-											var newAttributeValue = data.attributes[attributeTypeId];
-											var oldAttributeValue = attributeData.value;
-
-											attributeData.hasChanged = newAttributeValue !== oldAttributeValue;
-											attributeData.value = newAttributeValue;
-											attributeData.type = attributeTypeId;
-
-											this.attribute.update(attributeTypeId, attributeData.value);
-
-											if (this._category === 'unit') {
-												this.updateAttributeBar(attributeData);
-											}
-										}
-										// update attribute if entity has such attribute
-									}
-								}
-							} else if (ige.isServer) {
-								for (var attributeTypeId in data.attributes) {
-									// prevent attribute being passed to client if it is invisible
-									if (this._stats.attributes && this._stats.attributes[attributeTypeId]) {
-										var attribute = this._stats.attributes[attributeTypeId];
-										if (
-											((attribute.isVisible && typeof attribute.isVisible === 'boolean' && attribute.isVisible == false) || // will be deprecated.
-												(attribute.isVisible && attribute.isVisible.constructor === Array && attribute.isVisible.length == 0)) &&
-											attributeTypeId !== ige.game.data.settings.scoreAttributeId
-										) {
-											delete data[attrName];
-										}
-									}
-								}
-							}
-							break;
-
-						case 'attributesMax':
-							if (this._stats.attributes) {
-								// only on client side to prevent circular recursion
-								for (var attributeTypeId in data.attributesMax) {
-									if (this._stats.attributes && this._stats.attributes[attributeTypeId]) {
-										this._stats.attributes[attributeTypeId].max = data.attributesMax[attributeTypeId];
-									}
-
-									// update attribute if entity has such attribute
-									if (ige.isClient) {
-										if (this._category === 'unit') {
-											// this.updateAttributeBar(this._stats.attributes[attributeTypeId]);
-											this.unitUi && this.unitUi.updateAttributeBar(this._stats.attributes[attributeTypeId]);
-										}
-									}
-								}
-							}
-							break;
-
-						case 'attributesMin':
-							// only on client side to prevent circular recursion
-							for (var attributeTypeId in data.attributesMin) {
-								if (this._stats.attributes && this._stats.attributes[attributeTypeId]) {
-									this._stats.attributes[attributeTypeId].min = data.attributesMin[attributeTypeId];
-
-									// update attribute if entity has such attribute
-									if (ige.isClient) {
-										if (this._category === 'unit') {
-											this.updateAttributeBar(this._stats.attributes[attributeTypeId]);
-											this.unitUi && this.unitUi.updateAttributeBar(this._stats.attributes[attributeTypeId]);
-										}
-									}
-								}
-							}
-							break;
-
-						case 'attributesRegenerateRate':
-							// only on client side to prevent circular recursion
-							for (var attributeTypeId in data.attributesRegenerateRate) {
-								if (this._stats.attributes && this._stats.attributes[attributeTypeId]) {
-									this._stats.attributes[attributeTypeId].regenerateSpeed = data.attributesRegenerateRate[attributeTypeId];
-								}
-							}
-							break;
-
-						case 'depth':
-							if (ige.isClient) {
-								this.depth(data.depth);
-							}
-							break;
-
-						case 'flip':
-							// ignore flip command from server for my own unit, because it's already done locally
-							if (ige.isClient && this != ige.client.selectedUnit && !(this._category == 'item' && this.getOwnerUnit() == ige.client.selectedUnit)) {
-								this.flip(newValue);
-							}
-							break;
-
-						default:
-							// setting oldownerId b4 owner change
-							if (attrName === 'ownerId') {
-								this.oldOwnerId = this._stats[attrName];
-							}
-							this._stats[attrName] = newValue;
-							break;
-					}
-
-					if (ige.isServer) {
-						// keys that will stream even if its new value is same as the previous value
-						var forceStreamKeys = ['anim', 'coin', 'stateId', 'ownerId', 'name', 'slotIndex', 'newItemId', 'quantity', 'spriteOnly', 'setFadingText', 'playerJoinedAgain', 'use', 'hidden'];
-						if (typeof this.queueStreamData === 'function') {
-							if (data[attrName] != oldStats[attrName] || forceStreamKeys.includes(attrName)) {
-								// console.log("queueStreamData", attrName, data[attrName])
-								var streamData = {};
-								streamData[attrName] = data[attrName];
-								this.queueStreamData(streamData);
-							}
-						}
-					} else if (ige.isClient) {
-						switch (attrName) {
-							case 'anim':
-								var animationId = newValue;
-								this.applyAnimationById(animationId);
-								break;
-
-							case 'stateId':
-
-								var stateId = newValue;
-								this.setState(stateId);
-
-								if (this._category == 'item') {
-									var owner = this.getOwnerUnit();
-									// update state only iff it's not my unit's item
-									if (owner == ige.client.selectedUnit) {
-										// don't repeat whip-out tween for my own unit as it has already been executed from unit.changeItem()
-									} else if (stateId == 'selected') {
-										this.applyAnimationForState(stateId);
-
-										// whip-out the new item using tween
-										let customTween = {
-											type: 'swing',
-											keyFrames: [[0, [0, 0, -1.57]], [100, [0, 0, 0]]]
-										};
-										this.tween.start(null, this._rotate.z, customTween);
-
-									}
-
-									const bodyId = this._stats.states[stateId].body;
-									// make sure item always has proper size defined by state
-									if (
-										// accommodate legacy 'unSelected'
-										this._stats.states[stateId] &&
-										bodyId &&
-										this._stats.bodies[bodyId] &&
-										// old single condition
-										bodyId !== 'none'
-									) {
-
-										this.emit(
-											'size',
-											{
-												width: this._stats.currentBody.width,
-												height: this._stats.currentBody.height
-											}
-										);
-									}
-									// unmount item when item is in backpack
-									if (owner && this._stats.slotIndex >= owner._stats.inventorySize) {
-										this.unMount();
-									}
-
-								} else {
-									this.updateLayer();
-									this.applyAnimationForState(newValue);
-									this._scaleTexture();
-									this.scaleDimensions(this._stats.width, this._stats.height);
-								}
-
-								break;
-							case 'effect':
-								// don't use streamed effect call for my own unit or its items
-								if (this == ige.client.selectedUnit || (this._category == 'item' && this.getOwnerUnit() == ige.client.selectedUnit))
-									return;
-								this.playEffect(newValue);
-								break;
-							case 'makePlayerSelectUnit':
-								// this unit was queued to be selected by a player
-								ige.client.myPlayer.selectUnit(this.id());
-								break;
-							case 'makePlayerCameraTrackUnit':
-								// this unit was queued to be tracked by a player's camera
-								ige.client.myPlayer.cameraTrackUnit(this);
-								break;
-							case 'hideUnit':
-								this.hide();
-								break;
-							case 'showUnit':
-								this.show();
-								break;
-							case 'hideNameLabel':
-								this.emit('hide-label');
-								break;
-							case 'showNameLabel':
-								this.emit('show-label');
-								break;
-
-						}
-					}
-				}
+				this.processStreamData(data);				
 			}
 		}
 	},
@@ -4694,7 +4686,7 @@ var IgeEntity = IgeObject.extend({
 
 				case 'unit': 
 					// cellsheet is used for purchasable-skins
-					keys = ["name", "type", "stateId", "ownerId", "currentItemIndex", "currentItemId", "flip", "skin", "cellSheet"]
+					keys = ["name", "type", "stateId", "ownerPlayerId", "currentItemIndex", "currentItemId", "flip", "skin", "cellSheet"]
 					data = { 
 						attributes: {}, 
 						// variables: {} 
@@ -5265,23 +5257,6 @@ var IgeEntity = IgeObject.extend({
 		) {
 			rotate = this.angleToTarget;
 		}
-
-		
-		
-		// instantly rotate unit to mouse cursor
-		// if (this == ige.client.selectedUnit && !this._stats.aiEnabled) {
-		// 	var ownerPlayer = ige.$(this._stats.ownerId);
-		// 	if (ownerPlayer && ownerPlayer.control && ownerPlayer.control.input) {
-		// 		var mouse = ownerPlayer.control.input.mouse;
-		// 		if (mouse) {
-		// 			this.angleToTarget = Math.atan2(mouse.y - this._translate.y, mouse.x - this._translate.x) + Math.radians(90);
-		// 			if (this.angleToTarget != undefined && !isNaN(this.angleToTarget) && this._stats.controls && this._stats.controls.mouseBehaviour.rotateToFaceMouseCursor && this._stats.currentBody && !this._stats.currentBody.fixedRotation) {
-		// 				rotate = this.angleToTarget;
-		// 			}
-		// 		}
-		// 	}
-		// }
-
 		
 		this._translate.x = x;
 		this._translate.y = y;

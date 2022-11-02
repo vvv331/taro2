@@ -101,11 +101,11 @@ var Unit = IgeEntityPhysics.extend({
 		} else if (ige.isClient) {
 			// if player already exists on the client side, then set owner player and update its name label
 			// otherwise, client.js will wait for player entity and run this on client.js
-			if (this._stats.ownerId) {
+			if (this._stats.ownerPlayerId) {
 				// if the owner player entity is received on the client side already
-				const ownerPlayer = ige.$(this._stats.ownerId);
+				const ownerPlayer = ige.$(this._stats.ownerPlayerId);
 				if (ownerPlayer) {
-					this.setOwnerPlayer(this._stats.ownerId);
+					this.setOwnerPlayer(this._stats.ownerPlayerId);
 					this.equipSkin();
 				}
 			}
@@ -305,7 +305,7 @@ var Unit = IgeEntityPhysics.extend({
 		// add this unit to the new owner
 		var newOwnerPlayer = newOwnerPlayerId ? ige.$(newOwnerPlayerId) : undefined;
 		if (newOwnerPlayer && newOwnerPlayer._stats) {
-			self._stats.ownerId = newOwnerPlayerId;
+			self._stats.ownerPlayerId = newOwnerPlayerId;
 			self.ownerPlayer = newOwnerPlayer;
 			self._stats.name = (config && config.dontUpdateName) // if unit already has name dont update it
 														? (self._stats.name || newOwnerPlayer._stats.name)
@@ -1407,8 +1407,8 @@ var Unit = IgeEntityPhysics.extend({
 		// if (ige.isServer && ige.network.isPaused) 
 		// 	return;
 
-		IgeEntity.prototype.streamUpdateData.call(this, queuedData);
-
+		// IgeEntity.prototype.streamUpdateData.call(this, queuedData);
+		console.log("unit streamUpdateData", queuedData)
 		for (var i = 0; i < queuedData.length; i++) {
 			var data = queuedData[i];
 			for (attrName in data) {
@@ -1518,7 +1518,12 @@ var Unit = IgeEntityPhysics.extend({
 					case 'ownerPlayerId':
 						if (ige.isClient) {
 							self.setOwnerPlayer(newValue);
+							console.log("wtf")
 						}
+						break;
+
+					default:
+						IgeEntity.prototype.streamUpdateData.call(this, data);
 						break;
 				}
 			}

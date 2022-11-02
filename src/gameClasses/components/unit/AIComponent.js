@@ -97,7 +97,7 @@ var AIComponent = IgeEntity.extend({
 		// only response to hostile/neutral units
 		var ownerPlayer = self._entity.getOwner();
 		if (unit) {
-			var ownerPlayerOfTargetUnit = ige.$(unit._stats.ownerId);
+			var ownerPlayerOfTargetUnit = ige.$(unit._stats.ownerPlayerId);
 			if (ownerPlayer && ownerPlayer.isHostileTo(ownerPlayerOfTargetUnit) && unit._stats.isUnTargetable != true) {
 				// if I already have a target, re-target if new target unit is closer
 				var targetUnit = this.getTargetUnit();

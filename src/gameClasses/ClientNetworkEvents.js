@@ -10,6 +10,7 @@ var ClientNetworkEvents = {
 	},
 
 	_onUpdateAllEntities: function (data) {
+		console.log("_onUpdateAllEntities", data)
 		for (entityId in data) {
 			var entity = ige.$(entityId);
 			if (ige.client.entityUpdateQueue[entityId] == undefined) {
@@ -55,27 +56,6 @@ var ClientNetworkEvents = {
 		if (entity && data.position) {
 			// console.log("teleporting",data.entityId , " to", data.position)
 			entity.teleportTo(data.position[0], data.position[1]);
-		}
-	},
-
-	_onMakePlayerSelectUnit: function (data) {
-		if (data.unitId) {
-			if (ige.client.entityUpdateQueue[data.unitId] == undefined) {
-				ige.client.entityUpdateQueue[data.unitId] = [];
-			}
-			// in case the unit doesn't exist when player tries to select it, we're pushing the command into entityUpdateQueue
-			ige.client.entityUpdateQueue[data.unitId].push({ makePlayerSelectUnit: true });
-		}
-	},
-
-	_onMakePlayerCameraTrackUnit: function (data) {
-		if (data.unitId) {
-			if (ige.client.entityUpdateQueue[data.unitId] == undefined) {
-				ige.client.entityUpdateQueue[data.unitId] = [];
-			}
-
-			// in case the unit doesn't exist when player camera tries to track it, we're pushing the command into entityUpdateQueue
-			ige.client.entityUpdateQueue[data.unitId].push({ makePlayerCameraTrackUnit: true });
 		}
 	},
 

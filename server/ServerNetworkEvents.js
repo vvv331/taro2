@@ -802,7 +802,7 @@ var ServerNetworkEvents = {
 		var unit = ige.$(data.unitId);
 		var player = ige.game.getPlayerByClientId(clientId);
 		if (player && unit) {
-			player.selectUnit(data.unitId);
+			player.selectUnit(unit);
 		}
 	},
 
