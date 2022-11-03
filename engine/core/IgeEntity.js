@@ -4686,7 +4686,8 @@ var IgeEntity = IgeObject.extend({
 
 				case 'unit': 
 					// cellsheet is used for purchasable-skins
-					keys = ["name", "type", "stateId", "ownerPlayerId", "currentItemIndex", "currentItemId", "flip", "skin", "cellSheet"]
+					keys = ["name", "type", "stateId", "ownerPlayerId", "currentItemIndex", "currentItemId", "flip", "skin", "scale", "cellSheet"]
+
 					data = { 
 						attributes: {}, 
 						// variables: {} 
