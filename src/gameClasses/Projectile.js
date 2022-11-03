@@ -123,40 +123,26 @@ var Projectile = IgeEntityPhysics.extend({
 		}
 	},
 
-	streamUpdateData: function (queuedData) {
-
-		// if (ige.isServer && ige.network.isPaused) 
-		// 	return;
-			
-		IgeEntity.prototype.streamUpdateData.call(this, data);
+	processStreamUpdateQueue: function(queuedData) {
+		IgeEntity.prototype.processStreamUpdateQueue.call(this, queuedData);
 		for (var i = 0; i < queuedData.length; i++) {
 			var data = queuedData[i];
-			for (attrName in data) {
-				var newValue = data[attrName];
+			this.applyStreamUpdate(data);
+		}
+	},
 
-				switch (attrName) {
+	applyStreamUpdate: function(data) {
+		var self = this;
+		for (attrName in data) {
+			var newValue = data[attrName];
+			switch (attrName) {
 
-					case 'scaleBody':
-						if (ige.isServer) {
-							// finding all attach entities before changing body dimensions
-							if (this.jointsAttached) {
-								var attachedEntities = {};
-								for (var entityId in this.jointsAttached) {
-									if (entityId != this.id()) {
-										attachedEntities[entityId] = true;
-									}
-								}
-							}
-
-							this._scaleBox2dBody(newValue);
-						} else if (ige.isClient) {
-							this._stats.scale = newValue;
-							this._scaleTexture();
-						}
-						break;
-				}
 			}
 		}
+	},
+
+	streamUpdateData: function (queuedData) {
+		IgeEntity.prototype.streamUpdateData.call(this, data);
 	},
 
 	tick: function (ctx) {

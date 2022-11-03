@@ -412,146 +412,123 @@ var Player = IgeEntity.extend({
 			});
 	},
 
-	// update player's stats in the server side first, then update client side as well.
-	streamUpdateData: function (queuedData) {
-		var self = this;
-		var oldStats = JSON.parse(JSON.stringify(self._stats));
-		IgeEntity.prototype.streamUpdateData.call(this, queuedData);
-
+	processStreamUpdateQueue: function(queuedData) {
+		IgeEntity.prototype.processStreamUpdateQueue.call(this, queuedData);
 		for (var i = 0; i < queuedData.length; i++) {
 			var data = queuedData[i];
-			for (attrName in data) {
-				var newValue = data[attrName];
-				// if player's type changed, then update all of its base stats (speed, stamina, etc..)
-				if (attrName === 'playerTypeId') {
-					var playerTypeData = ige.game.getAsset('playerTypes', newValue);
-					if (playerTypeData) {
-						playerTypeData.playerTypeId = newValue;
+			this.applyStreamUpdate(data);
+		}
+	},
 
-						if (ige.isClient) {
-							// change color of label of all units that belongs to updating player
-							self.redrawUnits(function (unit) {
-								// dont update color if unitType of my unit is changed on my screen as it will be always Lime
-								var isMyPlayerUpdated = self._stats.clientId === ige.network.id();
-								// update color of all units that belongs to player whose playerType just changed
-								var ownerPlayer = unit.getOwner();
-								var unitBelongsToUpdatingPlayer = ownerPlayer && ownerPlayer.id() === self.id();
+	applyStreamUpdate: function(data) {
+		var self = this;
+		for (attrName in data) {
+			var newValue = data[attrName];
 
-								return !isMyPlayerUpdated && unitBelongsToUpdatingPlayer;
-							}, ['nameLabel']);
-						}
+			switch (attrName) {
+				case 'playerTypeId': 
+					// change color of label of all units that belongs to updating player
+					self.redrawUnits(function (unit) {
+						// dont update color if unitType of my unit is changed on my screen as it will be always Lime
+						var isMyPlayerUpdated = self._stats.clientId === ige.network.id();
+						// update color of all units that belongs to player whose playerType just changed
+						var ownerPlayer = unit.getOwner();
+						var unitBelongsToUpdatingPlayer = ownerPlayer && ownerPlayer.id() === self.id();
 
-						self.updatePlayerType(playerTypeData);
+						return !isMyPlayerUpdated && unitBelongsToUpdatingPlayer;
+					}, ['nameLabel']);
+					break;
+				case 'name':
+					// update here
+					if (typeof refreshUserName == 'function') {
+						refreshUserName(newValue);
 					}
-				}
+					break;
 
-				if (ige.isServer) {
-					if (attrName === 'name' && oldStats.name !== newValue) {
-						// update all units
-						self._stats.unitIds.forEach(function (unitId) {
-							var unit = ige.$(unitId);
-							unit.streamUpdateData([{ name: newValue }]);
-						});
-					} else if (attrName === 'playerJoined' && newValue == false) {
-						// player's been kicked/removed
-						self.remove();
+				case 'equiped':
+					var unit = self.getSelectedUnit();
+					if (unit) {
+						unit.equipSkin();
 					}
-				}
-				if (ige.isClient) {
-					if (attrName === 'name') {
-						// update here
-						if (typeof refreshUserName == 'function') {
-							refreshUserName(newValue);
-						}
-					}
-					if (attrName === 'equiped') {
-						var unit = self.getSelectedUnit();
-						if (unit) {
-							unit.equipSkin();
-						}
-					} else if (attrName === 'unEquiped') {
-						var unit = self.getSelectedUnit();
-						if (unit) {
-							unit.unEquipSkin(null, false, newValue);
-						}
-					}
+					break;
 
+				case 'unEquiped': 
+					var unit = self.getSelectedUnit();
+					if (unit) {
+						unit.unEquipSkin(null, false, newValue);
+					}
+					break;
+
+				case 'mapData':
 					if (self._stats.clientId == ige.network.id()) {
-						if (attrName === 'mapData') {
-							ige.developerMode.updateClientMap(data);
-						}
-						if (attrName === 'attributes') {
-							ige.playerUi.updatePlayerAttributesDiv(self._stats.attributes);
-						}
-						if (attrName === 'coins') {
-							ige.playerUi.updatePlayerCoin(newValue);
-						}
-						if (attrName === 'playerJoinedAgain') {
-							self.hideMenu();
-						}
-						if (attrName === 'banChat') {
-							self.setChatMute(newValue);
-						}
-						if (attrName === 'playerJoined') {
-							// console.log('received player.playerJoined');
-							ige.client.eventLog.push([ige._currentTime, 'playerJoined received']);
-							// render name labels of all other units
-							self.redrawUnits(['nameLabel']);
-
-							self._stats.receivedJoinGame = data.receivedJoinGame;
-							ige.client.eventLog.push([ige._currentTime - ige.client.eventLogStartTime, '\'playerJoined\' received from server']);
-							self._stats.processedJoinGame = data.processedJoinGame;
-							var streamingDiff = `${Date.now() - data.streamedOn}ms`;
-
-							window.joinGameSent.end = Date.now();
-							window.joinGameSent.completed = window.joinGameSent.end - window.joinGameSent.start;
-
-							console.log(
-								`JoinGame took ${window.joinGameSent.completed}ms to join player` +
-								`, client to gs: ${self._stats.receivedJoinGame - window.joinGameSent.start}ms` +
-								`, gs loading player data: ${self._stats.totalTime}ms` +
-								`, gs processed request for: ${self._stats.processedJoinGame}ms` +
-								`, gs to client: ${streamingDiff
-								}, client sent on: ${window.joinGameSent.start
-								}, server sent back on: ${data.streamedOn}`
-							);
-
-							if (window.joinGameSent.completed > 7000) {
-								$.post('/api/log', {
-									event: 'rollbar',
-									text: `${Date.now()}:- JoinGame took ${window.joinGameSent.completed}ms to join player` +
-										`, client to gs: ${self._stats.receivedJoinGame - window.joinGameSent.start}ms` +
-										`, gs loading player data: ${self._stats.totalTime}ms` +
-										`, gs processed request for: ${self._stats.processedJoinGame}ms` +
-										`, gs to client: ${streamingDiff
-										}, client sent on: ${window.joinGameSent.start
-										}, server sent back on: ${data.streamedOn}`
-								});
-							}
-							if (self._stats.processedJoinGame > 7000) {
-								$.post('/api/log', {
-									event: 'rollbar',
-									text: `${Date.now()}JoinGame took ${window.joinGameSent.completed}ms to create player` +
-										`, client to gs: ${self._stats.receivedJoinGame - window.joinGameSent.start}ms` +
-										`, gs loading player data: ${self._stats.totalTime}ms` +
-										`, gs processed request for: ${self._stats.processedJoinGame}ms` +
-										`, gs to client: ${streamingDiff
-										}, client sent on: ${window.joinGameSent.start
-										}, server sent back on: ${data.streamedOn}`
-								});
-							}
-
-							self.hideMenu();
-							clearTimeout(window.errorLogTimer);
-						}
+						ige.developerMode.updateClientMap(data);
 					}
+					break;
 
-					if (attrName === 'banChat' && (ige.game.data.isDeveloper || (ige.client.myPlayer && ige.client.myPlayer._stats.isUserMod))) {
-						ige.menuUi.kickPlayerFromGame();
+				case 'attributes':
+					if (self._stats.clientId == ige.network.id()) {
+						ige.playerUi.updatePlayerAttributesDiv(self._stats.attributes);
 					}
-				}
+					break;
+				
+				case 'coins':
+					if (self._stats.clientId == ige.network.id()) {
+						ige.playerUi.updatePlayerCoin(newValue);
+					}
+					break;
+
+				case 'playerJoinedAgain':
+					if (self._stats.clientId == ige.network.id()) {
+						self.hideMenu();
+					}
+					break;
+
+				case 'selectedUnitId':
+					var unit = ige.$(newValue)
+					if (unit) {
+						this.selectUnit(unit);
+					}
+					
+					break;
+				
+				case 'trackedUnitId':
+					// this unit was queued to be tracked by a player's camera
+					var unit = ige.$(newValue)
+					console.log("cameraTrackUnit")
+					if (unit) {
+						this.cameraTrackUnit(unit);
+					}
+					break;
+				case 'banChat':
+					if (self._stats.clientId == ige.network.id()) {
+						self.setChatMute(newValue);
+					}
+					break;
+				
+				case 'playerJoined':
+					// console.log('received player.playerJoined');
+					ige.client.eventLog.push([ige._currentTime, 'playerJoined received']);
+					// render name labels of all other units
+					self.redrawUnits(['nameLabel']);
+
+					self._stats.receivedJoinGame = data.receivedJoinGame;
+					ige.client.eventLog.push([ige._currentTime - ige.client.eventLogStartTime, '\'playerJoined\' received from server']);
+					self._stats.processedJoinGame = data.processedJoinGame;
+					self.hideMenu();
+					clearTimeout(window.errorLogTimer);
+					break;
+
+				default:
+					// IgeEntity.prototype.streamUpdateData.call(this, data);
+					break;
 			}
 		}
+	},
+
+	// update player's stats in the server side first, then update client side as well.
+	streamUpdateData: function (queuedData) {
+		IgeEntity.prototype.streamUpdateData.call(this, queuedData);
+
 	},
 	setChatMute: function (value) {
 		if (ige.env == 'local') // don't mute users in dev env

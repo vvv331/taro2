@@ -1399,130 +1399,133 @@ var Unit = IgeEntityPhysics.extend({
 		IgeEntityPhysics.prototype.remove.call(this);
 	},
 
-	// update unit's stats in the server side first, then update client side as well.
-	streamUpdateData: function (queuedData) {
-		var self = this;
-		// Unit.prototype.log("unit streamUpdateData", data)
 
-		// if (ige.isServer && ige.network.isPaused) 
-		// 	return;
-
-		IgeEntity.prototype.streamUpdateData.call(this, queuedData);
-
+	processStreamUpdateQueue: function(queuedData) {
+		IgeEntity.prototype.processStreamUpdateQueue.call(this, queuedData);
 		for (var i = 0; i < queuedData.length; i++) {
 			var data = queuedData[i];
-			for (attrName in data) {
-				var newValue = data[attrName];
+			this.applyStreamUpdate(data);
+		}
+	},
 
-				switch (attrName) {
-					case 'type':
-						this.changeUnitType(newValue);
-						break;
+	applyStreamUpdate: function(data) {
+		var self = this;
+		for (attrName in data) {
+			var newValue = data[attrName];
+			switch (attrName) {
+				case 'type':
+					this.changeUnitType(newValue);
+					break;
 
-					case 'aiEnabled':
-						if (ige.isClient) {
-							if (newValue == true) {
-								self.ai.enable();
-							} else {
-								self.ai.disable();
-							}
+				case 'aiEnabled':
+					if (ige.isClient) {
+						if (newValue == true) {
+							self.ai.enable();
+						} else {
+							self.ai.disable();
 						}
-						break;
+					}
+					break;
 
-					case 'itemIds':
-						// update shop as player points are changed and when shop modal is open
-						if (ige.isClient) {
-							this.inventory.update();
+				case 'itemIds':
+					// update shop as player points are changed and when shop modal is open
+					if (ige.isClient) {
+						this.inventory.update();
 
-							if ($('#modd-item-shop-modal').hasClass('show')) {
-								ige.shop.openItemShop();
-							}
-
-							// console.log('Unit.streamUpdateData(\'itemIds\') on the client', newValue);
-							this.setCurrentItem();
+						if ($('#modd-item-shop-modal').hasClass('show')) {
+							ige.shop.openItemShop();
 						}
-						break;
 
-					case 'currentItemIndex':
-						// for tracking selected index of other units
-						if (ige.isClient && this !== ige.client.selectedUnit) {
-							// console.log('Unit.streamUpdateData(\'currentItemIndex\') on the client', newValue);
-							this.setCurrentItem(newValue);
-						}
-						break;
+						// console.log('Unit.streamUpdateData(\'itemIds\') on the client', newValue);
+						this.setCurrentItem();
+					}
+					break;
 
-					case 'skin':
-					case 'isInvisible':
-					case 'isInvisibleToFriendly':
-					case 'isInvisibleToNeutral':
-						if (ige.isClient) {
-							this.updateTexture();
-						}
-						break;
+				case 'currentItemIndex':
+					// for tracking selected index of other units
+					if (ige.isClient && this !== ige.client.selectedUnit) {
+						// console.log('Unit.streamUpdateData(\'currentItemIndex\') on the client', newValue);
+						this.setCurrentItem(newValue);
+					}
+					break;
 
-					case 'scale':
-						if (ige.isClient) {
-							self._scaleTexture();
-						}
-						break;
+				case 'skin':
+				case 'isInvisible':
+				case 'isInvisibleToFriendly':
+				case 'isInvisibleToNeutral':
+					if (ige.isClient) {
+						this.updateTexture();
+					}
+					break;
 
-					case 'scaleBody':
-						if (ige.isServer) {
-							// finding all attach entities before changing body dimensions
-							if (self.jointsAttached) {
-								var attachedEntities = {};
-								for (var entityId in self.jointsAttached) {
-									var entity = self.jointsAttached[entityId];
-									if (entityId != self.id()) {
-										attachedEntities[entityId] = true;
-									}
+				case 'scale':
+					if (ige.isClient) {
+						self._scaleTexture();
+					}
+					break;
+
+				case 'scaleBody':
+					if (ige.isServer) {
+						// finding all attach entities before changing body dimensions
+						if (self.jointsAttached) {
+							var attachedEntities = {};
+							for (var entityId in self.jointsAttached) {
+								var entity = self.jointsAttached[entityId];
+								if (entityId != self.id()) {
+									attachedEntities[entityId] = true;
 								}
 							}
+						}
 
-							// changing body dimensions
-							self._scaleBox2dBody(newValue);
+						// changing body dimensions
+						self._scaleBox2dBody(newValue);
 
-						} else if (ige.isClient) {
-							self._stats.scale = newValue;
-							self._scaleTexture();
+					} else if (ige.isClient) {
+						self._stats.scale = newValue;
+						self._scaleTexture();
+					}
+					break;
+				case 'isNameLabelHidden':
+				case 'isNameLabelHiddenToNeutral':
+				case 'isNameLabelHiddenToFriendly':
+				case 'name':
+					if (attrName === 'name') {
+						self._stats.name = newValue;
+					}
+					// updating stats bcz setOwner is replacing stats.
+					if (ige.isClient) {
+						self.updateNameLabel();
+					}
+					break;
+				case 'isHidden':
+					if (ige.isClient) {
+						if (newValue == true) {
+							self.hide();
+						} else {
+							self.show();
 						}
-						break;
-					case 'isNameLabelHidden':
-					case 'isNameLabelHiddenToNeutral':
-					case 'isNameLabelHiddenToFriendly':
-					case 'name':
-						if (attrName === 'name') {
-							self._stats.name = newValue;
-						}
-						// updating stats bcz setOwner is replacing stats.
-						if (ige.isClient) {
-							self.updateNameLabel();
-						}
-						break;
-					case 'isHidden':
-						if (ige.isClient) {
-							if (newValue == true) {
-								self.hide();
-							} else {
-								self.show();
-							}
-						}
-						break;
+					}
+					break;
 
-					case 'setFadingText':
-						if (ige.isClient) {
-							newValue = newValue.split('|-|');
-							self.updateFadingText(newValue[0], newValue[1]);
-						}
-						break;
-					case 'ownerPlayerId':
-						if (ige.isClient) {
-							self.setOwnerPlayer(newValue);
-						}
-						break;
-				}
+				case 'setFadingText':
+					if (ige.isClient) {
+						newValue = newValue.split('|-|');
+						self.updateFadingText(newValue[0], newValue[1]);
+					}
+					break;
+				case 'ownerPlayerId':
+					if (ige.isClient) {
+						self.setOwnerPlayer(newValue);
+					}
+					break;
 			}
 		}
+	},
+
+	// update player's stats in the server side first, then update client side as well.
+	streamUpdateData: function (queuedData) {
+		IgeEntity.prototype.streamUpdateData.call(this, queuedData);
+
 	},
 
 	tick: function (ctx) {

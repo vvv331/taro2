@@ -891,7 +891,7 @@ const Client = IgeEventingClass.extend({
 			const entity = ige.$(entityId);
 
 			if (entity && entityData) {
-				entity.streamUpdateData(entityData);
+				entity.processStreamUpdateQueue(entityData);
 			}
 		}
 	},

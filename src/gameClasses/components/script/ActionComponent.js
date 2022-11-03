@@ -353,7 +353,12 @@ var ActionComponent = IgeEntity.extend({
 
 						if (entity && entity._category == 'player') {
 							var player = entity;
-							player.streamUpdateData([{ playerTypeId: playerTypeId }]);
+							var playerTypeData = ige.game.getAsset('playerTypes', playerTypeId);
+							if (playerTypeData) {
+								playerTypeData.playerTypeId = playerTypeId;
+								player.updatePlayerType(playerTypeData);
+								player.streamUpdateData([{ playerTypeId: playerTypeId }]);
+							}
 						}
 
 						break;
@@ -2564,6 +2569,16 @@ var ActionComponent = IgeEntity.extend({
 						var entity = self._script.variable.getValue(action.entity, vars);
 						var scale = self._script.variable.getValue(action.scale, vars);
 						if (entity && self.entityCategories.indexOf(entity._category) > -1 && !isNaN(scale)) {
+							if (entity.jointsAttached) {
+								var attachedEntities = {};
+								for (var entityId in entity.jointsAttached) {
+									if (entityId != entity.id()) {
+										attachedEntities[entityId] = true;
+									}
+								}
+							}
+							// attaching entities
+							entity._scaleBox2dBody(newValue);
 							entity.streamUpdateData([{ scaleBody: parseFloat(scale).toFixed(2) }]);
 						}
 						break;

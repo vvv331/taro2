@@ -58,7 +58,7 @@ class EntitiesToRender {
 						}
 
 						if (processedUpdates.length > 0) {
-							entity.streamUpdateData(processedUpdates);
+							entity.processStreamUpdateQueue(processedUpdates);
 							// processedUpdates.forEach((value) => {
 							// 	console.log(value);
 							// });

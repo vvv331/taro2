@@ -870,121 +870,94 @@ var Item = IgeEntityPhysics.extend({
 		IgeEntityPhysics.prototype.remove.call(this);
 	},
 
-	streamUpdateData: function (queuedData) {
-		var self = this;
-		
-		// this was preventing isBeingUsed from streaming hence preventing other players' projectiles from showing
-		// if (ige.isServer && ige.network.isPaused) 
-		// 	return;
-
-		IgeEntity.prototype.streamUpdateData.call(this, queuedData);
-		// ige.devLog("Item streamUpdateData ", data)
+	processStreamUpdateQueue: function(queuedData) {
+		IgeEntity.prototype.processStreamUpdateQueue.call(this, queuedData);
 		for (var i = 0; i < queuedData.length; i++) {
 			var data = queuedData[i];
-			for (attrName in data) {
-				var newValue = data[attrName];
+			this.applyStreamUpdate(data);
+		}
+	},
 
-				switch (attrName) {
-					case 'ownerUnitId':
-						if (ige.isClient) {
-							var newOwner = ige.$(newValue);
-							self.setOwnerUnit(newOwner);
-						}
-						break;
-					case 'scale':
-					case 'scaleBody':
-						if (ige.isClient) {
-							self._stats.scale = newValue;
-							self._scaleTexture();
+	applyStreamUpdate: function(data) {
+		var self = this;
+		for (attrName in data) {
+			var newValue = data[attrName];
+			switch (attrName) {
+				case 'ownerUnitId':
+					var newOwner = ige.$(newValue);
+					self.setOwnerUnit(newOwner);
+					break;
+				// case 'use':
+				// 	// only run client-side use for other players' units, because my player's unit's use() will get executed via actionComponent.
+				// 	if (ige.isClient) {
+				// 		self.use();
+				// 	}
+				// 	break;
+				case 'hidden':
+					if (newValue) {
+						self.hide();
+						this.emit('hide');
 
-						} else {
-							// finding all attach entities before changing body dimensions
-							if (self.jointsAttached) {
-								var attachedEntities = {};
-								for (var entityId in self.jointsAttached) {
-									if (entityId != self.id()) {
-										attachedEntities[entityId] = true;
-									}
-								}
-							}
-							// attaching entities
-							self._scaleBox2dBody(newValue);
-						}
-						break;
-					// case 'use':
-					// 	// only run client-side use for other players' units, because my player's unit's use() will get executed via actionComponent.
-					// 	if (ige.isClient) {
-					// 		self.use();
-					// 	}
-					// 	break;
-					case 'hidden':
-						if (ige.isClient) {
-							if (newValue) {
-								self.hide();
-								this.emit('hide');
+					} else {
+						self.show();
+						this.emit('show');
+					}
+					break;
 
-							} else {
-								self.show();
-								this.emit('show');
-							}
-						}
-						break;
+				case 'quantity':
+					self.updateQuantity(newValue);
+					var owner = self.getOwnerUnit();
+					if (ige.client.selectedUnit == owner) {
+						ige.itemUi.updateItemQuantity(self);
+					}
+					break;
+				case 'description':
+					var owner = self.getOwnerUnit();
+					if (ige.client.selectedUnit == owner) {
+						ige.itemUi.updateItemDescription(this);
+					}
 
-					case 'quantity':
-						self.updateQuantity(newValue);
-						var owner = self.getOwnerUnit();
-						if (ige.isClient && ige.client.selectedUnit == owner) {
-							ige.itemUi.updateItemQuantity(self);
-						}
-						break;
-					case 'description':
-						var owner = self.getOwnerUnit();
-						if (ige.isClient && ige.client.selectedUnit == owner) {
-							ige.itemUi.updateItemDescription(this);
-						}
+					break;
+				case 'name':
+					var owner = self.getOwnerUnit();
+					if (ige.client.selectedUnit == owner) {
+						ige.itemUi.updateItemInfo(this);
+						ige.itemUi.updateItemDescription(this);
+					}
+					break;
 
-						break;
-					case 'name':
-						var owner = self.getOwnerUnit();
-						if (ige.isClient && ige.client.selectedUnit == owner) {
-							ige.itemUi.updateItemInfo(this);
-							ige.itemUi.updateItemDescription(this);
-						}
-						break;
+				case 'inventoryImage':
+					var owner = self.getOwnerUnit();
+					if (ige.client.selectedUnit == owner) {
+						ige.itemUi.updateItemSlot(this, this._stats.slotIndex);
+					}
+					break;
+				case 'inventorySlotColor':
+					var owner = self.getOwnerUnit();
+					if (ige.client.selectedUnit == owner) {
+						owner.inventory.update();
+					}
+					break;
+				case 'slotIndex':
+					break;
+				case 'isBeingUsed':
+					// ignore stream for my unit's item use
+					if (owner != ige.client.selectedUnit) {
+						this._stats.isBeingUsed = newValue;							
+					}
+					break;
 
-					case 'inventoryImage':
-						var owner = self.getOwnerUnit();
-						if (ige.isClient && ige.client.selectedUnit == owner) {
-							ige.itemUi.updateItemSlot(this, this._stats.slotIndex);
-						}
-						break;
-					case 'inventorySlotColor':
-						var owner = self.getOwnerUnit();
-						if (ige.isClient && ige.client.selectedUnit == owner) {
-							owner.inventory.update();
-						}
-						break;
-					case 'slotIndex':
-						break;
-					case 'isBeingUsed':
-						// ignore stream for my unit's item use
-						if (ige.isClient && owner != ige.client.selectedUnit) {
-							this._stats.isBeingUsed = newValue;							
-						}
-						break;
+				case 'stopUsing':
+					// ignore stream for my unit's item use
+					if (owner != ige.client.selectedUnit) {
+						this._stats.isBeingUsed = newValue;
 
-					case 'stopUsing':
-						// ignore stream for my unit's item use
-						if (ige.isClient && owner != ige.client.selectedUnit) {
-							this._stats.isBeingUsed = newValue;
-
-							if (newValue == false) {
-								this.playEffect('none');
-							}
+						if (newValue == false) {
+							this.playEffect('none');
 						}
-						break;
+					}
+					break;
 
-				}
 			}
 		}
 	},
