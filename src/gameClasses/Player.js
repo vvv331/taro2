@@ -413,7 +413,6 @@ var Player = IgeEntity.extend({
 	},
 
 	processStreamUpdateQueue: function(queuedData) {
-		IgeEntity.prototype.processStreamUpdateQueue.call(this, queuedData);
 		for (var i = 0; i < queuedData.length; i++) {
 			var data = queuedData[i];
 			this.applyStreamUpdate(data);
@@ -421,6 +420,8 @@ var Player = IgeEntity.extend({
 	},
 
 	applyStreamUpdate: function(data) {
+		IgeEntity.prototype.applyStreamUpdate.call(this, data);
+		
 		var self = this;
 		for (attrName in data) {
 			var newValue = data[attrName];

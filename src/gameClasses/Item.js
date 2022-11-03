@@ -94,7 +94,6 @@ var Item = IgeEntityPhysics.extend({
 		}
 		self.playEffect('create');
 		// self.addComponent(EffectComponent);
-
 		// behaviour handles:
 		this.addBehaviour('itemBehaviour', this._behaviour);
 		this.scaleDimensions(this._stats.width, this._stats.height);
@@ -871,7 +870,6 @@ var Item = IgeEntityPhysics.extend({
 	},
 
 	processStreamUpdateQueue: function(queuedData) {
-		IgeEntity.prototype.processStreamUpdateQueue.call(this, queuedData);
 		for (var i = 0; i < queuedData.length; i++) {
 			var data = queuedData[i];
 			this.applyStreamUpdate(data);
@@ -879,6 +877,8 @@ var Item = IgeEntityPhysics.extend({
 	},
 
 	applyStreamUpdate: function(data) {
+		IgeEntity.prototype.applyStreamUpdate.call(this, data);
+		
 		var self = this;
 		for (attrName in data) {
 			var newValue = data[attrName];
@@ -887,6 +887,7 @@ var Item = IgeEntityPhysics.extend({
 					var newOwner = ige.$(newValue);
 					self.setOwnerUnit(newOwner);
 					break;
+
 				// case 'use':
 				// 	// only run client-side use for other players' units, because my player's unit's use() will get executed via actionComponent.
 				// 	if (ige.isClient) {
@@ -911,6 +912,7 @@ var Item = IgeEntityPhysics.extend({
 						ige.itemUi.updateItemQuantity(self);
 					}
 					break;
+
 				case 'description':
 					var owner = self.getOwnerUnit();
 					if (ige.client.selectedUnit == owner) {
@@ -918,6 +920,7 @@ var Item = IgeEntityPhysics.extend({
 					}
 
 					break;
+
 				case 'name':
 					var owner = self.getOwnerUnit();
 					if (ige.client.selectedUnit == owner) {
@@ -932,14 +935,17 @@ var Item = IgeEntityPhysics.extend({
 						ige.itemUi.updateItemSlot(this, this._stats.slotIndex);
 					}
 					break;
+
 				case 'inventorySlotColor':
 					var owner = self.getOwnerUnit();
 					if (ige.client.selectedUnit == owner) {
 						owner.inventory.update();
 					}
 					break;
+
 				case 'slotIndex':
 					break;
+
 				case 'isBeingUsed':
 					// ignore stream for my unit's item use
 					if (owner != ige.client.selectedUnit) {

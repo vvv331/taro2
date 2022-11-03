@@ -4051,16 +4051,11 @@ var IgeEntity = IgeObject.extend({
 		}
 	},
 	
-	processStreamUpdateQueue: function(queuedData) {
-		var self = this;
-		console.log(queuedData)
-		for (var i = 0; i < queuedData.length; i++) {
-			var data = queuedData[i];
-			this.applyStreamUpdate(data);
-		}
-	},
-
 	applyStreamUpdate: function(data) {
+		var self = this;
+
+		console.log(data)
+		
 		for (attrName in data) {
 			var newValue = data[attrName];
 
@@ -4088,20 +4083,6 @@ var IgeEntity = IgeObject.extend({
 									}
 								}
 								// update attribute if entity has such attribute
-							}
-						}
-					} else if (ige.isServer) {
-						for (var attributeTypeId in data.attributes) {
-							// prevent attribute being passed to client if it is invisible
-							if (this._stats.attributes && this._stats.attributes[attributeTypeId]) {
-								var attribute = this._stats.attributes[attributeTypeId];
-								if (
-									((attribute.isVisible && typeof attribute.isVisible === 'boolean' && attribute.isVisible == false) || // will be deprecated.
-										(attribute.isVisible && attribute.isVisible.constructor === Array && attribute.isVisible.length == 0)) &&
-									attributeTypeId !== ige.game.data.settings.scoreAttributeId
-								) {
-									delete data[attrName];
-								}
 							}
 						}
 					}
@@ -4255,6 +4236,10 @@ var IgeEntity = IgeObject.extend({
 					this.emit('show-label');
 					break;
 
+				case 'ownerId':
+					// setting oldownerId b4 owner change
+					this.oldOwnerId = this._stats.ownerId;
+					
 				default:
 					this._stats[attrName] = newValue;
 					break;
@@ -4278,6 +4263,64 @@ var IgeEntity = IgeObject.extend({
 							streamData[attrName] = data[attrName];
 							this.queueStreamData(streamData);
 						}
+					}
+
+
+					var newValue = data[attrName];
+
+					switch (attrName) {
+						case 'attributes':
+						
+							for (var attributeTypeId in data.attributes) {
+								// prevent attribute being passed to client if it is invisible
+								if (this._stats.attributes && this._stats.attributes[attributeTypeId]) {
+									var attribute = this._stats.attributes[attributeTypeId];
+									if (
+										((attribute.isVisible && typeof attribute.isVisible === 'boolean' && attribute.isVisible == false) || // will be deprecated.
+											(attribute.isVisible && attribute.isVisible.constructor === Array && attribute.isVisible.length == 0)) &&
+										attributeTypeId !== ige.game.data.settings.scoreAttributeId
+									) {
+										delete data[attrName];
+									}
+								}
+							}
+							break;
+
+						case 'attributesMax':
+							if (this._stats.attributes) {
+								// only on client side to prevent circular recursion
+								for (var attributeTypeId in data.attributesMax) {
+									if (this._stats.attributes && this._stats.attributes[attributeTypeId]) {
+										this._stats.attributes[attributeTypeId].max = data.attributesMax[attributeTypeId];
+									}
+
+									// update attribute if entity has such attribute
+									if (ige.isClient) {
+										if (this._category === 'unit') {
+											// this.updateAttributeBar(this._stats.attributes[attributeTypeId]);
+											this.unitUi && this.unitUi.updateAttributeBar(this._stats.attributes[attributeTypeId]);
+										}
+									}
+								}
+							}
+							break;
+
+						case 'attributesMin':
+							// only on client side to prevent circular recursion
+							for (var attributeTypeId in data.attributesMin) {
+								if (this._stats.attributes && this._stats.attributes[attributeTypeId]) {
+									this._stats.attributes[attributeTypeId].min = data.attributesMin[attributeTypeId];
+
+									// update attribute if entity has such attribute
+									if (ige.isClient) {
+										if (this._category === 'unit') {
+											this.updateAttributeBar(this._stats.attributes[attributeTypeId]);
+											this.unitUi && this.unitUi.updateAttributeBar(this._stats.attributes[attributeTypeId]);
+										}
+									}
+								}
+							}
+							break;
 					}
 				}
 			}
