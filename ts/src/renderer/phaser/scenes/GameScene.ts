@@ -90,6 +90,20 @@ class GameScene extends PhaserScene {
 			y -= camera.height / 2;
 			camera.setScroll(x, y);
 		});
+
+		ige.client.on('reload-game', ({ reason } : { reason: string }) => {
+			console.log("On Reload Game", reason);
+			swal.fire({
+			type: 'info',
+			title: 'About',
+			html: reason || 'Something changed. Reloading the Page...'
+			});
+				
+			setTimeout(() => {
+				window.history.replaceState({}, '', `/play/${gameSlug}?enterDevMode=true`);
+				window.location.reload();
+			}, 300);
+		})
 	}
 
 	preload (): void {

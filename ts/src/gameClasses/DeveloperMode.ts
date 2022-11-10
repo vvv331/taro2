@@ -126,6 +126,13 @@ class DeveloperMode {
 			ige.client.emit('updateMap');
 		}
 	}
+
+	updateServerMap (map): void {
+		console.log("Update Server Map Function");
+		ige.game.data.map = map;
+		console.log("Update Server Map Function 2");
+		ige.network.send("reload-game", {reason: 'from world'});
+	}
 }
 
 interface TileData {

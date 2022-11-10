@@ -72,6 +72,19 @@ var GameScene = /** @class */ (function (_super) {
             y -= camera.height / 2;
             camera.setScroll(x, y);
         });
+        ige.client.on('reload-game', function (_a) {
+            var reason = _a.reason;
+            console.log("On Reload Game", reason);
+            swal.fire({
+                type: 'info',
+                title: 'About',
+                html: reason || 'Something changed. Reloading the Page...'
+            });
+            setTimeout(function () {
+                window.history.replaceState({}, '', "/play/".concat(gameSlug, "?enterDevMode=true"));
+                window.location.reload();
+            }, 300);
+        });
     };
     GameScene.prototype.preload = function () {
         var _this = this;

@@ -120,6 +120,13 @@ var DeveloperMode = /** @class */ (function () {
             ige.client.emit('updateMap');
         }
     };
+    DeveloperMode.prototype.updateServerMap = function (map) {
+        console.log("Update Server Map Function");
+        ige.game.data.map = map;
+        console.log("Update Server Map Function 2");
+        ige.network.send("reload-game", { reason: 'from world' });
+        ige.client.emit('reload-game', { reason: 'Map changed. Reloading the Page...' });
+    };
     return DeveloperMode;
 }());
 if (typeof (module) !== 'undefined' && typeof (module.exports) !== 'undefined') {

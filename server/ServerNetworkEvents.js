@@ -442,6 +442,11 @@ var ServerNetworkEvents = {
 		ige.developerMode.editRegion(data, clientId);
 	},
 
+	_onUpdateServerMap: function(data, clientId) {
+		console.log("on update server map is called.");
+		ige.developerMode.updateServerMap(data, clientId);
+	},
+
 	_onBuyItem: function (id, clientId) {
 		ige.devLog('player ' + clientId + ' wants to purchase item' + id);
 

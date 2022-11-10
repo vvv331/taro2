@@ -90,6 +90,8 @@ var Player = IgeEntity.extend({
 				var dataLoadTime = self._stats.totalTime;
 				client.lastEventAt = Date.now();
 
+				console.log("was edited is : ", ige.game.data.map.wasEdited);
+
 				if (ige.game.data.map.wasEdited) {
 					var playerJoinStreamData = [
 						{ streamedOn: Date.now() },
