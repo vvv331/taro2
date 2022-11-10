@@ -131,7 +131,7 @@ class DeveloperMode {
 		console.log("Update Server Map Function");
 		ige.game.data.map = map;
 		console.log("Update Server Map Function 2");
-		ige.network.send("reload-game", {reason: 'from world'});
+		ige.network.send("reloadGame", {reason: 'from world'});
 	}
 }
 

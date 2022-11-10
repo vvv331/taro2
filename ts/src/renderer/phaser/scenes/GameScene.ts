@@ -91,13 +91,13 @@ class GameScene extends PhaserScene {
 			camera.setScroll(x, y);
 		});
 
-		ige.client.on('reload-game', ({ reason } : { reason: string }) => {
-			console.log("On Reload Game", reason);
-			swal.fire({
-			type: 'info',
-			title: 'About',
-			html: reason || 'Something changed. Reloading the Page...'
-			});
+		ige.client.on('reloadGame', () => {
+			// console.log("On Reload Game", reason);
+			// swal.fire({
+			// type: 'info',
+			// title: 'About',
+			// html: reason || 'Something changed. Reloading the Page...'
+			// });
 				
 			setTimeout(() => {
 				window.history.replaceState({}, '', `/play/${gameSlug}?enterDevMode=true`);

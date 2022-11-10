@@ -72,7 +72,7 @@ var GameScene = /** @class */ (function (_super) {
             y -= camera.height / 2;
             camera.setScroll(x, y);
         });
-        ige.client.on('reload-game', function (_a) {
+        ige.client.on('reloadGame', function (_a) {
             var reason = _a.reason;
             console.log("On Reload Game", reason);
             swal.fire({

@@ -477,6 +477,10 @@ var ClientNetworkEvents = {
 		ige.client.emit('editRegion', data);
 	},
 
+	_onReloadGame: function (data) {
+		ige.client.emit('reloadGame', data);
+	},
+
 	_onErrorLogs: function (logs) {
 		var element = document.getElementById('error-log-content');
 		for (actionName in logs) {
