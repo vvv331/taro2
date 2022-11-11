@@ -98,11 +98,11 @@ var ShopComponent = IgeEntity.extend({
 					self.purchaseWarning('price', name);
 					return;
 				}
-				if (isCoinTxRequired) {
-					self.verifyUserPinForPurchase($(this).attr('id'));
-				} else {
+				// if (isCoinTxRequired) {
+				// 	self.verifyUserPinForPurchase($(this).attr('id'));
+				// } else {
 					self.purchase($(this).attr('id'));
-				}
+				// }
 			});
 
 			$(document).on('click', '.btn-purchase-unit', function () {
@@ -801,9 +801,9 @@ var ShopComponent = IgeEntity.extend({
 				shopItemsKeysUsingCoins.push(key);
 			}
 		}
-		// shopItemsKeysUsingCoins.forEach((key) => {
-		// 	delete shopItems[key];
-		// });
+		shopItemsKeysUsingCoins.forEach((key) => {
+			delete shopItems[key];
+		});
 
 		// display items tab iff there's item to be sold
 		if (shopItemsKeys.length > 0) {
