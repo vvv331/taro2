@@ -512,54 +512,54 @@ var Unit = IgeEntityPhysics.extend({
 				}
 
 				// pay coins
-				if (shopData.price.coins && ownerPlayer._stats.coins >= shopData.price.coins) {
-					// disable coin consuming due to some bug wrt coins
-					// add coin consuming code
-					if (ige.game.data.defaultData.tier >= 2) {
-						
-						try {
-							const jwt = require("jsonwebtoken");
-							
-							const isUsedToken = ige.server.usedCoinJwts[token];
-							if (isUsedToken) {
-								console.log('Token has been used already', token);
-								return;
-							}
-							
-							const decodedToken = jwt.verify(token, process.env.JWT_SECRET_KEY);
-							const {type, userId, purchasableId, createdAt} = decodedToken;
-							
-							if (type === 'pinValidationToken' && userId && purchasableId && ownerPlayer._stats.userId === userId && purchasableId === itemTypeId) {
-								// allow coin transaction since token has been verified
-								
-								// store token for current client
-								ige.server.usedCoinJwts[token] = createdAt;
-								
-								// remove expired tokens
-								const filteredUsedCoinJwts = {};
-								const usedTokenEntries = Object.entries(ige.server.usedCoinJwts).filter(([token, tokenCreatedAt]) => (Date.now() - tokenCreatedAt) < ige.server.COIN_JWT_EXPIRES_IN);
-								for (const [key, value] of usedTokenEntries) {
-									if (typeof value === 'number') {
-										filteredUsedCoinJwts[key] = value;
-									}
-								}
-								ige.server.usedCoinJwts = filteredUsedCoinJwts;
-								
-							} else {
-								return;
-							}
-						} catch (e) {
-							console.log('invalid pinValidationToken', e.message, token);
-							return;
-						}
-						
-						ige.server.consumeCoinFromUser(ownerPlayer, shopData.price.coins, itemTypeId);
-														
-						ownerPlayer.streamUpdateData([{
-								coins: ownerPlayer._stats.coins - shopData.price.coins
-						}])
-					}
-				}
+				// if (shopData.price.coins && ownerPlayer._stats.coins >= shopData.price.coins) {
+				// 	// disable coin consuming due to some bug wrt coins
+				// 	// add coin consuming code
+				// 	if (ige.game.data.defaultData.tier >= 2) {
+				//		
+				// 		try {
+				// 			const jwt = require("jsonwebtoken");
+				//			
+				// 			const isUsedToken = ige.server.usedCoinJwts[token];
+				// 			if (isUsedToken) {
+				// 				console.log('Token has been used already', token);
+				// 				return;
+				// 			}
+				//			
+				// 			const decodedToken = jwt.verify(token, process.env.JWT_SECRET_KEY);
+				// 			const {type, userId, purchasableId, createdAt} = decodedToken;
+				//			
+				// 			if (type === 'pinValidationToken' && userId && purchasableId && ownerPlayer._stats.userId === userId && purchasableId === itemTypeId) {
+				// 				// allow coin transaction since token has been verified
+				//				
+				// 				// store token for current client
+				// 				ige.server.usedCoinJwts[token] = createdAt;
+				//				
+				// 				// remove expired tokens
+				// 				const filteredUsedCoinJwts = {};
+				// 				const usedTokenEntries = Object.entries(ige.server.usedCoinJwts).filter(([token, tokenCreatedAt]) => (Date.now() - tokenCreatedAt) < ige.server.COIN_JWT_EXPIRES_IN);
+				// 				for (const [key, value] of usedTokenEntries) {
+				// 					if (typeof value === 'number') {
+				// 						filteredUsedCoinJwts[key] = value;
+				// 					}
+				// 				}
+				// 				ige.server.usedCoinJwts = filteredUsedCoinJwts;
+				//				
+				// 			} else {
+				// 				return;
+				// 			}
+				// 		} catch (e) {
+				// 			console.log('invalid pinValidationToken', e.message, token);
+				// 			return;
+				// 		}
+				//		
+				// 		ige.server.consumeCoinFromUser(ownerPlayer, shopData.price.coins, itemTypeId);
+				//										
+				// 		ownerPlayer.streamUpdateData([{
+				// 				coins: ownerPlayer._stats.coins - shopData.price.coins
+				// 		}])
+				// 	}
+				// }
 
 				// remove the first item matching targetSlots if replaceItemInTargetSlot is set as true
 				var targetSlots = (itemData.controls && Array.isArray(itemData.controls.permittedInventorySlots)) ? itemData.controls.permittedInventorySlots : undefined;
