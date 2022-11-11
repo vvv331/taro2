@@ -88,6 +88,7 @@ var ShopComponent = IgeEntity.extend({
 				// else {
 				var isItemRequirementSetisfied = $(this).attr('requirementsSatisfied') == 'true';
 				var isItemAffordable = $(this).attr('isItemAffordable') == 'true';
+				var isCoinTxRequired = $(this).attr('isCoinTxRequired') == 'true';
 				var name = $(this).attr('name');
 				if (!isItemRequirementSetisfied) {
 					self.purchaseWarning('requirement', name);
@@ -97,9 +98,11 @@ var ShopComponent = IgeEntity.extend({
 					self.purchaseWarning('price', name);
 					return;
 				}
-				self.purchase($(this).attr('id'));
-				// }
-				// self.confirmPurchase($(this).attr("id"))
+				if (isCoinTxRequired) {
+					self.verifyUserPinForPurchase($(this).attr('id'));
+				} else {
+					self.purchase($(this).attr('id'));
+				}
 			});
 
 			$(document).on('click', '.btn-purchase-unit', function () {
@@ -335,12 +338,15 @@ var ShopComponent = IgeEntity.extend({
 			}, 800);
 		}
 	},
-	buySkin: function (itemId, sharedOn = '') {
+	buySkin: function (itemId, sharedOn = '', token = '') {
 		var self = this;
 		$.ajax({
 			url: `/api/user/purchase/${ige.game.data.defaultData.parentGame || ige.client.server.gameId}/${itemId}?sharedOn=${sharedOn}`,
 			dataType: 'html',
 			type: 'POST',
+			data: {
+				token,
+			},
 			success: function (data) {
 				var response = JSON.parse(data);
 
@@ -795,9 +801,9 @@ var ShopComponent = IgeEntity.extend({
 				shopItemsKeysUsingCoins.push(key);
 			}
 		}
-		shopItemsKeysUsingCoins.forEach((key) => {
-			delete shopItems[key];
-		});
+		// shopItemsKeysUsingCoins.forEach((key) => {
+		// 	delete shopItems[key];
+		// });
 
 		// display items tab iff there's item to be sold
 		if (shopItemsKeys.length > 0) {
@@ -911,7 +917,8 @@ var ShopComponent = IgeEntity.extend({
 						class: 'col-sm-2-5 rounded align-bottom btn-purchase-item item-shop-button',
 						name: item.name,
 						requirementsSatisfied: !!requirementsSatisfied,
-						isItemAffordable: !!isItemAffordable
+						isItemAffordable: !!isItemAffordable,
+						isCoinTxRequired: !!shopItem.price.coins
 					});
 
 					if (
@@ -1305,12 +1312,22 @@ var ShopComponent = IgeEntity.extend({
 			ige.network.send('ui', { command: 'closeShop' }, clientId);
 		}
 	},
-
-	purchase: function (id) {
-		ige.network.send('buyItem', id); // using attr name instead of skinName, otherwise, it'll send the last itemName in constants.itemTypes only
+	
+	purchase: function (id, token = null) {
+		ige.network.send('buyItem', {id, token}); // using attr name instead of skinName, otherwise, it'll send the last itemName in constants.itemTypes only
 	},
 	purchaseUnit: function (id) {
 		ige.network.send('buyUnit', id);
+	},
+	
+	verifyUserPinForPurchase: function (id) {
+		const serverId = ige.client.server.id;
+		
+		if (typeof window.validateUserPin === 'function') {
+			window.validateUserPin('ige.shop.purchase', id, serverId);
+		} else {
+			ige.network.send('buyItem', {id});
+		}
 	},
 
 	enableStockCycle: function () {
