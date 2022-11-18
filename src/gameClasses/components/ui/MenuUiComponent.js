@@ -118,6 +118,10 @@ var MenuUiComponent = IgeEntity.extend({
 				}
 			});
 
+			$('#toggle-dev-panels').on('click', function () {
+				$('#dev-console').toggle();
+			});
+
 			$('.open-menu-button').on('click', function () {
 				self.toggleMenu();
 				$('.open-menu-button').hide();
