@@ -20,8 +20,24 @@ var PhaserAttributeBar = /** @class */ (function (_super) {
         var scene = unit.scene;
         _this = _super.call(this, scene) || this;
         _this.unit = unit;
-        var bar = _this.bar = scene.add.graphics();
-        _this.add(bar);
+        _this.barImages = [];
+        // Bar
+        var stroke = scene.add.image(0, 0, 'stroke');
+        stroke.setOrigin(0.5);
+        var filLeft = scene.add.image(-stroke.width / 2, 0, 'fill-side');
+        filLeft.setOrigin(0, 0.5);
+        filLeft.visible = false;
+        var fill = scene.add.image(filLeft.x + filLeft.width - 1, 0, 'fill');
+        fill.setOrigin(0, 0.5);
+        fill.setScale(1, filLeft.height);
+        fill.visible = false;
+        var fillRight = scene.add.image(fill.x + fill.displayWidth - 1, 0, 'fill-side');
+        fillRight.setOrigin(0, 0.5);
+        fillRight.flipX = true;
+        fillRight.visible = false;
+        _this.barImages.push(filLeft, fill, fillRight, stroke);
+        _this.add(_this.barImages);
+        // Label
         var text = _this.bitmapText = scene.add.bitmapText(0, 0, BitmapFontManager.font(scene, 'Arial', true, false, '#000000'));
         text.setCenterAlign();
         text.setFontSize(14);
@@ -65,25 +81,39 @@ var PhaserAttributeBar = /** @class */ (function (_super) {
     PhaserAttributeBar.prototype.render = function (data) {
         var color = data.color, value = data.value, max = data.max, displayValue = data.displayValue, index = data.index, showWhen = data.showWhen, decimalPlaces = data.decimalPlaces;
         this.name = data.type || data.key;
-        var bar = this.bar;
-        var w = 94;
-        var h = 16;
-        var borderRadius = h / 2 - 1;
-        bar.clear();
-        bar.fillStyle(Phaser.Display.Color
+        // Bar
+        var images = this.barImages;
+        var fillLeft = images[0];
+        var fill = images[1];
+        var fillRight = images[2];
+        var stroke = images[3];
+        // TODO implement support for custom bar color, similar to how it's done with bitmap fonts
+        // ideally, texture cloning logic could be extracted into a separate class TextureManager
+        // and used both for bitmap fonts and attribute bar textures
+        /*bar.fillStyle(Phaser.Display.Color
             .HexStringToColor(color)
-            .color);
+            .color);*/
+        // TODO pack ui textures (including chat bubble) into a single atlas for perf improvement
         if (value !== 0) {
-            bar.fillRoundedRect(-w / 2, -h / 2, Math.max(w * value / max, borderRadius * 1.5), h, borderRadius);
+            var w = stroke.width - 2 * fillLeft.width + 2;
+            fill.scaleX = w * value / max;
+            fillRight.x = fill.x + fill.displayWidth - 1;
+            fillLeft.visible =
+                fill.visible =
+                    fillRight.visible = true;
         }
-        bar.lineStyle(2, 0x000000, 1);
-        bar.strokeRoundedRect(-w / 2, -h / 2, w, h, borderRadius);
+        else {
+            fillLeft.visible =
+                fill.visible =
+                    fillRight.visible = false;
+        }
+        // Label
         var text = this.bitmapText;
         var rt = this.rtText;
         if (displayValue) {
             text.setText(value.toFixed(decimalPlaces));
             text.visible = !rt;
-            if (rt) {
+            if (rt) { // TODO batch enitre container instead of only label
                 rt.resize(text.width, text.height);
                 rt.clear();
                 rt.draw(text, text.width / 2, text.height / 2);
@@ -95,7 +125,7 @@ var PhaserAttributeBar = /** @class */ (function (_super) {
             text.visible = false;
             rt && (rt.visible = false);
         }
-        this.y = (index - 1) * h * 1.1;
+        this.y = (index - 1) * stroke.height;
         this.resetFadeOut();
         if ((showWhen instanceof Array &&
             showWhen.indexOf('valueChanges') > -1) ||

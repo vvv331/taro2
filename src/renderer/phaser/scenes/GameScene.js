@@ -115,6 +115,9 @@ var GameScene = /** @class */ (function (_super) {
         });
         this.load.tilemapTiledJSON('map', this.patchMapData(data.map));
         BitmapFontManager.preload(this);
+        this.load.image('stroke', '/assets/images/attribute-bar/stroke.png');
+        this.load.image('fill', '/assets/images/attribute-bar/fill.png');
+        this.load.image('fill-side', '/assets/images/attribute-bar/fill-side.png');
     };
     GameScene.prototype.loadEntity = function (key, data, skin) {
         var _this = this;

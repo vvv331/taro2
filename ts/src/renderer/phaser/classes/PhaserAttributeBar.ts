@@ -117,43 +117,43 @@ class PhaserAttributeBar extends Phaser.GameObjects.Container {
 
 		this.name = data.type || data.key;
 
-		const bar = this.bar;
+		// Bar
+		const images = this.barImages;
+		const fillLeft = images[0];
+		const fill = images[1];
+		const fillRight = images[2];
+		const stroke = images[3];
 
-		const w = 94;
-		const h = 16;
-		const borderRadius = h / 2 - 1;
-
-		bar.clear();
-
-		bar.fillStyle(Phaser.Display.Color
+		// TODO implement support for custom bar color, similar to how it's done with bitmap fonts
+		// ideally, texture cloning logic could be extracted into a separate class TextureManager
+		// and used both for bitmap fonts and attribute bar textures
+		/*bar.fillStyle(Phaser.Display.Color
 			.HexStringToColor(color)
-			.color);
+			.color);*/
+
+		// TODO pack ui textures (including chat bubble) into a single atlas for perf improvement
 
 		if (value !== 0) {
-			bar.fillRoundedRect(
-				-w / 2,
-				-h / 2,
-				Math.max(w * value / max, borderRadius * 1.5),
-				h,
-				borderRadius
-			);
+			const w = stroke.width - 2*fillLeft.width + 2;
+			fill.scaleX = w * value / max;
+			fillRight.x = fill.x + fill.displayWidth - 1;
+
+			fillLeft.visible =
+				fill.visible =
+					fillRight.visible = true;
+		} else {
+			fillLeft.visible =
+				fill.visible =
+					fillRight.visible = false;
 		}
 
-		bar.lineStyle(2, 0x000000, 1);
-		bar.strokeRoundedRect(
-			-w / 2,
-			-h / 2,
-			w,
-			h,
-			borderRadius
-		);
-
+		// Label
 		const text = this.bitmapText;
 		const rt = this.rtText;
 		if (displayValue) {
 			text.setText(value.toFixed(decimalPlaces));
 			text.visible = !rt;
-			if (rt) {
+			if (rt) { // TODO batch enitre container instead of only label
 				rt.resize(text.width, text.height);
 				rt.clear();
 				rt.draw(text, text.width/2, text.height/2);
@@ -165,7 +165,7 @@ class PhaserAttributeBar extends Phaser.GameObjects.Container {
 			rt && (rt.visible = false);
 		}
 
-		this.y = (index - 1) * h*1.1;
+		this.y = (index - 1) * stroke.height;
 
 		this.resetFadeOut();
 
