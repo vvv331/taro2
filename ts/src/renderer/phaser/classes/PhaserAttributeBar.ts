@@ -35,7 +35,7 @@ class PhaserAttributeBar extends Phaser.GameObjects.Container {
 		bar.setActive(false);
 	}
 
-	private readonly bar: Phaser.GameObjects.Graphics;
+	private readonly barImages: Phaser.GameObjects.Image[] = [];
 	private readonly bitmapText: Phaser.GameObjects.BitmapText;
 	private readonly rtText: Phaser.GameObjects.RenderTexture;
 
@@ -48,9 +48,40 @@ class PhaserAttributeBar extends Phaser.GameObjects.Container {
 
 		super(scene);
 
-		const bar = this.bar = scene.add.graphics();
-		this.add(bar);
+		// Bar
+		const stroke = scene.add.image(0, 0, 'stroke');
+		stroke.setOrigin(0.5);
 
+		const filLeft = scene.add.image(
+			-stroke.width / 2,
+			0,
+			'fill-side'
+		);
+		filLeft.setOrigin(0, 0.5);
+		filLeft.visible = false;
+
+		const fill = scene.add.image(
+			filLeft.x + filLeft.width - 1,
+			0,
+			'fill'
+		);
+		fill.setOrigin(0, 0.5);
+		fill.setScale(1, filLeft.height);
+		fill.visible = false;
+
+		const fillRight = scene.add.image(
+			fill.x + fill.displayWidth - 1,
+			0,
+			'fill-side'
+		);
+		fillRight.setOrigin(0, 0.5);
+		fillRight.flipX = true;
+		fillRight.visible = false;
+
+		this.barImages.push(filLeft, fill, fillRight, stroke);
+		this.add(this.barImages);
+
+		// Label
 		const text = this.bitmapText = scene.add.bitmapText(0, 0,
 			BitmapFontManager.font(scene, 'Arial', true, false, '#000000')
 		);
