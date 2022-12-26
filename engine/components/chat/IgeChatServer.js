@@ -83,8 +83,19 @@ var IgeChatServer = {
 			}
 			else if (this.isSpamming(from, message)) { // mute spammers
 				sender._stats.banChat = true;
-				msg.text = 'You have been muted for spamming.',
-				ige.network.send('igeChatMsg', msg);
+				var recipient = from;
+				ige.network.send('igeChatMsg', {
+					roomId: roomId,
+					// message
+					text: 'You have been muted for spamming.',
+
+					// sender will be system
+					from: undefined,
+
+					// message should be visible only to user who is getting
+					// banned
+					to: from,
+				}, recipient);
 				ige.clusterClient.banChat({
 					gameId: gameData._id,
 					userId: sender._stats.userId
