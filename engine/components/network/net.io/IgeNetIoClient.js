@@ -75,17 +75,6 @@ var IgeNetIoClient = {
 							self.connectToGS(url)
 								.done(function () {
 									window.activatePlayGame = true;
-									// if (gameId && typeof analyticsUrl != 'undefined' && analyticsUrl) {
-									// 	$.post(`${analyticsUrl}api/game-report/game-access/${gameId}/gs-connected`)
-									// 		.then(function () { }, function (xhr, status, error) {
-									// 			$.post('/api/log', {
-									// 				event: 'gs-connected',
-									// 				game: gameId,
-									// 				status: xhr.status,
-									// 				text: xhr.statusText
-									// 			});
-									// 		});
-									// }
 									defer.resolve();
 								})
 								.fail(function (err) {
@@ -111,18 +100,6 @@ var IgeNetIoClient = {
 						self._state = 0; // Disconnected
 						self._onDisconnectFromServer.apply(self, arguments);
 
-						if (gameId && typeof analyticsUrl != undefined) {
-							$.post(`${analyticsUrl}api/game-report/game-access/${gameId}/could-not-connect`)
-								.fail(function (xhr) {
-									$.post('/api/log', {
-										event: 'could-not-connect',
-										game: gameId,
-										status: xhr.status,
-										text: xhr.statusText
-									});
-								});
-						}
-
 						if ($('#menu-wrapper').is(':visible')) {
 							$('#play-game-button .content').addClass('bg-danger');
 							$('#play-game-button .content').html(
@@ -142,13 +119,6 @@ var IgeNetIoClient = {
 							ige.menuUi.onDisconnectFromServer('igeNetIoClient #143');
 						}
 					}
-				})
-				.fail(function (error) {
-					$.post('/api/log', {
-						event: 'could-not-connect',
-						game: gameId,
-						text: error.toString()
-					});
 				});
 		}
 	},
