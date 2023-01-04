@@ -349,7 +349,6 @@ var Player = IgeEntity.extend({
 			
 			ige.trigger.fire('playerLeavesGame', { playerId: this.id() });
 			// session is in second
-			ige.clusterClient && ige.clusterClient.emit('log-session-duration', (Date.now() - this._stats.jointsOn) / 1000);
 			if (this.variables && this.variables.progression != undefined && this.variables.progression.value != undefined) {
 				ige.clusterClient && ige.clusterClient.emit('log-progression', this.variables.progression.value);
 			}
