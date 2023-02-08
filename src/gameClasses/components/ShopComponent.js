@@ -90,6 +90,8 @@ var ShopComponent = IgeEntity.extend({
 				var isItemAffordable = $(this).attr('isItemAffordable') == 'true';
 				var isCoinTxRequired = $(this).attr('isCoinTxRequired') == 'true';
 				var name = $(this).attr('name');
+				var itemPrice = $(this).attr('itemPrice');
+
 				if (!isItemRequirementSetisfied) {
 					self.purchaseWarning('requirement', name);
 					return;
@@ -98,6 +100,18 @@ var ShopComponent = IgeEntity.extend({
 					self.purchaseWarning('price', name);
 					return;
 				}
+
+				if(itemPrice && parseFloat(itemPrice) > 0 && window.userId && window.userId.toString() !== window.gameJson?.data?.defaultData?.owner?.toString()) {
+					window.userId && window.trackEvent && window.trackEvent('Coin Purchase', {
+						coins: parseFloat(itemPrice),
+						distinct_id: window.userId.toString(),
+						type: "ingame-item",
+						// purchaseId: purchasableId,
+						gameId: window.gameId?.toString(),
+						status: "initiated"
+					});
+				}
+
 				if (isCoinTxRequired) {
 					self.verifyUserPinForPurchase($(this).attr('id'));
 				} else {
@@ -184,6 +198,7 @@ var ShopComponent = IgeEntity.extend({
 								}
 							} else {
 								$('#purchasable-purchase-modal').data('purchasable', itemId);
+								$('#purchasable-purchase-modal').data('price', price);
 								$('#purchasable-purchase-modal').modal('show');
 								// if (confirm("Are you sure you want to purchase " + name + " ?")) {
 								// 	self.buySkin(itemId);
@@ -272,33 +287,33 @@ var ShopComponent = IgeEntity.extend({
 					purchasableItems = purchasableItems.slice(0, 4);
 
 					// remove skin shop UI if there are no skins in the game which user can purchase
-					if (purchasableItems.length === 0) {
-						var menuColumnRightContainer = $("#menu-column-right-container")[0];
+					// if (purchasableItems.length === 0) {
+					// 	var menuColumnRightContainer = $("#menu-column-right-container")[0];
 
-						if (!menuColumnRightContainer) {
-							return;
-						}
+					// 	if (!menuColumnRightContainer) {
+					// 		return;
+					// 	}
 
-						var skinShopParent = $(menuColumnRightContainer).find("#menu-column-left")[0];
+					// 	var skinShopParent = $(menuColumnRightContainer).find("#menu-column-left")[0];
 
-						if (skinShopParent) {
-							skinShopParent.remove();
-						}
-						else {
-							var skinShop = $("#skin-shop-container")[0];
+					// 	if (skinShopParent) {
+					// 		skinShopParent.remove();
+					// 	}
+					// 	else {
+					// 		var skinShop = $("#skin-shop-container")[0];
 
-							if (skinShop) {
-								skinShop.remove();
-							}
-						}
+					// 		if (skinShop) {
+					// 			skinShop.remove();
+					// 		}
+					// 	}
 
-						// since we removed the skin shop, to make sure we are not showing empty div check for text content on
-						var isRightColumnBlank = menuColumnRightContainer.innerText.trim().length === 0;
+					// 	// since we removed the skin shop, to make sure we are not showing empty div check for text content on
+					// 	var isRightColumnBlank = menuColumnRightContainer.innerText.trim().length === 0;
 
-						if (isRightColumnBlank) {
-							menuColumnRightContainer.remove();
-						}
-					}
+					// 	if (isRightColumnBlank) {
+					// 		menuColumnRightContainer.remove();
+					// 	}
+					// }
 
 					purchasableItems.forEach(function (purchasable, index) {
 						let html = `<div id="skin-list-${purchasable._id}" class="border rounded bg-light p-2 mx-2 ${index < 2 ? 'mb-3' : ''} col-5 d-flex flex-column justify-content-between">` +
@@ -947,7 +962,8 @@ var ShopComponent = IgeEntity.extend({
 						name: item.name,
 						requirementsSatisfied: !!requirementsSatisfied,
 						isItemAffordable: !!isItemAffordable,
-						isCoinTxRequired: !!shopItem.price.coins
+						isCoinTxRequired: !!shopItem.price.coins,
+						itemPrice: shopItem.price.coins || 0,
 					});
 
 					if (
@@ -1185,7 +1201,7 @@ var ShopComponent = IgeEntity.extend({
 		var modalBody = $('<div/>', {
 			class: 'row text-center'
 		});
-		for (var i in items) {
+		for (let i = 0; i < items.length; i++) {
 			var item = items[i];
 			// console.log(item)
 
