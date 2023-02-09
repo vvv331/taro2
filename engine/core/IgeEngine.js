@@ -855,7 +855,7 @@ var IgeEngine = IgeEntity.extend({
 	 * @param {String} url
 	 * @return {IgeTexture}
 	 */
-	textureFromUrl: function (url) {
+	/*textureFromUrl: function (url) {
 		var arr = this._textureStore;
 		var arrCount = arr.length;
 		var item;
@@ -866,7 +866,7 @@ var IgeEngine = IgeEntity.extend({
 				return item;
 			}
 		}
-	},
+	},*/
 
 	/**
 	 * Checks if all textures have finished loading and returns true if so.

@@ -13,7 +13,7 @@ var IgeParticleEmitter = IgeUiEntity.extend({
 		this._currentDelta = 0;
 		this._started = false;
 		this._particles = [];
-		this.texture = new IgeTexture(`${assetsProvider}/assets/particles/Rectangle.js`);
+		//this.texture = new IgeTexture(`${assetsProvider}/assets/particles/Rectangle.js`);
 
 		this.applyDepthToParticles(true);
 		this.applyLayerToParticles(true);

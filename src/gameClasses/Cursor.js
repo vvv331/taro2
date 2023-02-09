@@ -6,14 +6,14 @@ var Cursor = IgeEntity.extend({
 
 		var self = this;
 
-		if (ige.isClient) {
+		/*if (ige.isClient) {
 			var tex = new IgeTexture(`${ige.map.mapUrl}/spritesheet/baseball_bat.png`);
 			self.depth(10)
 				.layer(20)
 				.width(50)
 				.height(50)
 				.texture(tex);
-		}
+		}*/
 	},
 
 	/**

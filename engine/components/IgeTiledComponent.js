@@ -49,7 +49,7 @@ var IgeTiledComponent = IgeClass.extend({
 			ige.server.unpublish('IgeTiledComponent#51');
 		}
 		var self = this;
-		var mapClass = ige.isServer === true ? IgeTileMap2d : IgeTextureMap;
+		var mapClass = /*ige.isServer === true ?*/ IgeTileMap2d /*: IgeTextureMap*/;
 		var mapWidth = data.width;
 		var mapHeight = data.height;
 		var layerArray = data.layers;
@@ -158,10 +158,10 @@ var IgeTiledComponent = IgeClass.extend({
 					}
 
 					if (!self.cs) {
-						self.cs = new IgeCellSheet(imageUrl, this.width * scaleFactor.x / tileSetItem.tilewidth, this.height * scaleFactor.y / tileSetItem.tileheight, ige.scaleMapDetails.shouldScaleTilesheet)
+						self.cs = true; /*new IgeCellSheet(imageUrl, this.width * scaleFactor.x / tileSetItem.tilewidth, this.height * scaleFactor.y / tileSetItem.tileheight, ige.scaleMapDetails.shouldScaleTilesheet)
 						.id(tileSetItem.name)
-						.on('loaded', function () {
-							if (ige.scaleMapDetails.shouldScaleTilesheet && (imageUrl.includes('tilesheet') || tileSetCount === 0)) {
+						.on('loaded', function () {*/
+							/*if (ige.scaleMapDetails.shouldScaleTilesheet && (imageUrl.includes('tilesheet') || tileSetCount === 0)) {
 								this.resize(this._sizeX * scaleFactor.x, this._sizeY * scaleFactor.y);
 							}
 							cc = this.cellCount();
@@ -172,7 +172,7 @@ var IgeTiledComponent = IgeClass.extend({
 								textureCellLookup[this._tiledStartingId + i] = this;
 							}
 
-							textures.push(this);
+							textures.push(this);*/
 
 							tileSetsLoaded++;
 
@@ -180,7 +180,7 @@ var IgeTiledComponent = IgeClass.extend({
 								// All textures loaded, fire processing function
 								allTexturesLoadedFunc();
 							}
-						});
+						//});
 					}
 				};
 			};
