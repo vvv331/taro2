@@ -292,7 +292,7 @@ const Client = IgeEventingClass.extend({
 			}
 			
 			// added important configuration details for sandbox
-			if (mode == 'sandbox') {
+			/*if (mode == 'sandbox') {
 				$.when(this.mapLoaded, this.rendererLoaded)
 					.done(() => {
 						ige.mapEditor.scanMapLayers();
@@ -313,7 +313,7 @@ const Client = IgeEventingClass.extend({
 						console.error(err); // for now
 					});
 
-			}
+			}*/
 
 			// don't really know if this needs to be inside this
 			if(gameData.isDeveloper) {

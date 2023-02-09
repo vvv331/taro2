@@ -4021,7 +4021,7 @@ var IgeEntity = IgeObject.extend({
 	//mouseEvents for sandbox mode only
 	mouseEvents: function (defaultData) {
 		var self = this;
-		if (typeof mode === 'string' && mode === 'sandbox') {
+		/*if (typeof mode === 'string' && mode === 'sandbox') {
 			IgeObject.prototype.mount.call(this, ige.client.rootScene);
 			self.mount(ige.client.rootScene);
 			self.drawMouse(true)
@@ -4053,7 +4053,7 @@ var IgeEntity = IgeObject.extend({
 					this.onMouseDown = false;
 					this.onMouseMove = false;
 				});
-		}
+		}*/
 	},
 	// use to apply max,min value before attributes value
 	// orderData: function (data) {

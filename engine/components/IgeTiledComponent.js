@@ -73,7 +73,7 @@ var IgeTiledComponent = IgeClass.extend({
 		var textures = [];
 		var allTexturesLoadedFunc;
 		var i; var k; var x; var y; var z;
-		var ent;
+		//var ent;
 
 		//if (ige.isClient) {
 			ige.layersById = layersById;

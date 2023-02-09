@@ -69,7 +69,7 @@ var Region = IgeEntityPhysics.extend({
 					ige.client.emit('create-region', this);
 				}
 
-				if (typeof mode === 'string' && mode === 'sandbox') {
+				/*if (typeof mode === 'string' && mode === 'sandbox') {
 					delete self._stats.value;
 
 					if (ige.game.data.isDeveloper) {
@@ -96,7 +96,7 @@ var Region = IgeEntityPhysics.extend({
 								}
 							});
 					}
-				}
+				}*/
 			}
 		}
 		self.addBehaviour('regionBehaviour', self._behaviour);

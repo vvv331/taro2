@@ -681,9 +681,9 @@ var IgeEngine = IgeEntity.extend({
 			} else {
 				// Client-side implementation
 				window.requestAnimFrame = function (callback, element) {
-					if (typeof mode === 'string' && mode === 'sandbox') {
+					/*if (typeof mode === 'string' && mode === 'sandbox') {
 						fpsRate = 20;
-					}
+					}*/
 					setTimeout(function () {
 						callback(new Date().getTime());
 					}, 1000 / fpsRate); // client will always run at 60 fps.
@@ -810,20 +810,20 @@ var IgeEngine = IgeEntity.extend({
 	/**
 	 * Adds one to the number of textures currently loading.
 	 */
-	textureLoadStart: function (url, textureObj) {
+	/*textureLoadStart: function (url, textureObj) {
 		this._texturesLoading++;
 		this._texturesTotal++;
 
 		this.updateProgress();
 
 		this.emit('textureLoadStart', textureObj);
-	},
+	},*/
 
 	/**
 	 * Subtracts one from the number of textures currently loading and if no more need
 	 * to load, it will also call the _allTexturesLoaded() method.
 	 */
-	textureLoadEnd: function (url, textureObj) {
+	/*textureLoadEnd: function (url, textureObj) {
 		var self = this;
 
 		if (!textureObj._destroyed) {
@@ -848,7 +848,7 @@ var IgeEngine = IgeEntity.extend({
 				self._allTexturesLoaded();
 			}, 100);
 		}
-	},
+	},*/
 
 	/**
 	 * Returns a texture from the texture store by it's url.
