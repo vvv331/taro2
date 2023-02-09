@@ -68,7 +68,7 @@ var igeCoreConfig = {
 		['csap', 'IgeEntity', 'core/IgeEntity.js'],
 		['csap', 'IgeUiEntity', 'core/IgeUiEntity.js'],
 		['csap', 'IgeUiElement', 'core/IgeUiElement.js'],
-		['csap', 'IgeFontEntity', 'core/IgeFontEntity.js'],
+		//['csap', 'IgeFontEntity', 'core/IgeFontEntity.js'],
 		['csap', 'IgeParticleEmitter', 'core/IgeParticleEmitter.js'],
 		['csap', 'IgeParticle', 'core/IgeParticle.js'],
 		['csap', 'IgeMap2d', 'core/IgeMap2d.js'],
@@ -89,16 +89,16 @@ var igeCoreConfig = {
 		['csap', 'IgeAudioComponent', 'components/audio/IgeAudioComponent.js'],
 		['csap', 'IgeAudio', 'components/audio/IgeAudio.js'],
 		/* UI Classes */
-		['csap', 'IgeUiDropDown', 'ui/IgeUiDropDown.js'],
-		['csap', 'IgeUiButton', 'ui/IgeUiButton.js'],
-		['csap', 'IgeUiRadioButton', 'ui/IgeUiRadioButton.js'],
-		['csap', 'IgeUiProgressBar', 'ui/IgeUiProgressBar.js'],
-		['csap', 'IgeUiTextBox', 'ui/IgeUiTextBox.js'],
-		['csap', 'IgeUiLabel', 'ui/IgeUiLabel.js'],
-		['csap', 'IgeUiTooltip', 'ui/IgeUiTooltip.js'],
-		['csap', 'IgeUiMenu', 'ui/IgeUiMenu.js'],
+		//['csap', 'IgeUiDropDown', 'ui/IgeUiDropDown.js'],
+		//['csap', 'IgeUiButton', 'ui/IgeUiButton.js'],
+		//['csap', 'IgeUiRadioButton', 'ui/IgeUiRadioButton.js'],
+		//['csap', 'IgeUiProgressBar', 'ui/IgeUiProgressBar.js'],
+		//['csap', 'IgeUiTextBox', 'ui/IgeUiTextBox.js'],
+		//['csap', 'IgeUiLabel', 'ui/IgeUiLabel.js'],
+		//['csap', 'IgeUiTooltip', 'ui/IgeUiTooltip.js'],
+		//['csap', 'IgeUiMenu', 'ui/IgeUiMenu.js'],
 		/* Image Filters */
-		['cap', 'IgeFilters', 'core/IgeFilters.js'],
+		/*['cap', 'IgeFilters', 'core/IgeFilters.js'],
 		['cap', 'IgeFilters._convolute', 'filters/convolute.js'],
 		['cap', 'IgeFilters.greyScale', 'filters/greyScale.js'],
 		['cap', 'IgeFilters.brighten', 'filters/brighten.js'],
@@ -112,7 +112,7 @@ var igeCoreConfig = {
 		['cap', 'IgeFilters.colorOverlay', 'filters/colorOverlay.js'],
 		['cap', 'IgeFilters.sobel', 'filters/sobel.js'],
 		['cap', 'IgeFilters.invert', 'filters/invert.js'],
-		['cap', 'IgeFilters.glowMask', 'filters/glowMask.js'],
+		['cap', 'IgeFilters.glowMask', 'filters/glowMask.js'],*/
 		/* Engine Actual */
 		['csap', 'IgeEngine', 'core/IgeEngine.js'],
 		/* Physics Libraries */

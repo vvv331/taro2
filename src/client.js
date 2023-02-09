@@ -436,7 +436,7 @@ const Client = IgeEventingClass.extend({
 					.mount(ige);
 
 				// sandbox check for minimap
-				if (mode == 'sandbox') {
+				/*if (mode == 'sandbox') {
 
 					ige.addComponent(MapEditorComponent)
 						.mapEditor.createMiniMap();
@@ -470,7 +470,7 @@ const Client = IgeEventingClass.extend({
 				} else {
 
 					console.error('mode was not == to "sandbox" or "play"');
-				}
+				}*/
 
 				// moved this down here
 				ige._selectedViewport = this.vp1;
@@ -695,9 +695,9 @@ const Client = IgeEventingClass.extend({
 		ige.physics.start();
 		ige.raycaster = new Raycaster();
 
-		if (typeof mode == 'string' && mode == 'sandbox') {
+		/*if (typeof mode == 'string' && mode == 'sandbox') {
 			ige.script.runScript('initialize', {}); // loading entities to display in the sandbox
-		}
+		}*/
 	},
 
 	// not much here except definitions

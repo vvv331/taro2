@@ -62,7 +62,7 @@ var Region = IgeEntityPhysics.extend({
 				// 1 is 'automatic' streaming
 				self.streamMode(1);
 			} else if (ige.isClient) {
-				if ((mode === 'play' /*&& self._stats.default.inside*/) || mode === 'sandbox') {
+				if ((mode === 'play' /*&& self._stats.default.inside*/)/* || mode === 'sandbox'*/) {
 					// o.O TODO: Remove /refactor
 					ige.entitiesToRender.trackEntityById[entityIdFromServer] = this;
 					
