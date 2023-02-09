@@ -48,7 +48,7 @@ global.mixpanel = {
 if (process.env.ENV == 'production') {
 	var Rollbar = require('rollbar');
 	global.rollbar = new Rollbar({
-		accessToken: '326308ea71e041dc87e30fce4eb48d99',
+		accessToken: process.env.ROLLBAR_ACCESS_TOKEN,
 		environment: process.env.ENV,
 		captureUncaught: true,
 		captureUnhandledRejections: true,
