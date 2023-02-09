@@ -30,7 +30,7 @@ var EffectComponent = IgeEntity.extend({
 							};
 						}
 
-						self.particleEmitters[event][particleTypeId] = new IgeParticleEmitter() // Set the particle entity to generate for each particle
+						/*self.particleEmitters[event][particleTypeId] = new IgeParticleEmitter() // Set the particle entity to generate for each particle
 							.layer(particleData['z-index'].layer)
 							.depth(particleData['z-index'].depth)
 							.color(particleData.color)
@@ -47,7 +47,7 @@ var EffectComponent = IgeEntity.extend({
 							)
 							.particleMountTarget(ige.client.mainScene) // Mount new particles to the object scene
 							.translateTo(parseFloat(particleData.mountPosition.x), parseFloat(-particleData.mountPosition.y), 0) // Move the particle emitter to the bottom of the ship
-							.mount(self._entity);
+							.mount(self._entity);*/
 					}
 				}
 			}

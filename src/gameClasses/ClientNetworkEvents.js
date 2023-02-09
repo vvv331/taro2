@@ -572,7 +572,7 @@ var ClientNetworkEvents = {
 					};
 				}
 
-				new IgeParticleEmitter() // Set the particle entity to generate for each particle
+				/*new IgeParticleEmitter() // Set the particle entity to generate for each particle
 					.layer(particle['z-index'].layer)
 					.depth(particle['z-index'].depth)
 					.color(particle.color)
@@ -586,7 +586,7 @@ var ClientNetworkEvents = {
 					.particleMountTarget(ige.client.mainScene) // Mount new particles to the object scene
 					.translateTo(parseFloat(data.position.x), parseFloat(data.position.y), 0) // Move the particle emitter to the bottom of the ship
 					.mount(ige.client.mainScene)
-					.emitOnce();
+					.emitOnce();*/
 			}
 		}
 	},
