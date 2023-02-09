@@ -118,24 +118,34 @@ class TileEditor {
 	}
 
     edit (data:TileData): void {
-        const map = this.gameScene.tilemap as Phaser.Tilemaps.Tilemap;
-		map.putTileAt(data.gid, data.x, data.y, false, data.layer);
-		/* TODO: SAVE MAP DATA FROM SERVER SIDE */
-		const width = ige.game.data.map.width;
-		//save tile change to ige.game.map.data
-		if (ige.game.data.map.layers.length > 4 && data.layer >= 2) data.layer ++;
-		ige.game.data.map.layers[data.layer].data[data.y*width + data.x] = data.gid;
-		if (ige.physics && ige.game.data.map.layers[data.layer].name === 'walls') {
+		const map = ige.game.data.map;
+		const width = map.width;
+        const tileMap = this.gameScene.tilemap as Phaser.Tilemaps.Tilemap;
+		if (data.tool === 'flood') {
+			let tempLayer = data.layer;
+			if (map.layers.length > 4 && data.layer >= 2) {
+				tempLayer ++;
+			}
+			const oldTile = map.layers[tempLayer].data[data.y * width + data.x];
+			this.floodFill(data.layer, oldTile, data.gid, data.x, data.y, true);
+		} else {
+			tileMap.putTileAt(data.gid, data.x, data.y, false, data.layer);
+			/* TODO: SAVE MAP DATA FROM SERVER SIDE */
+			//save tile change to ige.game.map.data
+			if (map.layers.length > 4 && data.layer >= 2) data.layer ++;
+			map.layers[data.layer].data[data.y*width + data.x] = data.gid;
+		}
+		if (ige.physics && map.layers[data.layer].name === 'walls') {
 			//if changes was in 'walls' layer we destroy all old walls and create new staticsFromMap
 			ige.physics.destroyWalls();
-			let map = ige.scaleMap(_.cloneDeep(ige.game.data.map));
-			ige.tiled.loadJson(map, function (layerArray, IgeLayersById) {
+			let mapCopy = ige.scaleMap(_.cloneDeep(map));
+			ige.tiled.loadJson(mapCopy, function (layerArray, IgeLayersById) {
 				ige.physics.staticsFromMap(IgeLayersById.walls);
 			})
 		}
     }
 
-    putTile (tileX: number, tileY: number, selectedTile: Phaser.Tilemaps.Tile): void {
+    putTile (tileX: number, tileY: number, selectedTile: Phaser.Tilemaps.Tile, local?: boolean): void {
 		const map = this.gameScene.tilemap as Phaser.Tilemaps.Tilemap;
 		if (this.gameScene.tilemapLayers[map.currentLayerIndex].visible && selectedTile && this.devModeTools.scene.pointerInsideMap(tileX, tileY, map)) {
 			let index = selectedTile.index;
@@ -144,7 +154,9 @@ class TileEditor {
 			!(index === 0 && map.getTileAt(tileX, tileY, true).index === -1)) {
 				map.putTileAt(index, tileX, tileY);
 				map.getTileAt(tileX, tileY, true).tint = 0xffffff;
-				ige.network.send('editTile', {gid: index, layer: map.currentLayerIndex, x: tileX, y: tileY});
+				if (!local) {
+					ige.network.send('editTile', {gid: index, layer: map.currentLayerIndex, x: tileX, y: tileY});
+				}
 			}
 		}
 	}
@@ -160,26 +172,62 @@ class TileEditor {
 		}
 	}
 
-	floodFill (oldTile: number, newTile: number, x: number, y: number): void {
-		const map = this.gameScene.tilemap as Phaser.Tilemaps.Tilemap;
-        if (oldTile === newTile || this.getTile(x, y, this.selectedTile, map).index !== oldTile) {
-            return;
-        }
-
-		this.putTile(x, y, this.selectedTile);
-
-        if (x > 0) {
-            this.floodFill(oldTile, newTile, x - 1, y);
-        }
-        if (x < (map.width - 1)) {
-            this.floodFill(oldTile, newTile, x + 1, y);
-        }
-        if (y > 0) {
-            this.floodFill(oldTile, newTile, x, y - 1);
-        }
-        if (y < (map.height - 1)) {
-            this.floodFill(oldTile, newTile, x, y + 1);
-        }
+	floodFill (layer: number, oldTile: number, newTile: number, x: number, y: number, fromServer: boolean): void {
+		if (fromServer) { 
+			console.log(layer, oldTile, newTile, x, y)
+			const map = ige.game.data.map;
+			const tileMap = this.gameScene.tilemap as Phaser.Tilemaps.Tilemap;
+			const width = map.width;
+			//fix for debris layer
+			let tempLayer = layer;
+			if (map.layers.length > 4 && layer >= 2) {
+				tempLayer ++;
+			}
+			console.log(map.layers[tempLayer].data[y * width + x]);
+        	if (oldTile === newTile || map.layers[tempLayer].data[y * width + x] !== oldTile) {
+        	    return;
+        	}
+			tileMap.putTileAt(newTile, x, y, false, layer);
+			//save tile change to ige.game.map.data
+			map.layers[tempLayer].data[y*width + x] = newTile;
+				
+        	if (x > 0) {
+        	    this.floodFill(layer, oldTile, newTile, x - 1, y, fromServer);
+        	}
+        	if (x < (map.width - 1)) {
+        	    this.floodFill(layer, oldTile, newTile, x + 1, y, fromServer);
+        	}
+        	if (y > 0) {
+        	    this.floodFill(layer, oldTile, newTile, x, y - 1, fromServer);
+        	}
+        	if (y < (map.height - 1)) {
+        	    this.floodFill(layer, oldTile, newTile, x, y + 1, fromServer);
+        	}
+		} else {
+			const tileMap = this.gameScene.tilemap as Phaser.Tilemaps.Tilemap;
+        	if (
+				oldTile === newTile ||
+				tileMap.getTileAt(x, y, true, layer).index !== oldTile ||
+				tileMap.getTileAt(x, y, true, layer).index === 0 ||
+				tileMap.getTileAt(x, y, true, layer).index === -1
+				) {
+        	    return;
+        	}
+			tileMap.putTileAt(newTile, x, y, false, layer);
+				
+        	if (x > 0) {
+        	    this.floodFill(layer, oldTile, newTile, x - 1, y, fromServer);
+        	}
+        	if (x < (tileMap.width - 1)) {
+        	    this.floodFill(layer, oldTile, newTile, x + 1, y, fromServer);
+        	}
+        	if (y > 0) {
+        	    this.floodFill(layer, oldTile, newTile, x, y - 1, fromServer);
+        	}
+        	if (y < (tileMap.height - 1)) {
+        	    this.floodFill(layer, oldTile, newTile, x, y + 1, fromServer);
+        	}
+		}
 	}
 
     update (): void {
@@ -242,7 +290,8 @@ class TileEditor {
 					} else if (this.devModeTools.modeButtons[4].active) {
 						const targetTile = this.getTile(pointerTileX, pointerTileY, this.selectedTile, map);
 						if (targetTile && this.selectedTile && targetTile.index !== this.selectedTile.index) {
-							this.floodFill(targetTile.index, this.selectedTile.index, pointerTileX, pointerTileY);
+							this.floodFill(map.currentLayerIndex, targetTile.index, this.selectedTile.index, pointerTileX, pointerTileY, false);
+							ige.network.send('editTile', {gid: this.selectedTile.index, layer: map.currentLayerIndex, x: pointerTileX, y: pointerTileY, tool: 'flood'});
 						}
 						
 					}

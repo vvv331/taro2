@@ -54,7 +54,7 @@ console.log("process.env.ENV = ", process.env.ENV)
 if (process.env.ENV == 'production') {
 	var Rollbar = require('rollbar');
 	global.rollbar = new Rollbar({
-		accessToken: '326308ea71e041dc87e30fce4eb48d99',
+		accessToken: process.env.ROLLBAR_ACCESS_TOKEN,
 		environment: process.env.ENV,
 		captureUncaught: true,
 		captureUnhandledRejections: true,
@@ -730,6 +730,17 @@ var Server = IgeClass.extend({
 				coins: coin,
 				game: ige.game.data.defaultData._id,
 				itemName
+			});
+		}
+	},
+	
+	sendCoinsToPlayer: function (userId, coins) {
+		if (userId && coins && ige.game.data.defaultData.tier != 2) {
+			ige.clusterClient && ige.clusterClient.sendCoinsToPlayer({
+				creatorId: ige.game.data.defaultData.owner,
+				userId,
+				coins,
+				game: ige.game.data.defaultData._id,
 			});
 		}
 	},
