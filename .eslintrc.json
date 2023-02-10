@@ -62,7 +62,7 @@
         //"IgeTextureMap": "writable",
         "IgeTileMap2d": "writable",
         //"IgeTimeout": "writable",
-        "IgeTween": "writable",
+        //"IgeTween": "writable",
         //"IgeUiElement": "writable",
         //"IgeUiEntity": "writable",
         "IgeViewport": "writable"

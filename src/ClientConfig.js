@@ -51,7 +51,7 @@ var igeClientConfig = {
 		'/gameClasses/components/unit/AttributeComponent.js',
 
 		/* Standard game scripts */
-		'/gameClasses/Cursor.js',
+		//'/gameClasses/Cursor.js',
 		'/gameClasses/DeveloperMode.js',
 		'/gameClasses/EntitiesToRender.js',
 		'/gameClasses/Raycaster.js',
