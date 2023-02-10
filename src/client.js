@@ -290,30 +290,6 @@ const Client = IgeEventingClass.extend({
 				// old comment => 'always enable CSP'
 				this.loadCSP();
 			}
-			
-			// added important configuration details for sandbox
-			/*if (mode == 'sandbox') {
-				$.when(this.mapLoaded, this.rendererLoaded)
-					.done(() => {
-						ige.mapEditor.scanMapLayers();
-						ige.mapEditor.drawTile();
-						ige.mapEditor.addUI();
-						ige.mapEditor.customEditor();
-
-						if (!gameData.isDeveloper) {
-							//
-							ige.mapEditor.selectEntities = false;
-						}
-
-						ige.setFps(15);
-						$('#loading-container').addClass('slider-out');
-					})
-					.fail((err) => {
-						$('#loading-container').addClass('slider-out');
-						console.error(err); // for now
-					});
-
-			}*/
 
 			// don't really know if this needs to be inside this
 			if(gameData.isDeveloper) {
@@ -434,43 +410,6 @@ const Client = IgeEventingClass.extend({
 					.scene(this.rootScene)
 					.drawBounds(false)
 					.mount(ige);
-
-				// sandbox check for minimap
-				/*if (mode == 'sandbox') {
-
-					ige.addComponent(MapEditorComponent)
-						.mapEditor.createMiniMap();
-
-					// sandbox also gets a second viewport
-					// moved the code under a duplicate conditional
-					this.vp2 = new IgeViewport()
-						.id('vp2')
-						.layer(100)
-						.drawBounds(true)
-						.height(0)
-						.width(0)
-						.borderColor('#0bcc38')
-						.borderWidth(20)
-						.bottom(0)
-						.right(0)
-						.scene(this.tilesheetScene)
-						.mount(ige);
-
-					// sandbox also gets map pan components
-					this.vp1.addComponent(MapPanComponent)
-						.mapPan.enabled(true);
-
-					this.vp2.addComponent(MapPanComponent)
-						.mapPan.enabled(true);
-
-					ige.client.vp1.drawBounds(true);
-
-				} else if (mode == 'play') {
-
-				} else {
-
-					console.error('mode was not == to "sandbox" or "play"');
-				}*/
 
 				// moved this down here
 				ige._selectedViewport = this.vp1;
@@ -694,10 +633,6 @@ const Client = IgeEventingClass.extend({
 		ige.physics.createWorld();
 		ige.physics.start();
 		ige.raycaster = new Raycaster();
-
-		/*if (typeof mode == 'string' && mode == 'sandbox') {
-			ige.script.runScript('initialize', {}); // loading entities to display in the sandbox
-		}*/
 	},
 
 	// not much here except definitions

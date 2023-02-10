@@ -49,7 +49,7 @@ var IgeTiledComponent = IgeClass.extend({
 			ige.server.unpublish('IgeTiledComponent#51');
 		}
 		var self = this;
-		var mapClass = /*ige.isServer === true ?*/ IgeTileMap2d /*: IgeTextureMap*/;
+		var mapClass = IgeTileMap2d;
 		var mapWidth = data.width;
 		var mapHeight = data.height;
 		var layerArray = data.layers;
@@ -73,11 +73,8 @@ var IgeTiledComponent = IgeClass.extend({
 		var textures = [];
 		var allTexturesLoadedFunc;
 		var i; var k; var x; var y; var z;
-		//var ent;
 
-		//if (ige.isClient) {
-			ige.layersById = layersById;
-		//}
+		ige.layersById = layersById;
 
 		// Define the function to call when all textures have finished loading
 		allTexturesLoadedFunc = function () {
@@ -158,29 +155,13 @@ var IgeTiledComponent = IgeClass.extend({
 					}
 
 					if (!self.cs) {
-						self.cs = true; /*new IgeCellSheet(imageUrl, this.width * scaleFactor.x / tileSetItem.tilewidth, this.height * scaleFactor.y / tileSetItem.tileheight, ige.scaleMapDetails.shouldScaleTilesheet)
-						.id(tileSetItem.name)
-						.on('loaded', function () {*/
-							/*if (ige.scaleMapDetails.shouldScaleTilesheet && (imageUrl.includes('tilesheet') || tileSetCount === 0)) {
-								this.resize(this._sizeX * scaleFactor.x, this._sizeY * scaleFactor.y);
-							}
-							cc = this.cellCount();
+						self.cs = true; 
+						tileSetsLoaded++;
 
-							this._tiledStartingId = tileSetItem.firstgid;
-							// Fill the lookup array
-							for (i = 0; i < cc; i++) {
-								textureCellLookup[this._tiledStartingId + i] = this;
-							}
-
-							textures.push(this);*/
-
-							tileSetsLoaded++;
-
-							if (tileSetsLoaded === tileSetsTotal) {
-								// All textures loaded, fire processing function
-								allTexturesLoadedFunc();
-							}
-						//});
+						if (tileSetsLoaded === tileSetsTotal) {
+							// All textures loaded, fire processing function
+							allTexturesLoadedFunc();
+						}
 					}
 				};
 			};

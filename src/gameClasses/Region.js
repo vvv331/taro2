@@ -62,41 +62,8 @@ var Region = IgeEntityPhysics.extend({
 				// 1 is 'automatic' streaming
 				self.streamMode(1);
 			} else if (ige.isClient) {
-				if ((mode === 'play' /*&& self._stats.default.inside*/)/* || mode === 'sandbox'*/) {
-					// o.O TODO: Remove /refactor
-					ige.entitiesToRender.trackEntityById[entityIdFromServer] = this;
-					
-					ige.client.emit('create-region', this);
-				}
-
-				/*if (typeof mode === 'string' && mode === 'sandbox') {
-					delete self._stats.value;
-
-					if (ige.game.data.isDeveloper) {
-						// creating region click handler if user is developer
-						// /
-						// need to see if we can do this with simple region instead
-						// of using regionUi because we want to remove it entirely
-						// /
-
-						// IgeObject method
-						self.drawMouse(true)
-							// IgeEntity method (IgeUiEntity extends...)
-							.mouseDown(function (event, evc) {
-								if (
-									ige.mapEditor.selectEntities &&
-									event.which === 1 &&
-									!ige.mapEditor.mouseDownOnMiniMap &&
-									!ige.mapEditor.checkIfClickedMiniMap(event.pageX, event.pageY)
-								) {
-									var selectedRegion = self;
-									if (selectedRegion._stats && selectedRegion._stats.id) {
-										ige.regionManager.openRegionModal(selectedRegion._stats, selectedRegion._stats.id, false);
-									}
-								}
-							});
-					}
-				}*/
+				ige.entitiesToRender.trackEntityById[entityIdFromServer] = this;
+				ige.client.emit('create-region', this);
 			}
 		}
 		self.addBehaviour('regionBehaviour', self._behaviour);

@@ -4018,43 +4018,7 @@ var IgeEntity = IgeObject.extend({
 			}
 		}
 	},
-	//mouseEvents for sandbox mode only
-	mouseEvents: function (defaultData) {
-		var self = this;
-		/*if (typeof mode === 'string' && mode === 'sandbox') {
-			IgeObject.prototype.mount.call(this, ige.client.rootScene);
-			self.mount(ige.client.rootScene);
-			self.drawMouse(true)
-				.drawBoundsData(false)
-				.mouseMove(function (event) {
-					if (this.onMouseDown && ige.mapEditor.selectEntities) {
-						this.onMouseMove = true;
-						this.translateTo(ige.mapEditor.mouseCoordinatesWRTVp.x, ige.mapEditor.mouseCoordinatesWRTVp.y, 0);
-					}
-				})
-				.mouseDown(function (event, evc) {
-					if (event.which === 1 && ige.mapEditor.selectEntities) {
-						this.onMouseDown = true;
-						this.onMouseMove = false;
-					}
-				})
-				.mouseUp(function (event) {
-					if (this.onMouseDown === true) {
-						if (this.onMouseMove === true) {
-							self.scriptValues.x = ige.mapEditor.mouseCoordinatesWRTVp.x;
-							self.scriptValues.y = ige.mapEditor.mouseCoordinatesWRTVp.y;
-							ige.mapEditor.upsertMapEntities(self.scriptValues, parseInt(self.scriptValues.index));
-						} else if (this.onMouseMove === false && ige.mapEditor.selectEntities && event.which === 1) {
-							ige.mapEditor.openEntitiesModal(self.scriptValues, true);
-							this.selectedEntityForMovement = true;
-						}
-					}
 
-					this.onMouseDown = false;
-					this.onMouseMove = false;
-				});
-		}*/
-	},
 	// use to apply max,min value before attributes value
 	// orderData: function (data) {
 	// 	var attributes = data.attributes && _.cloneDeep(data.attributes);

@@ -132,7 +132,6 @@ var Unit = IgeEntityPhysics.extend({
 			var polygon = new IgePoly2d();
 			self.triggerPolygon(polygon);
 			self.flip(self._stats.flip);
-			self.mouseEvents();
 		}
 		self.playEffect('create');
 		self.addBehaviour('unitBehaviour', self._behaviour);

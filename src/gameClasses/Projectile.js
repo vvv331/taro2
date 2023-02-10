@@ -96,9 +96,6 @@ var Projectile = IgeEntityPhysics.extend({
 
 			self.updateLayer();
 			self.updateTexture();
-			//mouseEvents for sandbox mode only
-			self.mouseEvents();
-
 		}
 		this.playEffect('create');
 
