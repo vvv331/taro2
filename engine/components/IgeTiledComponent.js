@@ -65,19 +65,15 @@ var IgeTiledComponent = IgeClass.extend({
 		var tileSetItem;
 		var tileSetsTotal = tileSetCount;
 		var tileSetsLoaded = 0;
-		var textureCellLookup = [];
-		var currentTexture;
-		var currentCell;
 		var onLoadFunc;
 		var image;
-		var textures = [];
-		var allTexturesLoadedFunc;
+		var tilesetsLoadedFunc;
 		var i; var k; var x; var y; var z;
 
 		ige.layersById = layersById;
 
-		// Define the function to call when all textures have finished loading
-		allTexturesLoadedFunc = function () {
+		// Define the function to call when all tilesets have finished loading
+		tilesetsLoadedFunc = function () {
 			// Create a map for each layer
 			for (i = 0; i < layerCount; i++) {
 				layer = layerArray[i];
@@ -112,12 +108,6 @@ var IgeTiledComponent = IgeClass.extend({
 					layersById[layer.name] = maps[i];
 					tileSetCount = tileSetArray.length;
 
-					if (ige.isClient && !self.cs) {
-						for (k = 0; k < tileSetCount; k++) {
-							maps[i].addTexture(textures[k]);
-						}
-					}
-
 					// Loop through the layer data and paint the tiles
 					layerDataCount = layerData.length;
 
@@ -142,12 +132,10 @@ var IgeTiledComponent = IgeClass.extend({
 		};
 
 		if (ige.isClient && !self.cs) {
-			onLoadFunc = function (textures, tileSetCount, tileSetItem) {
+			onLoadFunc = function (tileSetCount, tileSetItem) {
 				return function () {
-					var i, cc;
 
 					var imageUrl = tileSetItem.image;
-					var scaleFactor = ige.scaleMapDetails.scaleFactor;
 
 					if (imageUrl.includes('tilesheet') || tileSetCount === 0) {
 						tileSetItem.tilewidth = ige.scaleMapDetails.originalTileWidth;
@@ -159,8 +147,8 @@ var IgeTiledComponent = IgeClass.extend({
 						tileSetsLoaded++;
 
 						if (tileSetsLoaded === tileSetsTotal) {
-							// All textures loaded, fire processing function
-							allTexturesLoadedFunc();
+							// All tilesets loaded, fire processing function
+							tilesetsLoadedFunc();
 						}
 					}
 				};
@@ -168,19 +156,19 @@ var IgeTiledComponent = IgeClass.extend({
 
 			// TODO remove image loading or entire IgeTiledComponent
 
-			// Load the tile sets as textures
+			// Load the tile sets
 			while (tileSetCount--) {
 				// Load the image into memory first so we can read the total width and height
 				image = new Image();
 
 				tileSetItem = tileSetArray[tileSetCount];
-				image.onload = onLoadFunc(textures, tileSetCount, tileSetItem);
+				image.onload = onLoadFunc(tileSetCount, tileSetItem);
 
 				image.src = tileSetItem.image;
 			}
 		} else {
-			// We're on the server so no textures are actually loaded
-			allTexturesLoadedFunc();
+			// We're on the server so no tilesets are actually loaded
+			tilesetsLoadedFunc();
 		}
 	}
 });

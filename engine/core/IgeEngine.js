@@ -61,9 +61,6 @@ var IgeEngine = IgeEntity.extend({
 			this.addComponent(IgeCocoonJsComponent);
 		}
 
-		// Create storage
-		this._textureStore = [];
-
 		// Set the initial id as the current time in milliseconds. This ensures that under successive
 		// restarts of the engine, new ids will still always be created compared to earlier runs -
 		// which is important when storing persistent data with ids etc
@@ -95,7 +92,6 @@ var IgeEngine = IgeEntity.extend({
 
 		this._requireScriptTotal = 0;
 		this._requireScriptLoading = 0;
-		this._loadingPreText = undefined; // The text to put in front of the loading percent on the loading progress screen
 		this._enableUpdates = true;
 		this._enableRenders = true;
 		this._debugEvents = {}; // Holds debug event booleans for named events
@@ -117,9 +113,6 @@ var IgeEngine = IgeEntity.extend({
 		this._aSecondAgo = 0;
 
 		this._state = 0; // Currently stopped
-		this._textureImageStore = {};
-		this._texturesLoading = 0; // Holds a count of currently loading textures
-		this._texturesTotal = 0; // Holds total number of textures loading / loaded
 		this._dependencyQueue = []; // Holds an array of functions that must all return true for the engine to start
 		this._drawCount = 0; // Holds the number of draws since the last frame (calls to drawImage)
 		this._dps = 0; // Number of draws that occurred last tick
@@ -776,56 +769,6 @@ var IgeEngine = IgeEntity.extend({
 	},
 
 	/**
-	 * Updates the loading screen DOM elements to show the update progress.
-	 */
-	updateProgress: function () {
-		// Check for a loading progress bar DOM element
-		if (typeof (document) !== 'undefined' && document.getElementById) {
-			var elem = document.getElementById('loadingProgressBar');
-			var textElem = document.getElementById('loadingText');
-
-			if (elem) {
-				// Calculate the width from progress
-				var totalWidth = parseInt(elem.parentNode.offsetWidth);
-				var currentWidth = Math.floor((totalWidth / this._texturesTotal) * (this._texturesTotal - this._texturesLoading));
-
-				// Set the current bar width
-				elem.style.width = `${currentWidth}px`;
-
-				if (textElem) {
-					if (this._loadingPreText === undefined) {
-						// Fill the text to use
-						this._loadingPreText = textElem.innerHTML;
-					}
-					textElem.innerHTML = `${this._loadingPreText} ${Math.floor((100 / this._texturesTotal) * (this._texturesTotal - this._texturesLoading))}%`;
-				}
-			}
-		}
-	},
-
-	/**
-	 * Checks if all textures have finished loading and returns true if so.
-	 * @return {Boolean}
-	 */
-	texturesLoaded: function () {
-		return ige._texturesLoading === 0;
-	},
-
-	/**
-	 * Emits the "texturesLoaded" event.
-	 * @private
-	 */
-	_allTexturesLoaded: function () {
-		if (!this._loggedATL) {
-			this._loggedATL = true;
-			IgeEngine.prototype.log('All textures have loaded');
-		}
-
-		// Fire off an event about this
-		this.emit('texturesLoaded');
-	},
-
-	/**
 	 * Gets / sets the default smoothing value for all new
 	 * IgeTexture class instances. If set to true, all newly
 	 * created textures will have smoothing enabled by default.
@@ -982,15 +925,6 @@ var IgeEngine = IgeEntity.extend({
 		}
 
 		return this._autoSize;
-	},
-
-	pixelRatioScaling: function (val) {
-		if (val !== undefined) {
-			this._pixelRatioScaling = val;
-			return this;
-		}
-
-		return this._pixelRatioScaling;
 	},
 
 	/**
