@@ -11,7 +11,7 @@ class PhaserEntity {
 	protected evtListeners: Record<string, EvtListener> = {};
 
 	protected constructor (
-		protected entity: IgeEntity
+		protected entity: TaroEntity
 	) {
 
 		Object.assign(this.evtListeners, {

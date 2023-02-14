@@ -29,7 +29,7 @@ var MobileControlsScene = /** @class */ (function (_super) {
         this.resize();
         scale.on(Phaser.Scale.Events.RESIZE, this.resize, this);
         var joysticks = this.joysticks;
-        ige.mobileControls.on('add-control', function (key, x, y, w, h, settings) {
+        taro.mobileControls.on('add-control', function (key, x, y, w, h, settings) {
             switch (key) {
                 case 'movementWheel':
                 case 'lookWheel':
@@ -76,7 +76,7 @@ var MobileControlsScene = /** @class */ (function (_super) {
                     break;
             }
         });
-        ige.mobileControls.on('clear-controls', function () {
+        taro.mobileControls.on('clear-controls', function () {
             joysticks.forEach(function (j) {
                 j.destroy();
             });
@@ -85,7 +85,7 @@ var MobileControlsScene = /** @class */ (function (_super) {
                 c.destroy();
             });
         });
-        ige.mobileControls.on('visible', function (value) {
+        taro.mobileControls.on('visible', function (value) {
             _this.scene.setVisible(value);
         });
         /* if (scale.fullscreen.available) {

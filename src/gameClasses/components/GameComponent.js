@@ -1,4 +1,4 @@
-var GameComponent = IgeEntity.extend({
+var GameComponent = TaroEntity.extend({
 	classId: 'GameComponent',
 	componentId: 'game',
 
@@ -19,8 +19,8 @@ var GameComponent = IgeEntity.extend({
 	start: function () {
 		var self = this;
 		GameComponent.prototype.log('Game component started');
-		if (ige.isServer) {
-			ige.chat.createRoom('lobby', {}, '1');
+		if (taro.isServer) {
+			taro.chat.createRoom('lobby', {}, '1');
 
 			// by default, create 5 computer players
 			var aiCount = 10;
@@ -37,25 +37,25 @@ var GameComponent = IgeEntity.extend({
 
 				// GameComponent.prototype.log("computerPlayer created " + this['computer' + i].id())
 				// if (global.isDev) {
-				// 	ige.trigger.fire("playerJoinsGame", { playerId: this['computer'+i].id() })
+				// 	taro.trigger.fire("playerJoinsGame", { playerId: this['computer'+i].id() })
 				// }
 			}
-			ige.trigger.fire('gameStart');
-		} else if (ige.isClient) {
+			taro.trigger.fire('gameStart');
+		} else if (taro.isClient) {
 			// determine which attribute will be used for scoreboard
 			var attr = 'points';
 			if (
-				ige.game.data.settings &&
-        ige.game.data.settings.constants &&
-        ige.game.data.settings.constants.currency != undefined
+				taro.game.data.settings &&
+        taro.game.data.settings.constants &&
+        taro.game.data.settings.constants.currency != undefined
 			) {
-				attr = ige.game.data.settings.constants.currency;
+				attr = taro.game.data.settings.constants.currency;
 			}
 			$('.game-currency').html(attr);
 		}
 
 		self.isGameStarted = true;
-		ige.timer.startGameClock();
+		taro.timer.startGameClock();
 	},
 
 	createPlayer: function (data, persistedData) {
@@ -97,7 +97,7 @@ var GameComponent = IgeEntity.extend({
 
 		var player = new Player(playerData);
 
-		if (ige.isServer) {
+		if (taro.isServer) {
 			var logInfo = {
 				name: playerData.name,
 				clientId: playerData.clientId
@@ -114,14 +114,14 @@ var GameComponent = IgeEntity.extend({
 			player.persistedData = persistedData;
 		}
 
-		if (ige.isServer) {
-			ige.gameText.sendLatestText(data.clientId); // send latest ui information to the client
-			// ige.shopkeeper.updateShopInventory(ige.shopkeeper.inventory, data.clientId) // send latest ui information to the client
+		if (taro.isServer) {
+			taro.gameText.sendLatestText(data.clientId); // send latest ui information to the client
+			// taro.shopkeeper.updateShopInventory(taro.shopkeeper.inventory, data.clientId) // send latest ui information to the client
 
-			var isOwner = ige.server.owner == data._id;
+			var isOwner = taro.server.owner == data._id;
 			var isInvitedUser = false;
-			if (ige.game.data.defaultData && ige.game.data.defaultData.invitedUsers) {
-				isInvitedUser = ige.game.data.defaultData.invitedUsers.some(e => e._id === data._id);
+			if (taro.game.data.defaultData && taro.game.data.defaultData.invitedUsers) {
+				isInvitedUser = taro.game.data.defaultData.invitedUsers.some(e => e._id === data._id);
 			}
 			var isUserAdmin = false;
 			var isUserMod = false;
@@ -135,7 +135,7 @@ var GameComponent = IgeEntity.extend({
 			// if User/Admin has access to game then show developer logs
 			if (isOwner || isInvitedUser || isUserAdmin) {
 				GameComponent.prototype.log(`owner connected. _id: ${data._id}`);
-				ige.server.developerClientIds.push(data.clientId);
+				taro.server.developerClientIds.push(data.clientId);
 
 			}
 		}
@@ -146,8 +146,8 @@ var GameComponent = IgeEntity.extend({
 	// get client with ip
 	getPlayerByIp: function (ip, currentUserId, all = false) {
 		var clientIds = [];
-		for (let clientId in ige.server.clients) {
-			const clientObj = ige.server.clients[clientId];
+		for (let clientId in taro.server.clients) {
+			const clientObj = taro.server.clients[clientId];
 
 			if (clientObj.ip === ip) {
 				clientIds.push(clientId);
@@ -159,7 +159,7 @@ var GameComponent = IgeEntity.extend({
 
 		if (clientIds.length > 0) {
 			var method = all ? 'filter' : 'find';
-			return ige.$$('player')[method](player => {
+			return taro.$$('player')[method](player => {
 				// var clientId = player && player._stats && player._stats.clientId;
 				// added currentUserId check to confirm it is logged in user and not add-instance bot.
 				return (
@@ -173,7 +173,7 @@ var GameComponent = IgeEntity.extend({
 
 	// not in use;
 	getUnitsByClientId: function (clientId) {
-		return ige
+		return taro
 			.$$('unit')
 			.filter(function (unit) {
 				return unit._stats && unit._stats.clientId == clientId;
@@ -185,13 +185,13 @@ var GameComponent = IgeEntity.extend({
 	},
 
 	getPlayerByUserId: function (userId) {
-		return ige.$$('player').find(function (player) {
+		return taro.$$('player').find(function (player) {
 			return player._stats && player._stats.userId == userId;
 		});
 	},
 
 	getPlayerByClientId: function (clientId) {
-		return ige.$$('player').find(function (player) {
+		return taro.$$('player').find(function (player) {
 			return player._stats && player._stats.controlledBy != 'computer' && player._stats.clientId == clientId;
 		});
 	},

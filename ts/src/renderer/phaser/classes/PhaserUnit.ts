@@ -41,7 +41,7 @@ class PhaserUnit extends PhaserAnimatedEntity {
 			'render-chat-bubble': entity.on('render-chat-bubble', this.renderChat, this),
 		});
 
-		this.zoomEvtListener = ige.client.on('scale', this.scaleElements, this);
+		this.zoomEvtListener = taro.client.on('scale', this.scaleElements, this);
 	}
 
 	protected updateTexture (usingSkin) {
@@ -148,7 +148,7 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		label.setFill(data.color || '#fff');
 		label.setResolution(4);
 
-		const strokeThickness = ige.game.data.settings
+		const strokeThickness = taro.game.data.settings
 			.addStrokeToNameAndAttributes !== false ? 4 : 0;
 		label.setStroke('#000', strokeThickness);
 		label.setText(data.text || '');
@@ -278,7 +278,7 @@ class PhaserUnit extends PhaserAnimatedEntity {
 	protected destroy (): void {
 
 		this.scene.renderedEntities = this.scene.renderedEntities.filter(item => item !== this.gameObject);
-		ige.client.off('scale', this.zoomEvtListener);
+		taro.client.off('scale', this.zoomEvtListener);
 		this.zoomEvtListener = null;
 
 		if (this.scaleTween) {

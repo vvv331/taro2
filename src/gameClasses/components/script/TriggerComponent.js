@@ -1,10 +1,10 @@
-var TriggerComponent = IgeEntity.extend({
+var TriggerComponent = TaroEntity.extend({
 	classId: 'TriggerComponent',
 	componentId: 'trigger',
 
 	init: function () {
 		var self = this;
-		if (ige.isServer || (ige.isClient && ige.physics)) {
+		if (taro.isServer || (taro.isClient && taro.physics)) {
 			self._enableContactListener();
 		}
 
@@ -16,8 +16,8 @@ var TriggerComponent = IgeEntity.extend({
 	// map trigger events, so we don't have to iterate through all scripts to find corresponding scripts
 	_registerTriggeredScripts: function () {
 		this.triggeredScripts = {};
-		for (scriptId in ige.game.data.scripts) {
-			var script = ige.game.data.scripts[scriptId];
+		for (scriptId in taro.game.data.scripts) {
+			var script = taro.game.data.scripts[scriptId];
 
 			// look for matching trigger within the script's triggers
 
@@ -58,7 +58,7 @@ var TriggerComponent = IgeEntity.extend({
 							ownerUnit.ai.registerSensorDetection(entityB);
 						}
 					} else if (entityB._category == 'item') {
-						ige.trigger.fire('whenItemEntersSensor', {
+						taro.trigger.fire('whenItemEntersSensor', {
 							unitId: ownerUnit.id(),
 							sensorId: entityA.id(),
 							itemId: entityB.id()
@@ -92,21 +92,21 @@ var TriggerComponent = IgeEntity.extend({
 
 			switch (entityA._category) {
 				case 'region':
-					var region = ige.variable.getValue({
+					var region = taro.variable.getValue({
 						function: 'getVariable',
 						variableName: entityA._stats.id
 					});
 
 					switch (entityB._category) {
 						case 'unit':
-							ige.trigger.fire('unitEntersRegion', {
+							taro.trigger.fire('unitEntersRegion', {
 								unitId: entityB.id(),
 								region: region
 							});
 							break;
 
 						case 'item':
-							ige.trigger.fire('itemEntersRegion', {
+							taro.trigger.fire('itemEntersRegion', {
 								itemId: entityB.id(),
 								region: region
 							});
@@ -119,26 +119,26 @@ var TriggerComponent = IgeEntity.extend({
 					var triggeredBy = {
 						unitId: entityA.id()
 					};
-					ige.game.lastTouchingUnitId = entityA.id();
-					ige.game.lastTouchedUnitId = entityB.id();
+					taro.game.lastTouchingUnitId = entityA.id();
+					taro.game.lastTouchedUnitId = entityB.id();
 
 					switch (entityB._category) {
 						case 'unit':
-							ige.trigger.fire('unitTouchesUnit', triggeredBy); // handle unitA touching unitB
+							taro.trigger.fire('unitTouchesUnit', triggeredBy); // handle unitA touching unitB
 							triggeredBy.unitId = entityB.id();
-							ige.game.lastTouchingUnitId = entityB.id();
-							ige.game.lastTouchedUnitId = entityA.id();
-							ige.trigger.fire('unitTouchesUnit', triggeredBy); // handle unitB touching unitA
+							taro.game.lastTouchingUnitId = entityB.id();
+							taro.game.lastTouchedUnitId = entityA.id();
+							taro.trigger.fire('unitTouchesUnit', triggeredBy); // handle unitB touching unitA
 							break;
 
 						case 'item':
 							triggeredBy.itemId = entityB.id();
-							ige.game.lastTouchedItemId = entityB.id();
+							taro.game.lastTouchedItemId = entityB.id();
 							// don't trigger if item is owned by the unit
 							if (entityB._stats.ownerUnitId == entityA.id())
 								return;
 
-							ige.trigger.fire('unitTouchesItem', triggeredBy);
+							taro.trigger.fire('unitTouchesItem', triggeredBy);
 
 							break;
 
@@ -146,19 +146,19 @@ var TriggerComponent = IgeEntity.extend({
 							// console.log(entityA._category, entityA._stats.name, entityA.id())
 							triggeredBy.projectileId = entityB.id();
 							triggeredBy.collidingEntity = entityA.id();
-							ige.game.lastTouchedProjectileId = entityB.id();
+							taro.game.lastTouchedProjectileId = entityB.id();
 							triggeredBy.projectileId = entityB.id();
-							ige.game.lastAttackingUnitId = entityB._stats.sourceUnitId;
-							ige.game.lastAttackedUnitId = entityA.id();
-							ige.trigger.fire('unitTouchesProjectile', triggeredBy);
+							taro.game.lastAttackingUnitId = entityB._stats.sourceUnitId;
+							taro.game.lastAttackedUnitId = entityA.id();
+							taro.trigger.fire('unitTouchesProjectile', triggeredBy);
 
 							break;
 
 						case undefined:
 						case 'wall':
-							ige.game.lastTouchingUnitId = entityA.id();
+							taro.game.lastTouchingUnitId = entityA.id();
 							var triggeredBy = { unitId: entityA.id() };
-							ige.trigger.fire('unitTouchesWall', triggeredBy);
+							taro.trigger.fire('unitTouchesWall', triggeredBy);
 							break;
 					}
 					break;
@@ -171,7 +171,7 @@ var TriggerComponent = IgeEntity.extend({
 								itemId: entityA.id(),
 								collidingEntity: entityA.id()
 							};
-							ige.trigger.fire('projectileTouchesItem', triggeredBy);
+							taro.trigger.fire('projectileTouchesItem', triggeredBy);
 							break;
 					}
 					break;
@@ -184,7 +184,7 @@ var TriggerComponent = IgeEntity.extend({
 								projectileId: entityA.id(),
 								collidingEntity: entityB.id()
 							};
-							ige.trigger.fire('projectileTouchesWall', triggeredBy);
+							taro.trigger.fire('projectileTouchesWall', triggeredBy);
 							break;
 					}
 					break;
@@ -196,12 +196,12 @@ var TriggerComponent = IgeEntity.extend({
 								projectileId: entityB.id(),
 								collidingEntity: entityA.id()
 							};
-							ige.trigger.fire('projectileTouchesWall', triggeredBy);
+							taro.trigger.fire('projectileTouchesWall', triggeredBy);
 							break;
 
 						case 'item':
 							var triggeredBy = { itemId: entityB.id() };
-							ige.trigger.fire('itemTouchesWall', triggeredBy);
+							taro.trigger.fire('itemTouchesWall', triggeredBy);
 							break;
 					}
 					break;
@@ -216,7 +216,7 @@ var TriggerComponent = IgeEntity.extend({
 	_enableContactListener: function () {
 		// Set the contact listener methods to detect when
 		// contacts (collisions) begin and end
-		ige.physics.contactListener(this._beginContactCallback, this.endContactCallback);
+		taro.physics.contactListener(this._beginContactCallback, this.endContactCallback);
 	},
 
 	/*
@@ -225,9 +225,9 @@ var TriggerComponent = IgeEntity.extend({
 	fire: function (triggerName, triggeredBy) {
 		// if (triggerName === 'projectileTouchesWall') console.log("trigger fire", triggerName, triggeredBy)
 
-		if (ige.isServer || (ige.isClient && ige.physics)) {
+		if (taro.isServer || (taro.isClient && taro.physics)) {
 			
-			if (ige.isServer) {
+			if (taro.isServer) {
 				var now = Date.now();		
 				var lastTriggerRunTime = now - this.lastTriggerRanAt;
 				
@@ -249,21 +249,21 @@ var TriggerComponent = IgeEntity.extend({
 			let scriptIds = this.triggeredScripts[triggerName]
 			for (i in scriptIds) {
 				let scriptId = scriptIds[i]
-				ige.script.scriptLog(`\ntrigger: ${triggerName}`);
+				taro.script.scriptLog(`\ntrigger: ${triggerName}`);
 
 				var localVariables = {
 					triggeredBy: triggeredBy
 				};
-				ige.script.runScript(scriptId, localVariables);
+				taro.script.runScript(scriptId, localVariables);
 			}
 		}
 
 		if (triggeredBy && triggeredBy.projectileId) {
-			var projectile = ige.$(triggeredBy.projectileId);
+			var projectile = taro.$(triggeredBy.projectileId);
 			if (projectile) {
 				switch (triggerName) {
 					case 'unitTouchesProjectile':
-						var attackedUnit = ige.$(ige.game.lastTouchingUnitId);
+						var attackedUnit = taro.$(taro.game.lastTouchingUnitId);
 						if (attackedUnit) {
 							var damageHasBeenInflicted = attackedUnit.inflictDamage(projectile._stats.damageData);
 

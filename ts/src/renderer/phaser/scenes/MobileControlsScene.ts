@@ -25,7 +25,7 @@ class MobileControlsScene extends PhaserScene {
 
 		const joysticks = this.joysticks;
 
-		ige.mobileControls.on('add-control',(
+		taro.mobileControls.on('add-control',(
 			key: MobileControlKey,
 			x: number,
 			y: number,
@@ -100,7 +100,7 @@ class MobileControlsScene extends PhaserScene {
 			}
 		});
 
-		ige.mobileControls.on('clear-controls', () => {
+		taro.mobileControls.on('clear-controls', () => {
 
 			joysticks.forEach((j) => {
 				j.destroy();
@@ -113,7 +113,7 @@ class MobileControlsScene extends PhaserScene {
 
 		});
 
-		ige.mobileControls.on('visible', (value: boolean) => {
+		taro.mobileControls.on('visible', (value: boolean) => {
 			this.scene.setVisible(value);
 		});
 

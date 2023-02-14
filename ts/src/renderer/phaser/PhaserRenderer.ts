@@ -47,7 +47,7 @@ class PhaserRenderer extends Phaser.Game {
 			);
 		}
 
-		if (typeof ga != 'undefined' && ige.env != 'local') {
+		if (typeof ga != 'undefined' && taro.env != 'local') {
 			ga('send', {
 				hitType: 'event',
 				eventCategory: 'Rendering Engine',
@@ -58,7 +58,7 @@ class PhaserRenderer extends Phaser.Game {
 
 	private setupInputListeners(): void {
 		// Ask the input component to setup any listeners it has
-		ige.input.setupListeners(this.canvas);
+		taro.input.setupListeners(this.canvas);
 	}
 
 	getViewportBounds (): Phaser.Geom.Rectangle {

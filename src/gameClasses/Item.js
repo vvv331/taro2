@@ -1,17 +1,17 @@
-var Item = IgeEntityPhysics.extend({
+var Item = TaroEntityPhysics.extend({
 	classId: 'Item',
 
 	init: function (data, entityIdFromServer) {
-		IgeEntityPhysics.prototype.init.call(this, data.defaultData);
+		TaroEntityPhysics.prototype.init.call(this, data.defaultData);
 		this.id(entityIdFromServer); // ensure that entityId is consistent between server & client
 
 		var self = this;
 		self._stats = {};
 		self.anchorOffset = { x: 0, y: 0, rotate: 0 };
 		var itemData = {};
-		if (ige.isClient) {
-			itemData = ige.game.getAsset('itemTypes', data.itemTypeId);
-			itemData = _.pick(itemData, ige.client.keysToAddBeforeRender);
+		if (taro.isClient) {
+			itemData = taro.game.getAsset('itemTypes', data.itemTypeId);
+			itemData = _.pick(itemData, taro.client.keysToAddBeforeRender);
 		}
 
 		self._stats = Object.assign(
@@ -20,7 +20,7 @@ var Item = IgeEntityPhysics.extend({
 		);
 
 		if (self._stats.projectileType) {
-			self.projectileData = ige.game.getAsset('projectileTypes', self._stats.projectileType);
+			self.projectileData = taro.game.getAsset('projectileTypes', self._stats.projectileType);
 		}
 
 		// so if cost is set as 0 it should be usable item
@@ -58,20 +58,20 @@ var Item = IgeEntityPhysics.extend({
 		self.parseEntityObject(self._stats);
 		self.addComponent(AttributeComponent); // every item gets one
 
-		ige.game.lastCreatedItemId = entityIdFromServer || this.id();
+		taro.game.lastCreatedItemId = entityIdFromServer || this.id();
 
-		if (ige.isClient) {
+		if (taro.isClient) {
 			// must create Phaser item before emitting init events
-			ige.client.emit('create-item', this);
+			taro.client.emit('create-item', this);
 		}
 		self.setState(self._stats.stateId, self._stats.defaultData);
 
-		self.scaleRatio = ige.physics && ige.physics.scaleRatio();
-		if (ige.isServer) {
+		self.scaleRatio = taro.physics && taro.physics.scaleRatio();
+		if (taro.isServer) {
 			this.streamMode(1);
 			self.streamCreate();
-			ige.server.totalItemsCreated++;
-		} else if (ige.isClient) {
+			taro.server.totalItemsCreated++;
+		} else if (taro.isClient) {
 			self._hidden = self._stats.isHidden;
 			if (self._stats.currentBody == undefined || self._stats.currentBody.type == 'none' || self._hidden) {
 				self.hide();
@@ -99,10 +99,10 @@ var Item = IgeEntityPhysics.extend({
 		var self = this;
 		var body = self._stats.currentBody;
 
-		if (ige.isServer) {
+		if (taro.isServer) {
 			if (this._stats.stateId == 'dropped') {
 				this.lifeSpan(this._stats.lifeSpan);
-				self.mount(ige.$('baseScene'));
+				self.mount(taro.$('baseScene'));
 				this.streamMode(1);
 			} else {
 				this.deathTime(undefined); // remove lifespan, so the entity stays indefinitely
@@ -117,18 +117,18 @@ var Item = IgeEntityPhysics.extend({
 		}
 
 		if (body && body.type != 'none') {
-			IgeEntityPhysics.prototype.updateBody.call(self, initTransform);
+			TaroEntityPhysics.prototype.updateBody.call(self, initTransform);
 
 			self.show();
-			if (ige.isClient) {
+			if (taro.isClient) {
 				self.updateTexture();
 			}
 		} else {
-			ige.devLog('hide & destroyBody.');
+			taro.devLog('hide & destroyBody.');
 			self.hide();
 
 			self.destroyBody();
-			if (ige.isServer) {
+			if (taro.isServer) {
 				this.streamMode(2);
 			}
 		}
@@ -142,30 +142,30 @@ var Item = IgeEntityPhysics.extend({
 		// console.log("mounting on", obj._category)
 		if (obj && obj._category == 'unit') {
 			if (body && body.type != 'none') {
-				ige.devLog('mounting item to unit ', body.unitAnchor.x, (-1 * body.unitAnchor.y));
+				taro.devLog('mounting item to unit ', body.unitAnchor.x, (-1 * body.unitAnchor.y));
 
 				this.width(body.width);
 				this.height(body.height);
 
 				// mount texture on the unit in a correct position
-				if (ige.isClient) {
+				if (taro.isClient) {
 					// avoid transforming box2d body by calling prototype
 
 					var unitAnchorX = body.unitAnchor.x;
 					var unitAnchorY = body.unitAnchor.y;
-					IgeEntity.prototype.translateTo.call(this, unitAnchorX, (-1 * unitAnchorY), 0);
-					// IgeEntity.prototype.rotateTo.call(this, 0, 0, body.unitAnchor.rotation || 0)
+					TaroEntity.prototype.translateTo.call(this, unitAnchorX, (-1 * unitAnchorY), 0);
+					// TaroEntity.prototype.rotateTo.call(this, 0, 0, body.unitAnchor.rotation || 0)
 				}
 			}
 		} else {
-			ige.devLog('there\'s no unit to attach!');
+			taro.devLog('there\'s no unit to attach!');
 			// item is dropped
 			if (body && body.type != 'none') {
 				this.width(body.width);
 				this.height(body.height);
 			}
-			if (ige.isServer) {
-				IgeEntity.prototype.mount.call(this, obj);
+			if (taro.isServer) {
+				TaroEntity.prototype.mount.call(this, obj);
 			}
 		}
 	},
@@ -179,7 +179,7 @@ var Item = IgeEntityPhysics.extend({
 		if (ownerUnit) {
 			var ownerPlayer = ownerUnit.getOwner();
 			// item should be invisible to myPlayer if this item is held by invisible hostile unit
-			var isInvisible = self.shouldBeInvisible(ownerPlayer, ige.client.myPlayer);
+			var isInvisible = self.shouldBeInvisible(ownerPlayer, taro.client.myPlayer);
 			var hasBody = self._stats.currentBody && self._stats.currentBody.type !== 'none';
 
 			if (isInvisible || !hasBody) {
@@ -195,15 +195,15 @@ var Item = IgeEntityPhysics.extend({
 		// leave because it is taro not renderer
 		self.updateLayer();
 		// leave because it updates state for animation
-		IgeEntity.prototype.updateTexture.call(this);
+		TaroEntity.prototype.updateTexture.call(this);
 	},
 
 	getOwnerUnit: function () {
-		return ((this._stats.ownerUnitId) ? ige.$(this._stats.ownerUnitId) : undefined);
+		return ((this._stats.ownerUnitId) ? taro.$(this._stats.ownerUnitId) : undefined);
 	},
 
 	setOwnerUnit: function (newOwner) {
-		var oldOwner = ige.$(this.oldOwnerId);
+		var oldOwner = taro.$(this.oldOwnerId);
 
 		if (newOwner == oldOwner)
 			return;
@@ -213,7 +213,7 @@ var Item = IgeEntityPhysics.extend({
 				this.setState('unselected');
 			}
 
-			if (ige.isServer) {
+			if (taro.isServer) {
 				this.streamUpdateData([{ ownerUnitId: newOwner.id() }]);
 				this.streamMode(2);
 			}
@@ -228,7 +228,7 @@ var Item = IgeEntityPhysics.extend({
 			if (oldOwner) {
 				this.updateBody();
 
-				if (ige.isClient) {
+				if (taro.isClient) {
 					if (oldOwner._stats) {
 						oldOwner._stats.currentItemId = null;
 					}
@@ -237,7 +237,7 @@ var Item = IgeEntityPhysics.extend({
 				this.oldOwnerId = null;
 			}
 
-			if (ige.isServer) {
+			if (taro.isServer) {
 				this.streamUpdateData([{ ownerUnitId: 0 }]);
 				this.streamMode(1);
 			}
@@ -257,7 +257,7 @@ var Item = IgeEntityPhysics.extend({
 	// when player presses Mouse1
 	use: function () {
 		var self = this;
-		var now = ige.now;
+		var now = taro.now;
 		var owner = self.getOwnerUnit();
 		var player = owner && owner.getOwner();
 		var isUsed = false;
@@ -270,28 +270,28 @@ var Item = IgeEntityPhysics.extend({
 		}
 
 		if (self.hasQuantityRemaining()) {
-			ige.game.lastUsedItemId = self.id();
+			taro.game.lastUsedItemId = self.id();
 
 			if ((self._stats.lastUsed + self._stats.fireRate < now) || self._stats.type == 'consumable') {
 				if (!self.canAffordItemCost()) {
-					ige.devLog('cannot afford item cost');
+					taro.devLog('cannot afford item cost');
 					return;
 				}
 
 				isUsed = true;
 
 				// item must be ready to fire (accordingly to fire rate), and must have ammo or have infinite ammo
-				if (ige.isClient && self._stats.type == 'weapon' && self._stats.effects && self._stats.effects.use && self._stats.effects.use.animation) {
+				if (taro.isClient && self._stats.type == 'weapon' && self._stats.effects && self._stats.effects.use && self._stats.effects.use.animation) {
 					self.applyAnimationById(self._stats.effects.use.animation);
 				}
 
-				self._stats.lastUsed = ige.now;
-				ige.trigger && ige.trigger.fire('unitUsesItem', {
+				self._stats.lastUsed = taro.now;
+				taro.trigger && taro.trigger.fire('unitUsesItem', {
 					unitId: (owner) ? owner.id() : undefined,
 					itemId: self.id()
 				});
 
-				if (ige.physics && self._stats.type == 'weapon') {
+				if (taro.physics && self._stats.type == 'weapon') {
 					if (self._stats.isGun) {
 						if (self._stats.bulletStartPosition) {
 							var rotate = this._rotate.z;
@@ -322,14 +322,14 @@ var Item = IgeEntityPhysics.extend({
 
 							if (
 								this._stats.isGun &&
-								(ige.isServer || (ige.isClient && ige.physics)) // render projectile on clientside if physics is enabled
+								(taro.isServer || (taro.isClient && taro.physics)) // render projectile on clientside if physics is enabled
 							) {
 								var defaultData = {
 									rotate: rotate,
 									translate: bulletStartPosition
 								};
 
-								if (self.projectileData && (ige.isServer || (ige.isClient && !self._stats.projectileStreamMode))) {
+								if (self.projectileData && (taro.isServer || (taro.isClient && !self._stats.projectileStreamMode))) {
 									defaultData.velocity = {
 										deployMethod: self._stats.deployMethod,
 										x: Math.cos(rotate + Math.radians(-90)) * self._stats.bulletForce,
@@ -355,7 +355,7 @@ var Item = IgeEntityPhysics.extend({
 										});
 
 									var projectile = new Projectile(data);
-									ige.game.lastCreatedProjectileId = projectile.id();
+									taro.game.lastCreatedProjectileId = projectile.id();
 								}
 								if (this._stats.bulletType == 'raycast') {
 									// starting from unit center position
@@ -388,7 +388,7 @@ var Item = IgeEntityPhysics.extend({
 
 										def.ReportFixture = function (fixture, point, normal, fraction) {
 											var fixtureList = fixture.m_body.m_fixtureList;
-											var entity = fixtureList && fixtureList.igeId && ige.$(fixtureList.igeId);
+											var entity = fixtureList && fixtureList.taroId && taro.$(fixtureList.taroId);
 											if (entity) {
 												entity.lastRaycastCollisionPosition = {
 													x: point.x * self.scaleRatio,
@@ -420,8 +420,8 @@ var Item = IgeEntityPhysics.extend({
 
 									var callback = raycastMultipleCallback();
 
-									// ige.physics.world().rayCast(, callback.ReportFixture);
-									ige.physics.world().rayCast(
+									// taro.physics.world().rayCast(, callback.ReportFixture);
+									taro.physics.world().rayCast(
 										callback.ReportFixture,
 										{
 											x: raycastStartPosition.x / self.scaleRatio,
@@ -434,9 +434,9 @@ var Item = IgeEntityPhysics.extend({
 									);
 
 									// if (!self._stats.penetration) {
-									ige.game.entitiesCollidingWithLastRaycast = _.orderBy(self.raycastTargets, ['raycastFraction'], ['asc']);
+									taro.game.entitiesCollidingWithLastRaycast = _.orderBy(self.raycastTargets, ['raycastFraction'], ['asc']);
 									// }
-									ige.trigger && ige.trigger.fire('raycastItemFired', {
+									taro.trigger && taro.trigger.fire('raycastItemFired', {
 										itemId: self.id()
 									});
 								}
@@ -480,7 +480,7 @@ var Item = IgeEntityPhysics.extend({
 							};
 							// console.log(owner._translate.x, owner._translate.y, hitbox);                                              //////////Hitbox log
 
-							entities = ige.physics.getBodiesInRegion(hitbox);
+							entities = taro.physics.getBodiesInRegion(hitbox);
 
 							while (entities.length > 0) {
 								var entity = entities.shift();
@@ -523,15 +523,15 @@ var Item = IgeEntityPhysics.extend({
 								}
 							}
 
-							if (ige.isServer && self._stats && self._stats.bonus && self._stats.bonus.consume && self._stats.bonus.consume.coin) {
-								// ige.server.giveCoinToUser(player, self._stats.bonus.consume.coin, self._stats.name);
+							if (taro.isServer && self._stats && self._stats.bonus && self._stats.bonus.consume && self._stats.bonus.consume.coin) {
+								// taro.server.giveCoinToUser(player, self._stats.bonus.consume.coin, self._stats.name);
 								// player.streamUpdateData([{
 								// 	coins: self._stats.bonus.consume.coin + player._stats.coins
 								// }]);
 							}
 						}
 
-						if (ige.isServer) {
+						if (taro.isServer) {
 							owner.streamUpdateData(attrData);
 						}
 					}
@@ -545,12 +545,12 @@ var Item = IgeEntityPhysics.extend({
 			self.stopUsing();
 		}
 
-		if (isUsed && ige.isClient) {
+		if (isUsed && taro.isClient) {
 			this.playEffect('use');
 		}
 
 		if (self._stats.quantity != null || self._stats.quantity != undefined) {
-			// ige.devLog(isUsed, self._stats.quantity , self._stats.quantity > 0)
+			// taro.devLog(isUsed, self._stats.quantity , self._stats.quantity > 0)
 			if (isUsed && self._stats.quantity > 0) {
 				self.updateQuantity(self._stats.quantity - self.quantityCost);
 			}
@@ -560,7 +560,7 @@ var Item = IgeEntityPhysics.extend({
 	updateQuantity: function (qty) {
 		this._stats.quantity = qty;
 
-		if (ige.isServer) {
+		if (taro.isServer) {
 			// item's set to be removed when empty
 			if (this._stats.quantity == 0 && this._stats.removeWhenEmpty === true) {
 				var ownerUnit = this.getOwnerUnit();
@@ -569,8 +569,8 @@ var Item = IgeEntityPhysics.extend({
 					ownerUnit.streamUpdateData([{ itemIds: ownerUnit._stats.itemIds }]);
 				}
 			}
-		} else if (ige.isClient && ige.client.selectedUnit == this.getOwnerUnit()) {
-			ige.itemUi.updateItemQuantity(this);
+		} else if (taro.isClient && taro.client.selectedUnit == this.getOwnerUnit()) {
+			taro.itemUi.updateItemQuantity(this);
 		}
 	},
 
@@ -630,12 +630,12 @@ var Item = IgeEntityPhysics.extend({
 				}
 
 				// calling stream for unit because there is delay in transferring attributes data
-				if (ige.isClient && owner._stats.clientId == ige.network.id() && player._stats.selectedUnitId == owner.id()) {
+				if (taro.isClient && owner._stats.clientId == taro.network.id() && player._stats.selectedUnitId == owner.id()) {
 					if (unitAttributeChanged) {
 						owner.attribute.refresh();
 					}
 					if (playerAttributeChanged) {
-						ige.playerUi.updatePlayerAttributesDiv(player._stats.attributes);
+						taro.playerUi.updatePlayerAttributesDiv(player._stats.attributes);
 					}
 				}
 			}
@@ -660,7 +660,7 @@ var Item = IgeEntityPhysics.extend({
 	// 			if (self._stats.isGun) {
 	// 				var velocity = self._stats.bulletForce;
 	// 				var bulletLifespan = self.projectileData.lifeSpan
-	// 				reach = velocity * bulletLifespan / ige._fpsRate / 4;
+	// 				reach = velocity * bulletLifespan / taro._fpsRate / 4;
 	// 				// console.log(velocity, bulletLifespan, reach)
 	// 			} else {
 	// 				var hitboxData = this._stats.damageHitBox;
@@ -683,15 +683,15 @@ var Item = IgeEntityPhysics.extend({
 
 		self._stats.isBeingUsed = true;
 		var owner = this.getOwnerUnit();
-		if (ige.isServer) {
+		if (taro.isServer) {
 			this.quantityAtStartusing = this._stats.quantity;
 			this.streamUpdateData([{ isBeingUsed: true }]);
-		} else if (ige.isClient && owner == ige.client.selectedUnit) {
+		} else if (taro.isClient && owner == taro.client.selectedUnit) {
 			this._stats.isBeingUsed = true;
 		}
 
-		if (owner && ige.trigger) {
-			ige.trigger && ige.trigger.fire('unitStartsUsingAnItem', {
+		if (owner && taro.trigger) {
+			taro.trigger && taro.trigger.fire('unitStartsUsingAnItem', {
 				unitId: owner.id(),
 				itemId: this.id()
 			});
@@ -704,16 +704,16 @@ var Item = IgeEntityPhysics.extend({
 			self._stats.isBeingUsed = false;
 			var owner = self.getOwnerUnit();
 
-			if (owner && ige.trigger) {
-				ige.trigger && ige.trigger.fire('unitStopsUsingAnItem', {
+			if (owner && taro.trigger) {
+				taro.trigger && taro.trigger.fire('unitStopsUsingAnItem', {
 					unitId: owner.id(),
 					itemId: self.id()
 				});
 			}
 		}
-		if (ige.isClient) {
+		if (taro.isClient) {
 			this.playEffect('none');
-		} else if (ige.isServer) {
+		} else if (taro.isServer) {
 			var data = { isBeingUsed: false };
 			if (self._stats.quantity != self.quantityAtStartusing) {
 				data.quantity = self._stats.quantity;
@@ -722,7 +722,7 @@ var Item = IgeEntityPhysics.extend({
 		}
 	},
 	refillAmmo: function () {
-		var itemData = ige.game.getAsset('itemTypes', this._stats.itemTypeId);
+		var itemData = taro.game.getAsset('itemTypes', this._stats.itemTypeId);
 		this.streamUpdateData([
 			{ ammoTotal: itemData.ammoTotal },
 			{ ammo: itemData.ammoSize }
@@ -751,7 +751,7 @@ var Item = IgeEntityPhysics.extend({
 				if (self._stats.currentBody.unitAnchor) {
 					// if entity is flipped, then flip the keyFrames as well
 					// var itemAngle = ownerUnit.angleToTarget
-					// if (ige.isClient && ownerUnit == ige.client.selectedUnit) {
+					// if (taro.isClient && ownerUnit == taro.client.selectedUnit) {
 					// console.log(itemAngle, unitAnchoredPosition)
 					// }
 
@@ -800,7 +800,7 @@ var Item = IgeEntityPhysics.extend({
 		}
 
 		// if item has owner, then remove item from owner's inventory as well
-		var ownerUnit = ige.$(this._stats.ownerUnitId);
+		var ownerUnit = taro.$(this._stats.ownerUnitId);
 		if (ownerUnit) {
 			// remove its passive attributes from its ownerUnit unit.
 			if (this._stats.bonus && this._stats.passive) {
@@ -816,14 +816,14 @@ var Item = IgeEntityPhysics.extend({
 			}
 		}
 
-		IgeEntityPhysics.prototype.remove.call(this);
+		TaroEntityPhysics.prototype.remove.call(this);
 	},
 
 	streamUpdateData: function (queuedData) {
 		var self = this;
-		IgeEntity.prototype.streamUpdateData.call(this, queuedData);
+		TaroEntity.prototype.streamUpdateData.call(this, queuedData);
 
-		// ige.devLog("Item streamUpdateData ", data)
+		// taro.devLog("Item streamUpdateData ", data)
 		// console.log(data, this._streamMode, this.id());
 		for (var i = 0; i < queuedData.length; i++) {
 			var data = queuedData[i];
@@ -832,14 +832,14 @@ var Item = IgeEntityPhysics.extend({
 
 				switch (attrName) {
 					case 'ownerUnitId':
-						if (ige.isClient) {
-							var newOwner = ige.$(newValue);
+						if (taro.isClient) {
+							var newOwner = taro.$(newValue);
 							self.setOwnerUnit(newOwner);
 						}
 						break;
 					case 'scale':
 					case 'scaleBody':
-						if (ige.isClient) {
+						if (taro.isClient) {
 							self._stats.scale = newValue;
 							self._scaleTexture();
 
@@ -859,12 +859,12 @@ var Item = IgeEntityPhysics.extend({
 						break;
 					// case 'use':
 					// 	// only run client-side use for other players' units, because my player's unit's use() will get executed via actionComponent.
-					// 	if (ige.isClient) {
+					// 	if (taro.isClient) {
 					// 		self.use();
 					// 	}
 					// 	break;
 					case 'hidden':
-						if (ige.isClient) {
+						if (taro.isClient) {
 							if (newValue) {
 								self.hide();
 								this.emit('hide');
@@ -879,34 +879,34 @@ var Item = IgeEntityPhysics.extend({
 					case 'quantity':
 						self.updateQuantity(newValue);
 						var owner = self.getOwnerUnit();
-						if (ige.isClient && ige.client.selectedUnit == owner) {
-							ige.itemUi.updateItemQuantity(self);
+						if (taro.isClient && taro.client.selectedUnit == owner) {
+							taro.itemUi.updateItemQuantity(self);
 						}
 						break;
 					case 'description':
 						var owner = self.getOwnerUnit();
-						if (ige.isClient && ige.client.selectedUnit == owner) {
-							ige.itemUi.updateItemDescription(this);
+						if (taro.isClient && taro.client.selectedUnit == owner) {
+							taro.itemUi.updateItemDescription(this);
 						}
 
 						break;
 					case 'name':
 						var owner = self.getOwnerUnit();
-						if (ige.isClient && ige.client.selectedUnit == owner) {
-							ige.itemUi.updateItemInfo(this);
-							ige.itemUi.updateItemDescription(this);
+						if (taro.isClient && taro.client.selectedUnit == owner) {
+							taro.itemUi.updateItemInfo(this);
+							taro.itemUi.updateItemDescription(this);
 						}
 						break;
 
 					case 'inventoryImage':
 						var owner = self.getOwnerUnit();
-						if (ige.isClient && ige.client.selectedUnit == owner) {
-							ige.itemUi.updateItemSlot(this, this._stats.slotIndex);
+						if (taro.isClient && taro.client.selectedUnit == owner) {
+							taro.itemUi.updateItemSlot(this, this._stats.slotIndex);
 						}
 						break;
 					case 'inventorySlotColor':
 						var owner = self.getOwnerUnit();
-						if (ige.isClient && ige.client.selectedUnit == owner) {
+						if (taro.isClient && taro.client.selectedUnit == owner) {
 							owner.inventory.update();
 						}
 						break;
@@ -940,7 +940,7 @@ var Item = IgeEntityPhysics.extend({
 
 			self.translateTo(x, y);
 
-			if (ige.isClient && ige.client.selectedUnit == ownerUnit) {
+			if (taro.isClient && taro.client.selectedUnit == ownerUnit) {
 				if (self._stats.controls && self._stats.controls.mouseBehaviour) {
 					if (self._stats.controls.mouseBehaviour.flipSpriteHorizontallyWRTMouse) {
 						if (rotate > 0 && rotate < Math.PI) {
@@ -960,13 +960,13 @@ var Item = IgeEntityPhysics.extend({
 		}
 
 		// if entity (unit/item/player/projectile) has attribute, run regenerate
-		if (ige.isServer) {
+		if (taro.isServer) {
 			if (this.attribute) {
 				this.attribute.regenerate();
 			}
 		}
 
-		if (ige.physics && ige.physics.engine != 'CRASH') {
+		if (taro.physics && taro.physics.engine != 'CRASH') {
 			this.processBox2dQueue();
 		}
 	},
@@ -974,7 +974,7 @@ var Item = IgeEntityPhysics.extend({
 	loadPersistentData: function (persistData) {
 		var self = this;
 		if (persistData) {
-			IgeEntity.prototype.loadPersistentData.call(this, persistData);
+			TaroEntity.prototype.loadPersistentData.call(this, persistData);
 		}
 	},
 	/**
@@ -982,13 +982,13 @@ var Item = IgeEntityPhysics.extend({
 	 * @param ctx The canvas context to render to.
 	 */
 	tick: function (ctx) {
-		if (ige.isClient && !ige.client.itemRenderEnabled) return;
-		// Call the IgeEntity (super-class) tick() method
-		IgeEntity.prototype.tick.call(this, ctx);
+		if (taro.isClient && !taro.client.itemRenderEnabled) return;
+		// Call the TaroEntity (super-class) tick() method
+		TaroEntity.prototype.tick.call(this, ctx);
 	},
 	destroy: function () {
 		this.playEffect('destroy');
-		IgeEntityPhysics.prototype.destroy.call(this);
+		TaroEntityPhysics.prototype.destroy.call(this);
 	}
 });
 

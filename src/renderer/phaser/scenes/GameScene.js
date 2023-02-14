@@ -23,44 +23,44 @@ var GameScene = /** @class */ (function (_super) {
     }
     GameScene.prototype.init = function () {
         var _this = this;
-        if (ige.isMobile) {
+        if (taro.isMobile) {
             this.scene.launch('MobileControls');
         }
         var camera = this.cameras.main;
         this.scale.on(Phaser.Scale.Events.RESIZE, function () {
             if (_this.zoomSize) {
                 camera.zoom = _this.calculateZoom();
-                ige.client.emit('scale', { ratio: camera.zoom });
+                taro.client.emit('scale', { ratio: camera.zoom });
             }
         });
-        ige.client.on('zoom', function (height) {
+        taro.client.on('zoom', function (height) {
             if (_this.zoomSize === height * 2.15) {
                 return;
             }
             _this.setZoomSize(height);
             var ratio = _this.calculateZoom();
             camera.zoomTo(ratio, 1000, Phaser.Math.Easing.Quadratic.Out, true);
-            ige.client.emit('scale', { ratio: ratio });
+            taro.client.emit('scale', { ratio: ratio });
         });
-        ige.client.on('create-unit', function (unit) {
+        taro.client.on('create-unit', function (unit) {
             new PhaserUnit(_this, unit);
         });
-        ige.client.on('create-item', function (item) {
+        taro.client.on('create-item', function (item) {
             new PhaserItem(_this, item);
         });
-        ige.client.on('create-projectile', function (projectile) {
+        taro.client.on('create-projectile', function (projectile) {
             new PhaserProjectile(_this, projectile);
         });
-        ige.client.on('create-region', function (region) {
+        taro.client.on('create-region', function (region) {
             new PhaserRegion(_this, region);
         });
-        ige.client.on('floating-text', function (data) {
+        taro.client.on('floating-text', function (data) {
             new PhaserFloatingText(_this, data);
         });
-        ige.client.on('stop-follow', function () {
+        taro.client.on('stop-follow', function () {
             camera.stopFollow();
         });
-        ige.client.on('position-camera', function (x, y) {
+        taro.client.on('position-camera', function (x, y) {
             x -= camera.width / 2;
             y -= camera.height / 2;
             camera.setScroll(x, y);
@@ -68,7 +68,7 @@ var GameScene = /** @class */ (function (_super) {
     };
     GameScene.prototype.preload = function () {
         var _this = this;
-        var data = ige.game.data;
+        var data = taro.game.data;
         for (var type in data.unitTypes) {
             this.loadEntity("unit/".concat(type), data.unitTypes[type]);
         }
@@ -147,10 +147,10 @@ var GameScene = /** @class */ (function (_super) {
     };
     GameScene.prototype.create = function () {
         var _this = this;
-        ige.client.rendererLoaded.resolve();
+        taro.client.rendererLoaded.resolve();
         var map = this.make.tilemap({ key: 'map' });
-        var data = ige.game.data;
-        var scaleFactor = ige.scaleMapDetails.scaleFactor;
+        var data = taro.game.data;
+        var scaleFactor = taro.scaleMapDetails.scaleFactor;
         data.map.tilesets.forEach(function (tileset) {
             var key = "tiles/".concat(tileset.name);
             var extrudedKey = "extruded-".concat(key);
@@ -186,7 +186,7 @@ var GameScene = /** @class */ (function (_super) {
         var camera = this.cameras.main;
         camera.centerOn(map.width * map.tileWidth / 2 * scaleFactor.x, map.height * map.tileHeight / 2 * scaleFactor.y);
         this.events.on('update', function () {
-            ige.client.emit('tick');
+            taro.client.emit('tick');
         });
         //temporary making each loaded texture not smoothed (later planned to add option for smoothing some of them)
         Object.values(this.textures.list).forEach(function (val) {
@@ -275,7 +275,7 @@ var GameScene = /** @class */ (function (_super) {
     };
     GameScene.prototype.update = function () {
         var worldPoint = this.cameras.main.getWorldPoint(this.input.activePointer.x, this.input.activePointer.y);
-        ige.input.emit('pointermove', [{
+        taro.input.emit('pointermove', [{
                 x: worldPoint.x,
                 y: worldPoint.y,
             }]);

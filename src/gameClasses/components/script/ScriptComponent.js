@@ -1,4 +1,4 @@
-var ScriptComponent = IgeEntity.extend({
+var ScriptComponent = TaroEntity.extend({
 	classId: 'ScriptComponent',
 	componentId: 'script',
 
@@ -26,13 +26,13 @@ var ScriptComponent = IgeEntity.extend({
 		var self = this;
 
 		self.currentScriptId = scriptId;
-		if (ige.game.data.scripts[scriptId]) {
-			// var actions = JSON.parse(JSON.stringify(ige.game.data.scripts[scriptId].actions));
+		if (taro.game.data.scripts[scriptId]) {
+			// var actions = JSON.parse(JSON.stringify(taro.game.data.scripts[scriptId].actions));
 			var actions = self.getScriptActions(scriptId, timings);
 			if (actions) {
-				var cmd = ige.action.run(actions, localVariables);
+				var cmd = taro.action.run(actions, localVariables);
 				if (cmd == 'return') {
-					ige.log('script return called');
+					taro.log('script return called');
 					return;
 				}
 			}
@@ -48,7 +48,7 @@ var ScriptComponent = IgeEntity.extend({
 				self.scriptTime[scriptId] += elapsed;
 				var avg = self.scriptTime[scriptId] / (self.scriptRuns[scriptId] - 1);
 				if (self.scriptRuns[scriptId] % 100 == 0) {
-					console.log(`runScript: ${scriptId} ${ige.game.data.scripts[scriptId].name} [${avg} ms avg in ${self.scriptRuns[scriptId]}x]`);
+					console.log(`runScript: ${scriptId} ${taro.game.data.scripts[scriptId].name} [${avg} ms avg in ${self.scriptRuns[scriptId]}x]`);
 				}
 			}
 		}
@@ -59,7 +59,7 @@ var ScriptComponent = IgeEntity.extend({
 		if (self.scriptCache[scriptId] && (typeof mode === 'undefined' || (typeof mode === 'string' && mode != 'sandbox'))) {
 			return self.scriptCache[scriptId];
 		} else {
-			var script = ige.game.data.scripts[scriptId];
+			var script = taro.game.data.scripts[scriptId];
 			if (!script.actions) return null;
 			if (script) {
 				if (timings) {
@@ -92,7 +92,7 @@ var ScriptComponent = IgeEntity.extend({
 			tabs += '    ';
 		}
 
-		// if (ige.server.isScriptLogOn)
+		// if (taro.server.isScriptLogOn)
 		// console.log(tabs+str)
 
 		// this.logStr = this.logStr  + tabs + str
@@ -100,7 +100,7 @@ var ScriptComponent = IgeEntity.extend({
 		// if (this.entryCount > 50000)
 		// {
 
-		// 	var filename = "logs/"+ige.server.serverId+"script.log"
+		// 	var filename = "logs/"+taro.server.serverId+"script.log"
 
 		// 	fs.writeFile(filename, this.logStr, function(err) {
 		// 	    if(err) {
@@ -121,18 +121,18 @@ var ScriptComponent = IgeEntity.extend({
 		}
 
 		var scriptName = '[scriptName undefined]';
-		if (ige.game.data.scripts[this.currentScriptId]) {
-			scriptName = ige.game.data.scripts[this.currentScriptId].name;
+		if (taro.game.data.scripts[this.currentScriptId]) {
+			scriptName = taro.game.data.scripts[this.currentScriptId].name;
 		}
 
 		var record = `script '${scriptName}' in Action '${action}'`;
 		self.last50Actions.push(record);
 	},
 	errorLog: function (message) {
-		var script = ige.game.data.scripts[this.currentScriptId];
+		var script = taro.game.data.scripts[this.currentScriptId];
 		var log = `Script error '${(script) ? script.name : ''}' in Action '${this.currentActionName}' : ${message}`;
 		this.errorLogs[this.currentActionName] = log;
-		ige.devLog('script errorLog', log, message);
+		taro.devLog('script errorLog', log, message);
 		ScriptComponent.prototype.log(log);
 		return log;
 	}
