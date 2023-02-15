@@ -55,7 +55,7 @@ var PhaserRenderer = /** @class */ (function (_super) {
         else {
             _this.events.once(Phaser.Core.Events.BOOT, _this.setupInputListeners, _this);
         }
-        if (typeof ga != 'undefined' && ige.env != 'local') {
+        if (typeof ga != 'undefined' && taro.env != 'local') {
             ga('send', {
                 hitType: 'event',
                 eventCategory: 'Rendering Engine',
@@ -66,7 +66,7 @@ var PhaserRenderer = /** @class */ (function (_super) {
     }
     PhaserRenderer.prototype.setupInputListeners = function () {
         // Ask the input component to setup any listeners it has
-        ige.input.setupListeners(this.canvas);
+        taro.input.setupListeners(this.canvas);
     };
     PhaserRenderer.prototype.getViewportBounds = function () {
         return this.scene.getScene('Game').cameras.main.worldView;

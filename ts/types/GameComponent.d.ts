@@ -12,7 +12,7 @@ interface EntityData {
 	}>
 }
 
-declare class GameComponent extends IgeEntity {
+declare class GameComponent extends TaroEntity {
 
 	data: {
 		map: {

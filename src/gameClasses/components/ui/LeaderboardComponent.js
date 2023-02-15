@@ -1,19 +1,19 @@
-var LeaderboardComponent = IgeEntity.extend({
+var LeaderboardComponent = TaroEntity.extend({
 	classId: 'LeaderboardComponent',
 	componentId: 'leaderboard',
 
 	init: function () {
 		var self = this;
-		// self.scoreAttributeId = ige.game.data.settings.scoreBoard
-		// console.log("ige.game.data.settings", ige.game.data.settings)
-		self.scoreAttributeId = ige.game.data.settings.scoreAttributeId;
+		// self.scoreAttributeId = taro.game.data.settings.scoreBoard
+		// console.log("taro.game.data.settings", taro.game.data.settings)
+		self.scoreAttributeId = taro.game.data.settings.scoreAttributeId;
 		self._hidden = false;
 
 		self.setUI();
 	},
 
 	setUI: function () {
-		if (ige.isMobile) {
+		if (taro.isMobile) {
 			$('#leaderboard-header').addClass('small');
 			$('#leaderboard').addClass('small');
 		} else {
@@ -29,7 +29,7 @@ var LeaderboardComponent = IgeEntity.extend({
 				selector: '.leaderboard-user-entry',
 				build: function ($trigger) {
 					var userData = $trigger.data();
-					var myPlayer = ige.client.myPlayer;
+					var myPlayer = taro.client.myPlayer;
 
 					if (!myPlayer || !myPlayer._stats) {
 						return;
@@ -42,9 +42,9 @@ var LeaderboardComponent = IgeEntity.extend({
 						return;
 					}
 
-					ige.leaderboard.selectedUser = userData;
+					taro.leaderboard.selectedUser = userData;
 
-					var index = mutedUsers.indexOf(ige.leaderboard.selectedUser.userId);
+					var index = mutedUsers.indexOf(taro.leaderboard.selectedUser.userId);
 
 					return {
 						callback: function (key) {
@@ -52,7 +52,7 @@ var LeaderboardComponent = IgeEntity.extend({
 								case 'unmute': {
 									mutedUsers.splice(index, 1);
 									$.ajax({
-										url: `/api/user/toggle-mute/${ige.leaderboard.selectedUser.userId}`,
+										url: `/api/user/toggle-mute/${taro.leaderboard.selectedUser.userId}`,
 										type: 'POST',
 										success: function (data) {
 											console.log(data);											// alert('request sent');
@@ -61,9 +61,9 @@ var LeaderboardComponent = IgeEntity.extend({
 									break;
 								}
 								case 'mute': {
-									mutedUsers.push(ige.leaderboard.selectedUser.userId);
+									mutedUsers.push(taro.leaderboard.selectedUser.userId);
 									$.ajax({
-										url: `/api/user/toggle-mute/${ige.leaderboard.selectedUser.userId}`,
+										url: `/api/user/toggle-mute/${taro.leaderboard.selectedUser.userId}`,
 										type: 'POST',
 										success: function (data) {
 											console.log(data);											// alert('request sent');
@@ -73,7 +73,7 @@ var LeaderboardComponent = IgeEntity.extend({
 								}
 								case 'addFriend': {
 									$.ajax({
-										url: `/api/user/request/${ige.leaderboard.selectedUser.userId}`,
+										url: `/api/user/request/${taro.leaderboard.selectedUser.userId}`,
 										type: 'POST',
 										success: function (data) {
 											alert('request sent');
@@ -89,11 +89,11 @@ var LeaderboardComponent = IgeEntity.extend({
 							},
 							separator: { type: 'cm_separator' },
 							unmute: {
-								name: `Unmute ${ige.leaderboard.selectedUser.userName}`,
+								name: `Unmute ${taro.leaderboard.selectedUser.userName}`,
 								visible: index > -1
 							},
 							mute: {
-								name: `Mute ${ige.leaderboard.selectedUser.userName}`,
+								name: `Mute ${taro.leaderboard.selectedUser.userName}`,
 								visible: index === -1,
 								className: 'context-menu-item context-menu-hover context-menu-danger'
 							}
@@ -125,10 +125,10 @@ var LeaderboardComponent = IgeEntity.extend({
 		var self = this;
 		var DEFAULT_COLOR = 'white';
 
-		if (ige.isClient) {
+		if (taro.isClient) {
 			var sortedScores = [];
-			var players = ige.$$('player');
-			var topPlayersToShow = ige.isMobile ? 3 : 10;
+			var players = taro.$$('player');
+			var topPlayersToShow = taro.isMobile ? 3 : 10;
 
 			players.forEach(function (player) {
 				if (player._stats && player._stats.clientId) // only display human players on scoreboard
@@ -154,17 +154,17 @@ var LeaderboardComponent = IgeEntity.extend({
 			var scoreboard = '';
 			for (var i = sortedScores.length - 1; i >= 0; i--) {
 				var clientId = sortedScores[i].key;
-				var player = ige.game.getPlayerByClientId(clientId);
+				var player = taro.game.getPlayerByClientId(clientId);
 				var defaultFontWeight = 500;
 				if (player) {
 					var color = null; // color to indicate human, animal, or my player on scoreboard
 
-					var playerType = ige.game.getAsset('playerTypes', player._stats.playerTypeId);
+					var playerType = taro.game.getAsset('playerTypes', player._stats.playerTypeId);
 
 					if (playerType && playerType.color) {
 						color = playerType.color;
 					}
-					if (player._stats.clientId == ige.network.id()) {
+					if (player._stats.clientId == taro.network.id()) {
 						defaultFontWeight = 800;
 						color = '#99FF00';
 					}
@@ -178,16 +178,16 @@ var LeaderboardComponent = IgeEntity.extend({
 				}
 			}
 
-			ige.client.clientCount = sortedScores.length;
+			taro.client.clientCount = sortedScores.length;
 
 			$('#player-count').html(players.length);
 
 			if (self._hidden) {
 				$('#scoreboard').html('');
-				$('#scoreboard-toggle').html('&nbsp;<i class="far fa-caret-square-down" aria-hidden="true" onclick="ige.scoreboard.toggleScores()" style="cursor:pointer;"></i>');
+				$('#scoreboard-toggle').html('&nbsp;<i class="far fa-caret-square-down" aria-hidden="true" onclick="taro.scoreboard.toggleScores()" style="cursor:pointer;"></i>');
 			} else {
 				$('#scoreboard').html(scoreboard);
-				$('#scoreboard-toggle').html('&nbsp;<i class="far fa-caret-square-up" aria-hidden="true" onclick="ige.scoreboard.toggleScores()" style="cursor:pointer;"></i>');
+				$('#scoreboard-toggle').html('&nbsp;<i class="far fa-caret-square-up" aria-hidden="true" onclick="taro.scoreboard.toggleScores()" style="cursor:pointer;"></i>');
 			}
 		}
 	},

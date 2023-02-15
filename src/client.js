@@ -13,7 +13,7 @@ $(document).mousedown(function() {
 
 const statsPanels = {}; // will we need this?
 
-const Client = IgeEventingClass.extend({
+const Client = TaroEventingClass.extend({
 	classId: 'Client',
 
 	init: function() {
@@ -23,7 +23,7 @@ const Client = IgeEventingClass.extend({
 
 		console.log('window.location.hostname: ', window.location.hostname); // unnecessary
 
-		if (window.location.hostname == 'localhost') ige.env = 'local';
+		if (window.location.hostname == 'localhost') taro.env = 'local';
 
 		this.entityUpdateQueue = {};
 		this.errorLogs = [];
@@ -38,7 +38,7 @@ const Client = IgeEventingClass.extend({
 			})
 		);
 
-		this.igeEngineStarted = $.Deferred();
+		this.taroEngineStarted = $.Deferred();
 		this.physicsConfigLoaded = $.Deferred();
 		this.mapLoaded = $.Deferred();
 		this.rendererLoaded = $.Deferred();
@@ -121,7 +121,7 @@ const Client = IgeEventingClass.extend({
 
 		//go fetch
 
-		ige.addComponent(GameComponent);
+		taro.addComponent(GameComponent);
 		// we're going to try and insert the fetch here
 		let promise = new Promise((resolve, reject) => {
 			// if the gameJson is available as a global object, use it instead of sending another ajax request
@@ -165,25 +165,25 @@ const Client = IgeEventingClass.extend({
 		});
 
 		promise.then((game) => {
-			ige.game.data = game.data;
-			ige.addComponent(IgeInputComponent);
-			ige.entitiesToRender = new EntitiesToRender();
-			ige.renderer = new PhaserRenderer();
+			taro.game.data = game.data;
+			taro.addComponent(TaroInputComponent);
+			taro.entitiesToRender = new EntitiesToRender();
+			taro.renderer = new PhaserRenderer();
 
 			if(!window.isStandalone){
 				this.servers = this.getServersArray();
 			}
 
-			// add components to ige instance
+			// add components to taro instance
 			// old comment => 'components required for client-side game logic'
-			ige.addComponent(IgeNetIoComponent);
-			ige.addComponent(SoundComponent);
+			taro.addComponent(TaroNetIoComponent);
+			taro.addComponent(SoundComponent);
 
-			ige.addComponent(MenuUiComponent);
-			ige.addComponent(TradeUiComponent); // could we comment this one out?
+			taro.addComponent(MenuUiComponent);
+			taro.addComponent(TradeUiComponent); // could we comment this one out?
 
-			if (ige.isMobile) {
-				ige.addComponent(MobileControlsComponent);
+			if (taro.isMobile) {
+				taro.addComponent(MobileControlsComponent);
 			}
 		})
 			.catch((err) => {
@@ -208,7 +208,7 @@ const Client = IgeEventingClass.extend({
 			//
 			// if our url vars contained a serverId we are adding it to params
 			// ADDING check for engine start resolved
-			$.when(this.igeEngineStarted).done(() => {
+			$.when(this.taroEngineStarted).done(() => {
 
 				const params = this.getUrlVars();
 				this.serverFound = false;
@@ -256,12 +256,12 @@ const Client = IgeEventingClass.extend({
 
 	loadPhysics: function() {
 		// this will be empty string in data if no client-side physics
-		const clientPhysicsEngine = ige.game.data.defaultData.clientPhysicsEngine;
-		const serverPhysicsEngine = ige.game.data.defaultData.physicsEngine;
+		const clientPhysicsEngine = taro.game.data.defaultData.clientPhysicsEngine;
+		const serverPhysicsEngine = taro.game.data.defaultData.physicsEngine;
 
 		if (clientPhysicsEngine) {
 
-			ige.addComponent(PhysicsComponent)
+			taro.addComponent(PhysicsComponent)
 				.physics.sleep(true);
 		}
 
@@ -270,20 +270,20 @@ const Client = IgeEventingClass.extend({
 
 	loadMap: function() {
 		//we need the contents of physicsConfig to progress
-		ige.addComponent(MapComponent);
-		ige.addComponent(RegionManager);
+		taro.addComponent(MapComponent);
+		taro.addComponent(RegionManager);
 
-		ige.menuUi.clipImageForShop();
-		ige.scaleMap(ige.game.data.map);
+		taro.menuUi.clipImageForShop();
+		taro.scaleMap(taro.game.data.map);
 
-		ige.map.load(ige.game.data.map);
+		taro.map.load(taro.game.data.map);
 	},
 
 	// new language for old 'initEngine' method
 	//
 	configureEngine: function() {
 		// let's make it easier by assigning the game data to a variable
-		const gameData = ige.game.data;
+		const gameData = taro.game.data;
 
 		if (!gameData.isDeveloper) { // .isDeveloper property seems to be outdated
 
@@ -294,14 +294,14 @@ const Client = IgeEventingClass.extend({
 
 		$.when(this.physicsConfigLoaded).done(() => {
 
-			this.startIgeEngine();
+			this.startTaroEngine();
 
 			this.loadMap();
 
 			// still doing things only after physics load
 			if (gameData.defaultData && !isNaN(gameData.defaultData.frameRate)) {
 
-				ige._physicsTickRate = Math.max(
+				taro._physicsTickRate = Math.max(
 					// old comment => 'keep fps range between 15 and 60'
 					20,
 					Math.min(
@@ -312,7 +312,7 @@ const Client = IgeEventingClass.extend({
 				);
 			}
 
-			if (ige.physics) {
+			if (taro.physics) {
 				// old comment => 'always enable CSP'
 				this.loadCSP();
 			}
@@ -321,17 +321,17 @@ const Client = IgeEventingClass.extend({
 			if (mode == 'sandbox') {
 				$.when(this.mapLoaded, this.rendererLoaded)
 					.done(() => {
-						ige.mapEditor.scanMapLayers();
-						ige.mapEditor.drawTile();
-						ige.mapEditor.addUI();
-						ige.mapEditor.customEditor();
+						taro.mapEditor.scanMapLayers();
+						taro.mapEditor.drawTile();
+						taro.mapEditor.addUI();
+						taro.mapEditor.customEditor();
 
 						if (!gameData.isDeveloper) {
 							//
-							ige.mapEditor.selectEntities = false;
+							taro.mapEditor.selectEntities = false;
 						}
 
-						ige.setFps(15);
+						taro.setFps(15);
 						$('#loading-container').addClass('slider-out');
 					})
 					.fail((err) => {
@@ -342,11 +342,11 @@ const Client = IgeEventingClass.extend({
 			}
 
 			// don't really know if this needs to be inside this
-			ige.addComponent(VariableComponent);
+			taro.addComponent(VariableComponent);
 
 			if(gameData.isDeveloper) {
 
-				ige.addComponent(DevConsoleComponent);
+				taro.addComponent(DevConsoleComponent);
 			}
 		});
 
@@ -357,26 +357,26 @@ const Client = IgeEventingClass.extend({
 		}
 
 		//don't think these depend on physcis
-		ige.menuUi.toggleScoreBoard();
-		ige.menuUi.toggleLeaderBoard();
+		taro.menuUi.toggleScoreBoard();
+		taro.menuUi.toggleLeaderBoard();
 
 		// this is viewport stuff
-		// doing these with this.igeEngineStarted.done()
+		// doing these with this.taroEngineStarted.done()
 		// we can move the Deferred for mapLoaded to before engine start
 
-		$.when(this.igeEngineStarted, this.mapLoaded, this.rendererLoaded).done(() => {
+		$.when(this.taroEngineStarted, this.mapLoaded, this.rendererLoaded).done(() => {
 			// old comment => 'center camera while loading'
-			const tileWidth = ige.scaleMapDetails.tileWidth;
-			const tileHeight = ige.scaleMapDetails.tileHeight;
+			const tileWidth = taro.scaleMapDetails.tileWidth;
+			const tileHeight = taro.scaleMapDetails.tileHeight;
 			const params = this.getUrlVars();
 			
-			ige.client.vp1.camera.translateTo(
-				(ige.map.data.width * tileWidth) / 2,
-				(ige.map.data.height * tileHeight) /2,
+			taro.client.vp1.camera.translateTo(
+				(taro.map.data.width * tileWidth) / 2,
+				(taro.map.data.height * tileHeight) /2,
 				0
 			);
 
-			ige.addComponent(AdComponent);
+			taro.addComponent(AdComponent);
 
 			let zoom = 1000;
 
@@ -391,7 +391,7 @@ const Client = IgeEventingClass.extend({
 
 			this.setZoom(zoom);
 
-			ige.addComponent(TimerComponent)
+			taro.addComponent(TimerComponent)
 				.addComponent(ThemeComponent)
 				.addComponent(PlayerUiComponent)
 				.addComponent(UnitUiComponent)
@@ -400,11 +400,11 @@ const Client = IgeEventingClass.extend({
 				// old comment => 'game data is needed to populate shop
 				.addComponent(ShopComponent);
 
-			ige.shop.enableShop();
+			taro.shop.enableShop();
 
 			//old comments => 'load sound and music when game starts'
-			ige.sound.preLoadSound();
-			ige.sound.preLoadMusic();
+			taro.sound.preLoadSound();
+			taro.sound.preLoadMusic();
 
 			window.activatePlayGame = true; // is there a reason this line was repeated?
 
@@ -427,51 +427,51 @@ const Client = IgeEventingClass.extend({
 
 	},
 
-	startIgeEngine: function() {
+	startTaroEngine: function() {
 
-		ige.start((success) => {
+		taro.start((success) => {
 
 			if (success) {
 
-				this.rootScene = new IgeScene2d()
+				this.rootScene = new TaroScene2d()
 					.id('rootScene')
 					.drawBounds(false);
 
-				this.minimapScene = new IgeScene2d()
+				this.minimapScene = new TaroScene2d()
 					.id('minimapScene')
 					.drawBounds(false);
 
-				this.tilesheetScene = new IgeScene2d()
+				this.tilesheetScene = new TaroScene2d()
 					.id('tilesheetScene')
 					.drawBounds(true)
 					.drawMouse(true);
 
-				this.mainScene = new IgeScene2d()
+				this.mainScene = new TaroScene2d()
 					.id('baseScene') // torturing me with the naming
 					.mount(this.rootScene)
 					.drawMouse(true);
 
-				this.objectScene = new IgeScene2d()
+				this.objectScene = new TaroScene2d()
 					.id('objectScene')
 					.mount(this.mainScene);
 
 				// moving this up here so we can give sandbox the map pan component below
-				this.vp1 = new IgeViewport()
+				this.vp1 = new TaroViewport()
 					.id('vp1')
 					.autoSize(true)
 					.scene(this.rootScene)
 					.drawBounds(false)
-					.mount(ige);
+					.mount(taro);
 
 				// sandbox check for minimap
 				if (mode == 'sandbox') {
 
-					ige.addComponent(MapEditorComponent)
+					taro.addComponent(MapEditorComponent)
 						.mapEditor.createMiniMap();
 
 					// sandbox also gets a second viewport
 					// moved the code under a duplicate conditional
-					this.vp2 = new IgeViewport()
+					this.vp2 = new TaroViewport()
 						.id('vp2')
 						.layer(100)
 						.drawBounds(true)
@@ -482,7 +482,7 @@ const Client = IgeEventingClass.extend({
 						.bottom(0)
 						.right(0)
 						.scene(this.tilesheetScene)
-						.mount(ige);
+						.mount(taro);
 
 					// sandbox also gets map pan components
 					this.vp1.addComponent(MapPanComponent)
@@ -491,7 +491,7 @@ const Client = IgeEventingClass.extend({
 					this.vp2.addComponent(MapPanComponent)
 						.mapPan.enabled(true);
 
-					ige.client.vp1.drawBounds(true);
+					taro.client.vp1.drawBounds(true);
 
 				} else if (mode == 'play') {
 
@@ -501,9 +501,9 @@ const Client = IgeEventingClass.extend({
 				}
 
 				// moved this down here
-				ige._selectedViewport = this.vp1;
+				taro._selectedViewport = this.vp1;
 
-				this.igeEngineStarted.resolve();
+				this.taroEngineStarted.resolve();
 			}
 		});
 	},
@@ -566,24 +566,24 @@ const Client = IgeEventingClass.extend({
 
 	connectToServer: function() {
 		// if typeof args[1] == 'function', callback(args[0])
-		ige.network.start(ige.client.server, (clientServer) => { // changed param from 'data' to clientServer
+		taro.network.start(taro.client.server, (clientServer) => { // changed param from 'data' to clientServer
 
-			for (let serverObj of ige.client.servers) {
+			for (let serverObj of taro.client.servers) {
 
 				if (serverObj.url == clientServer.url) {
 
-					ige.client.server = serverObj;
+					taro.client.server = serverObj;
 					break;
 				}
 			}
 
-			if (ige.client.server) {
+			if (taro.client.server) {
 
-				const serverIP = ige.client.server.url.split('://')[1];
+				const serverIP = taro.client.server.url.split('://')[1];
 
 				if (serverIP) {
 
-					const serverName = ige.client.server.name || serverIP.split('.')[0];
+					const serverName = taro.client.server.name || serverIP.split('.')[0];
 
 					if (serverName) {
 
@@ -594,20 +594,20 @@ const Client = IgeEventingClass.extend({
 
 			$('#loading-container').addClass('slider-out');
 
-			console.log('connected to ', ige.client.server.url, 'clientId ', ige.network.id()); // idk if this needs to be in production
+			console.log('connected to ', taro.client.server.url, 'clientId ', taro.network.id()); // idk if this needs to be in production
 
-			ige.client.defineNetworkEvents();
+			taro.client.defineNetworkEvents();
 
-			ige.network.send('igeChatJoinRoom', '1');
+			taro.network.send('taroChatJoinRoom', '1');
 
-			ige.addComponent(IgeChatComponent);
-			ige.addComponent(VideoChatComponent); // shall we talk about the elephant in the room?
+			taro.addComponent(TaroChatComponent);
+			taro.addComponent(VideoChatComponent); // shall we talk about the elephant in the room?
 
 			// old comment => 'check for all of the existing entities in the game
-			ige.network.addComponent(IgeStreamComponent);
+			taro.network.addComponent(TaroStreamComponent);
 
 			// old comment => 'create a listener that will fire whenever an entity is created because of the incoming stream data'
-			ige.network.stream.on('entityCreated', (entity) => {
+			taro.network.stream.on('entityCreated', (entity) => {
 
 				if (entity._category == 'unit') {
 					// old comment => 'unit detected. add it to units array'
@@ -616,7 +616,7 @@ const Client = IgeEventingClass.extend({
 
 					if (unit._stats.ownerId) {
 						// this one can probably be refactored, but i'm not sure what it may break
-						const ownerPlayer = ige.$(unit._stats.ownerId);
+						const ownerPlayer = taro.$(unit._stats.ownerId);
 
 						if (ownerPlayer) {
 
@@ -635,14 +635,14 @@ const Client = IgeEventingClass.extend({
 
 					if (player._stats.controlledBy == 'human') {
 						// old comment => 'if the player is me'
-						if (player._stats.clientId == ige.network.id()) {
+						if (player._stats.clientId == taro.network.id()) {
 
-							ige.client.eventLog.push([
-								ige._currentTime - ige.client.eventLogStartTime,
+							taro.client.eventLog.push([
+								taro._currentTime - taro.client.eventLogStartTime,
 								'My player created'
 							]);
 							// old comment => 'declare my player'
-							ige.client.myPlayer = player;
+							taro.client.myPlayer = player;
 
 							if (typeof startVideoChat == 'function') {
 								// the elephant is back
@@ -653,7 +653,7 @@ const Client = IgeEventingClass.extend({
 						}
 						// old comment => 'if there are pre-existing units that belong to the newly detected player,
 						// assign those units' owner as this player
-						const unitsObject = ige.game.getUnitsByClientId(player._stats.clientId);
+						const unitsObject = taro.game.getUnitsByClientId(player._stats.clientId);
 
 						for (let unitId in unitsObject) {
 
@@ -665,7 +665,7 @@ const Client = IgeEventingClass.extend({
 
 						if (player._stats && player._stats.selectedUnitId) {
 
-							const unit = ige.$(player._stats.selectedUnitId);
+							const unit = taro.$(player._stats.selectedUnitId);
 
 							if (unit) {
 
@@ -673,18 +673,18 @@ const Client = IgeEventingClass.extend({
 							}
 						}
 
-						if (ige.game.data.isDeveloper ||
-							(ige.client.myPlayer &&
-								ige.client.myPlayer._stats.isUserMod)
+						if (taro.game.data.isDeveloper ||
+							(taro.client.myPlayer &&
+								taro.client.myPlayer._stats.isUserMod)
 						) {
 
-							ige.menuUi.kickPlayerFromGame(); // we should rename this method
+							taro.menuUi.kickPlayerFromGame(); // we should rename this method
 						}
 					}
 				}
 			});
 
-			ige.network.stream.on('entityDestroyed', (entityBeingDestroyed) => { // renamed param from 'unitBeingDestroyed' to 'entityBeingDestroyed'
+			taro.network.stream.on('entityDestroyed', (entityBeingDestroyed) => { // renamed param from 'unitBeingDestroyed' to 'entityBeingDestroyed'
 
 				if (entityBeingDestroyed._category == 'unit') {
 
@@ -692,16 +692,16 @@ const Client = IgeEventingClass.extend({
 
 				} else if (
 					(
-						ige.game.data.isDeveloper ||
+						taro.game.data.isDeveloper ||
 						(
-							ige.client.myPlayer &&
-							ige.client.myPlayer._stats.isUserMod
+							taro.client.myPlayer &&
+							taro.client.myPlayer._stats.isUserMod
 						)
 					) &&
 					entityBeingDestroyed._category == 'player'
 				) {
 
-					ige.menuUi.kickPlayerFromGame(entityBeingDestroyed.id()); // this is inside the 'Moderate' menu
+					taro.menuUi.kickPlayerFromGame(entityBeingDestroyed.id()); // this is inside the 'Moderate' menu
 				} else {
 					try {
 						entityBeingDestroyed.remove();
@@ -711,14 +711,14 @@ const Client = IgeEventingClass.extend({
 				}
 			});
 
-			const params = ige.client.getUrlVars();
+			const params = taro.client.getUrlVars();
 
-			ige.game.start();
-			ige.menuUi.playGame();
+			taro.game.start();
+			taro.menuUi.playGame();
 
 			if (params.guestmode == 'on') { // i removed 'this params.joinGame == 'true' || ' from the condition
 				// old comment => 'hide menu and skin shop button'
-				ige.client.guestmode = true;
+				taro.client.guestmode = true;
 				$('.open-menu-button').hide();
 				$('.open-modd-shop-button').hide();
 			}
@@ -734,82 +734,82 @@ const Client = IgeEventingClass.extend({
 	//
 	loadCSP: function() {
 
-		ige.game.cspEnabled = !!ige.game.data.defaultData.clientSidePredictionEnabled;
-		const gravity = ige.game.data.settings.gravity;
+		taro.game.cspEnabled = !!taro.game.data.defaultData.clientSidePredictionEnabled;
+		const gravity = taro.game.data.settings.gravity;
 
 		if (gravity) {
 
 			console.log('setting gravity: ', gravity); // not in prod please
-			ige.physics.gravity(gravity.x, gravity.y);
+			taro.physics.gravity(gravity.x, gravity.y);
 		}
-		if (ige.physics.engine == 'CRASH') {
-			ige.physics.addBorders();
+		if (taro.physics.engine == 'CRASH') {
+			taro.physics.addBorders();
 		}
-		ige.physics.createWorld();
-		ige.physics.start();
+		taro.physics.createWorld();
+		taro.physics.start();
 
-		ige.addComponent(TriggerComponent);
-		// ige.addComponent(VariableComponent); // this appears twice
-		ige.addComponent(ScriptComponent);
-		ige.addComponent(ConditionComponent);
-		ige.addComponent(ActionComponent);
+		taro.addComponent(TriggerComponent);
+		// taro.addComponent(VariableComponent); // this appears twice
+		taro.addComponent(ScriptComponent);
+		taro.addComponent(ConditionComponent);
+		taro.addComponent(ActionComponent);
 
 		if (typeof mode == 'string' && mode == 'sandbox') {
 
-			ige.script.runScript('initialize', {}); // why are we doing this?
+			taro.script.runScript('initialize', {}); // why are we doing this?
 		}
 	},
 
 	// not much here except definitions
 	defineNetworkEvents: function () {
 		//
-		ige.network.define('makePlayerSelectUnit', this._onMakePlayerSelectUnit);
-		ige.network.define('makePlayerCameraTrackUnit', this._onMakePlayerCameraTrackUnit);
-		ige.network.define('changePlayerCameraPanSpeed', this._onChangePlayerCameraPanSpeed);
+		taro.network.define('makePlayerSelectUnit', this._onMakePlayerSelectUnit);
+		taro.network.define('makePlayerCameraTrackUnit', this._onMakePlayerCameraTrackUnit);
+		taro.network.define('changePlayerCameraPanSpeed', this._onChangePlayerCameraPanSpeed);
 
-		ige.network.define('hideUnitFromPlayer', this._onHideUnitFromPlayer);
-		ige.network.define('showUnitFromPlayer', this._onShowUnitFromPlayer);
-		ige.network.define('hideUnitNameLabelFromPlayer', this._onHideUnitNameLabelFromPlayer);
-		ige.network.define('showUnitNameLabelFromPlayer', this._onShowUnitNameLabelFromPlayer);
+		taro.network.define('hideUnitFromPlayer', this._onHideUnitFromPlayer);
+		taro.network.define('showUnitFromPlayer', this._onShowUnitFromPlayer);
+		taro.network.define('hideUnitNameLabelFromPlayer', this._onHideUnitNameLabelFromPlayer);
+		taro.network.define('showUnitNameLabelFromPlayer', this._onShowUnitNameLabelFromPlayer);
 
-		ige.network.define('updateAllEntities', this._onUpdateAllEntities);
-		ige.network.define('teleport', this._onTeleport);
+		taro.network.define('updateAllEntities', this._onUpdateAllEntities);
+		taro.network.define('teleport', this._onTeleport);
 
-		ige.network.define('updateEntityAttribute', this._onUpdateEntityAttribute);
+		taro.network.define('updateEntityAttribute', this._onUpdateEntityAttribute);
 
-		ige.network.define('updateUiText', this._onUpdateUiText);
-		ige.network.define('updateUiTextForTime', this._onUpdateUiTextForTime);
+		taro.network.define('updateUiText', this._onUpdateUiText);
+		taro.network.define('updateUiTextForTime', this._onUpdateUiTextForTime);
 
-		ige.network.define('alertHighscore', this._onAlertHighscore);
+		taro.network.define('alertHighscore', this._onAlertHighscore);
 
-		ige.network.define('item', this._onItem);
+		taro.network.define('item', this._onItem);
 
-		ige.network.define('clientDisconnect', this._onClientDisconnect);
+		taro.network.define('clientDisconnect', this._onClientDisconnect);
 
-		ige.network.define('ui', this._onUi);
-		ige.network.define('playAd', this._onPlayAd);
-		ige.network.define('buySkin', this._onBuySkin);
-		ige.network.define('videoChat', this._onVideoChat);
+		taro.network.define('ui', this._onUi);
+		taro.network.define('playAd', this._onPlayAd);
+		taro.network.define('buySkin', this._onBuySkin);
+		taro.network.define('videoChat', this._onVideoChat);
 
-		ige.network.define('devLogs', this._onDevLogs);
-		ige.network.define('errorLogs', this._onErrorLogs);
+		taro.network.define('devLogs', this._onDevLogs);
+		taro.network.define('errorLogs', this._onErrorLogs);
 
-		ige.network.define('sound', this._onSound);
-		ige.network.define('particle', this._onParticle);
-		ige.network.define('camera', this._onCamera);
+		taro.network.define('sound', this._onSound);
+		taro.network.define('particle', this._onParticle);
+		taro.network.define('camera', this._onCamera);
 
-		ige.network.define('gameSuggestion', this._onGameSuggestion);
+		taro.network.define('gameSuggestion', this._onGameSuggestion);
 
-		ige.network.define('createFloatingText', this._onCreateFloatingText)
+		taro.network.define('createFloatingText', this._onCreateFloatingText)
 
-		ige.network.define('openShop', this._onOpenShop);
-		ige.network.define('openDialogue', this._onOpenDialogue);
-		ige.network.define('closeDialogue', this._onCloseDialogue);
+		taro.network.define('openShop', this._onOpenShop);
+		taro.network.define('openDialogue', this._onOpenDialogue);
+		taro.network.define('closeDialogue', this._onCloseDialogue);
 
-		ige.network.define('setOwner', this._setOwner);
-		ige.network.define('userJoinedGame', this._onUserJoinedGame);
+		taro.network.define('setOwner', this._setOwner);
+		taro.network.define('userJoinedGame', this._onUserJoinedGame);
 
-		ige.network.define('trade', this._onTrade);
+		taro.network.define('trade', this._onTrade);
 	},
 
 	login: function() {
@@ -849,7 +849,7 @@ const Client = IgeEventingClass.extend({
 			number: (Math.floor(Math.random() * 999) + 100) // yeah ok cool, why?
 		};
 
-		ige.client.removeOutsideEntities = undefined;
+		taro.client.removeOutsideEntities = undefined;
 		window.joinedGame = true;
 
 		$('#dev-console').hide();
@@ -860,7 +860,7 @@ const Client = IgeEventingClass.extend({
 			data.sessionId = sessionId;
 		}
 
-		if (!ige.isMobile) {
+		if (!taro.isMobile) {
 
 			$('.game-ui').show();
 		}
@@ -898,13 +898,13 @@ const Client = IgeEventingClass.extend({
 		}
 
 		// old comment => 'show popover on settings icon for low fram rate'
-		if (!ige.isMobile) {
+		if (!taro.isMobile) {
 
 			setTimeout(() => {
 
 				this.lowFPSInterval = setInterval(() => {
 
-					if (this.resolutionQuality != 'low' && ige._renderFPS < 40) { // do we still use this?
+					if (this.resolutionQuality != 'low' && taro._renderFPS < 40) { // do we still use this?
 
 						$('#setting').popover('show');
 						clearInterval(this.lowFPSInterval);
@@ -920,7 +920,7 @@ const Client = IgeEventingClass.extend({
 
 		data.isAdBlockEnabled = !!isAdBlockEnabled;
 
-		ige.network.send('joinGame', data);
+		taro.network.send('joinGame', data);
 
 		window.joinGameSent.start = Date.now();
 
@@ -929,11 +929,11 @@ const Client = IgeEventingClass.extend({
 		// old comment => 'if game was paused'
 		if (!window.playerJoined) {
 
-			ige.client.eventLog.push([
+			taro.client.eventLog.push([
 				0,
 				`joinGame sent. userId: ${userId}`
 			]);
-			ige.client.eventLogStartTime = ige._currentTime;
+			taro.client.eventLogStartTime = taro._currentTime;
 
 		}
 	},
@@ -963,7 +963,7 @@ const Client = IgeEventingClass.extend({
 			const entityData = _.cloneDeep(this.inactiveTabEntityStream[entityId]);
 			this.inactiveTabEntityStream[entityId] = [];
 
-			const entity = ige.$(entityId);
+			const entity = taro.$(entityId);
 
 			if (entity && entityData) {
 				entity.streamUpdateData(entityData);

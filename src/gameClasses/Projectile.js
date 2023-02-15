@@ -1,15 +1,15 @@
-var Projectile = IgeEntityPhysics.extend({
+var Projectile = TaroEntityPhysics.extend({
 	classId: 'Projectile',
 
 	init: function (data, entityIdFromServer) {
-		IgeEntityPhysics.prototype.init.call(this, data.defaultData);
+		TaroEntityPhysics.prototype.init.call(this, data.defaultData);
 		this.id(entityIdFromServer);
 		var self = this;
 		self.category('projectile');
 		var projectileData = {};
-		if (ige.isClient) {
-			projectileData = ige.game.getAsset('projectileTypes', data.type);
-			projectileData = _.pick(projectileData, ige.client.keysToAddBeforeRender);
+		if (taro.isClient) {
+			projectileData = taro.game.getAsset('projectileTypes', data.type);
+			projectileData = _.pick(projectileData, taro.client.keysToAddBeforeRender);
 		}
 
 		self.entityId = this._id;
@@ -37,12 +37,12 @@ var Projectile = IgeEntityPhysics.extend({
 			}
 		}
 
-		if (ige.isServer) {
-			self.mount(ige.$('baseScene'));
+		if (taro.isServer) {
+			self.mount(taro.$('baseScene'));
 		}
 
-		if (ige.isClient) {
-			ige.client.emit('create-projectile', this);
+		if (taro.isClient) {
+			taro.client.emit('create-projectile', this);
 		}
 
 		if (self._stats.states) {
@@ -74,7 +74,7 @@ var Projectile = IgeEntityPhysics.extend({
 
 		var sourceItem = this.getSourceItem();
 		if ( // stream projectile data if
-			!ige.game.data.defaultData.clientPhysicsEngine || // client side isn't running physics (csp requires physics) OR
+			!taro.game.data.defaultData.clientPhysicsEngine || // client side isn't running physics (csp requires physics) OR
 			!sourceItem || // projectile does not have source item (created via script) OR
 			(sourceItem && sourceItem._stats.projectileStreamMode) // item is set to stream its projectiles from server
 		) {
@@ -83,9 +83,9 @@ var Projectile = IgeEntityPhysics.extend({
 			this.streamMode(0);
 		}
 
-		if (ige.isServer) {
-			ige.server.totalProjectilesCreated++;
-		} else if (ige.isClient) {
+		if (taro.isServer) {
+			taro.server.totalProjectilesCreated++;
+		} else if (taro.isClient) {
 
 			if (currentState) {
 				var defaultAnimation = this._stats.animations[currentState.animation];
@@ -108,19 +108,19 @@ var Projectile = IgeEntityPhysics.extend({
 
 	_behaviour: function (ctx) {
 		// if entity (unit/item/player/projectile) has attribute, run regenerate
-		if (ige.isServer) {
+		if (taro.isServer) {
 			if (this.attribute) {
 				this.attribute.regenerate();
 			}
 		}
 
-		if (ige.physics && ige.physics.engine != 'CRASH') {
+		if (taro.physics && taro.physics.engine != 'CRASH') {
 			this.processBox2dQueue();
 		}
 	},
 
 	streamUpdateData: function (queuedData) {
-		IgeEntity.prototype.streamUpdateData.call(this, data);
+		TaroEntity.prototype.streamUpdateData.call(this, data);
 		for (var i = 0; i < queuedData.length; i++) {
 			var data = queuedData[i];
 			for (attrName in data) {
@@ -129,7 +129,7 @@ var Projectile = IgeEntityPhysics.extend({
 				switch (attrName) {
 
 					case 'scaleBody':
-						if (ige.isServer) {
+						if (taro.isServer) {
 							// finding all attach entities before changing body dimensions
 							if (this.jointsAttached) {
 								var attachedEntities = {};
@@ -141,7 +141,7 @@ var Projectile = IgeEntityPhysics.extend({
 							}
 
 							this._scaleBox2dBody(newValue);
-						} else if (ige.isClient) {
+						} else if (taro.isClient) {
 							this._stats.scale = newValue;
 							this._scaleTexture();
 						}
@@ -152,18 +152,18 @@ var Projectile = IgeEntityPhysics.extend({
 	},
 
 	tick: function (ctx) {
-		IgeEntity.prototype.tick.call(this, ctx);
+		TaroEntity.prototype.tick.call(this, ctx);
 	},
 
 	getSourceItem: function () {
 		var self = this;
 
-		return self._stats && self._stats.sourceItemId && ige.$(self._stats.sourceItemId);
+		return self._stats && self._stats.sourceItemId && taro.$(self._stats.sourceItemId);
 	},
 	destroy: function () {
 		this.playEffect('destroy');
-		IgeEntityPhysics.prototype.destroy.call(this);
-		if (ige.physics && ige.physics.engine == 'CRASH') {
+		TaroEntityPhysics.prototype.destroy.call(this);
+		if (taro.physics && taro.physics.engine == 'CRASH') {
 			this.destroyBody();
 		}
 	}

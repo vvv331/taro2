@@ -36,7 +36,7 @@ var PhaserUnit = /** @class */ (function (_super) {
             'update-attribute': entity.on('update-attribute', _this.updateAttribute, _this),
             'render-chat-bubble': entity.on('render-chat-bubble', _this.renderChat, _this),
         });
-        _this.zoomEvtListener = ige.client.on('scale', _this.scaleElements, _this);
+        _this.zoomEvtListener = taro.client.on('scale', _this.scaleElements, _this);
         return _this;
     }
     PhaserUnit.prototype.updateTexture = function (usingSkin) {
@@ -120,7 +120,7 @@ var PhaserUnit = /** @class */ (function (_super) {
         label.setFontStyle(data.bold ? 'bold' : 'normal');
         label.setFill(data.color || '#fff');
         label.setResolution(4);
-        var strokeThickness = ige.game.data.settings
+        var strokeThickness = taro.game.data.settings
             .addStrokeToNameAndAttributes !== false ? 4 : 0;
         label.setStroke('#000', strokeThickness);
         label.setText(data.text || '');
@@ -231,7 +231,7 @@ var PhaserUnit = /** @class */ (function (_super) {
     PhaserUnit.prototype.destroy = function () {
         var _this = this;
         this.scene.renderedEntities = this.scene.renderedEntities.filter(function (item) { return item !== _this.gameObject; });
-        ige.client.off('scale', this.zoomEvtListener);
+        taro.client.off('scale', this.zoomEvtListener);
         this.zoomEvtListener = null;
         if (this.scaleTween) {
             this.scaleTween.stop();

@@ -17,7 +17,7 @@ class PhaserFloatingText extends Phaser.GameObjects.Text {
 		this.setFill(data.color || '#fff');
 		this.setResolution(4);
 
-		const strokeThickness = ige.game.data.settings
+		const strokeThickness = taro.game.data.settings
 			.addStrokeToNameAndAttributes !== false ? 4 : 0;
 		this.setStroke('#000', strokeThickness);
 

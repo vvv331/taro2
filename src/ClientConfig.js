@@ -1,4 +1,4 @@
-var igeClientConfig = {
+var taroClientConfig = {
 	include: [
 		'/lib/stats.js',
 		'/lib/dat.gui.min.js',
@@ -80,5 +80,5 @@ var igeClientConfig = {
 };
 
 if (typeof (module) !== 'undefined' && typeof (module.exports) !== 'undefined') {
-	module.exports = igeClientConfig;
+	module.exports = taroClientConfig;
 }

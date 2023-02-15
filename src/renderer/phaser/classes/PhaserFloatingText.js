@@ -22,7 +22,7 @@ var PhaserFloatingText = /** @class */ (function (_super) {
         _this.setFontStyle('bold');
         _this.setFill(data.color || '#fff');
         _this.setResolution(4);
-        var strokeThickness = ige.game.data.settings
+        var strokeThickness = taro.game.data.settings
             .addStrokeToNameAndAttributes !== false ? 4 : 0;
         _this.setStroke('#000', strokeThickness);
         scene.add.existing(_this);

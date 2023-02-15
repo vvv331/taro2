@@ -2,15 +2,15 @@
  * The engine's box2d component class.
  */
 
-var PhysicsComponent = IgeEventingClass.extend({
+var PhysicsComponent = TaroEventingClass.extend({
 	classId: 'PhysicsComponent',
 	componentId: 'physics',
 
 	init: function (entity, options) {
 		// Check that the engine has not already started
 		// as this will mess everything up if it has
-		if (ige._state != 0) {
-			console.log('Cannot add box2d physics component to the ige instance once the engine has started!', 'error');
+		if (taro._state != 0) {
+			console.log('Cannot add box2d physics component to the taro instance once the engine has started!', 'error');
 		}
 
 		this._entity = entity;
@@ -27,15 +27,15 @@ var PhysicsComponent = IgeEventingClass.extend({
 		this.exponent = 2;
 		this.divisor = 80;
 
-		if (ige.isServer) {
+		if (taro.isServer) {
 			this.engine = dists.defaultEngine;
 
-			if (ige.game && ige.game.data && ige.game.data.defaultData) {
-				this.engine = ige.game.data.defaultData.physicsEngine;
+			if (taro.game && taro.game.data && taro.game.data.defaultData) {
+				this.engine = taro.game.data.defaultData.physicsEngine;
 			}
-		} else if (ige.isClient) {
-			if (ige.game && ige.game.data && ige.game.data.defaultData) {
-				this.engine = ige.game.data.defaultData.clientPhysicsEngine;
+		} else if (taro.isClient) {
+			if (taro.game && taro.game.data && taro.game.data.defaultData) {
+				this.engine = taro.game.data.defaultData.clientPhysicsEngine;
 			}
 		}
 		this.engine = this.engine.toUpperCase();
@@ -46,7 +46,7 @@ var PhysicsComponent = IgeEventingClass.extend({
 		if (this.engine) {
 			dists[this.engine].init(this);
 		} else {
-			if (ige.isClient) {
+			if (taro.isClient) {
 				alert('no physics engine selected');
 			}
 		}
@@ -156,7 +156,7 @@ var PhysicsComponent = IgeEventingClass.extend({
 	/**
 	 * Creates a Box2d body and attaches it to an IGE entity
 	 * based on the supplied body definition.
-	 * @param {IgeEntity} entity
+	 * @param {TaroEntity} entity
 	 * @param {Object} body
 	 * @return {b2Body}
 	 */
@@ -209,7 +209,7 @@ var PhysicsComponent = IgeEventingClass.extend({
 
 	// move entityA to entityB's position and create joint
 	createJoint: function (entityA, entityB, anchorA, anchorB) {
-		// ige.devLog("joint created", entityA._category, entityA._translate.x, entityA._translate.y, entityB._category, entityB._translate.x, entityB._translate.y)
+		// taro.devLog("joint created", entityA._category, entityA._translate.x, entityA._translate.y, entityB._category, entityB._translate.x, entityB._translate.y)
 		// dists[this.engine].createJoint(this, entityA, entityB, anchorA, anchorB);
 	},
 
@@ -231,9 +231,9 @@ var PhysicsComponent = IgeEventingClass.extend({
 	getBodiesInRegion: function (region) {
 		var self = this;
 
-		if (ige.physics.engine == 'crash') {
+		if (taro.physics.engine == 'crash') {
 			var collider = new self.crash.Box(new self.crash.Vector(region.x + (region.width / 2), region.y + (region.height / 2)), region.width, region.height);
-			return ige.physics.crash.search(collider);
+			return taro.physics.crash.search(collider);
 		} else {
 			var aabb = new self.b2AABB();
 
@@ -244,12 +244,12 @@ var PhysicsComponent = IgeEventingClass.extend({
 			// Query the world for overlapping shapes.
 			function getBodyCallback (fixture) {
 				if (fixture && fixture.m_body && fixture.m_body.m_fixtureList) {
-					entityId = fixture.m_body.m_fixtureList.igeId;
-					var entity = ige.$(entityId);
+					entityId = fixture.m_body.m_fixtureList.taroId;
+					var entity = taro.$(entityId);
 					if (entity) {
-						// ige.devLog("found", entity._category, entity._translate.x, entity._translate.y)
-						var entity = ige.$(entityId);
-						entities.push(ige.$(entityId));
+						// taro.devLog("found", entity._category, entity._translate.x, entity._translate.y)
+						var entity = taro.$(entityId);
+						entities.push(taro.$(entityId));
 					}
 				}
 				return true;
@@ -263,7 +263,7 @@ var PhysicsComponent = IgeEventingClass.extend({
 
 	/**
 	 * Produces static box2d bodies from passed map data.
-	 * @param {IgeTileMap2d} mapLayer
+	 * @param {TaroTileMap2d} mapLayer
 	 * @param {Function=} callback Returns true or false depending
 	 * on if the passed map data should be included as part of the
 	 * box2d static object data. This allows you to control what
@@ -274,12 +274,12 @@ var PhysicsComponent = IgeEventingClass.extend({
 	 */
 	staticsFromMap: function (mapLayer, callback) {
 		if (mapLayer == undefined) {
-			ige.server.unpublish('PhysicsComponent#51');
+			taro.server.unpublish('PhysicsComponent#51');
 		}
 
 		if (mapLayer.map) {
-			var tileWidth = ige.scaleMapDetails.tileWidth || mapLayer.tileWidth();
-			var tileHeight = ige.scaleMapDetails.tileHeight || mapLayer.tileHeight();
+			var tileWidth = taro.scaleMapDetails.tileWidth || mapLayer.tileWidth();
+			var tileHeight = taro.scaleMapDetails.tileHeight || mapLayer.tileHeight();
 			var posX; var posY;
 			var rectArray; var rectCount; var rect;
 
@@ -310,7 +310,7 @@ var PhysicsComponent = IgeEventingClass.extend({
 					};
 				}
 
-				var wall = new IgeEntityPhysics(defaultData)
+				var wall = new TaroEntityPhysics(defaultData)
 					.width(rect.width * tileWidth)
 					.height(rect.height * tileHeight)
 					.drawBounds(false)
@@ -318,7 +318,7 @@ var PhysicsComponent = IgeEventingClass.extend({
 					.category('wall');
 
 				// walls must be created immediately, because there isn't actionQueue for walls
-				ige.physics.createBody(wall, {
+				taro.physics.createBody(wall, {
 					type: 'static',
 					linearDamping: 0,
 					angularDamping: 0,
@@ -333,11 +333,11 @@ var PhysicsComponent = IgeEventingClass.extend({
 							filterCategoryBits: 0x0001, // i am
 							filterMaskBits: 0x0002 /*| 0x0004*/ | 0x0008 | 0x0010 | 0x0020 // i collide with everything except with each other (walls)
 						},
-						igeId: wall.id()
+						taroId: wall.id()
 					}]
 				});
-				if (ige.isServer) {
-					ige.server.totalWallsCreated++;
+				if (taro.isServer) {
+					taro.server.totalWallsCreated++;
 				}
 			}
 		} else {
@@ -399,7 +399,7 @@ var PhysicsComponent = IgeEventingClass.extend({
 	/**
 	 * Creates a debug entity that outputs the bounds of each box2d
 	 * body during standard engine ticks.
-	 * @param {IgeEntity} mountScene
+	 * @param {TaroEntity} mountScene
 	 */
 	enableDebug: function (mountScene) {
 		if (this.engine == 'PLANCK' || this.engine == 'CRASH') return; // planck doesn't support debugdraw
@@ -409,7 +409,7 @@ var PhysicsComponent = IgeEventingClass.extend({
 			var debugDraw = new this.b2DebugDraw();
 			this._box2dDebug = true;
 
-			debugDraw.SetSprite(ige._ctx);
+			debugDraw.SetSprite(taro._ctx);
 			debugDraw.SetDrawScale(this._scaleRatio);
 			debugDraw.SetFillAlpha(0.3);
 			debugDraw.SetLineThickness(1.0);
@@ -427,7 +427,7 @@ var PhysicsComponent = IgeEventingClass.extend({
 
 			// Create the debug painter entity and mount
 			// it to the passed scene
-			new igeClassStore.IgeBox2dDebugPainter(this._entity)
+			new taroClassStore.TaroBox2dDebugPainter(this._entity)
 				.depth(40000) // Set a really high depth
 				.drawBounds(false)
 				.mount(mountScene);
@@ -468,13 +468,13 @@ var PhysicsComponent = IgeEventingClass.extend({
 
 			if (!this._networkDebugMode) {
 				if (this._mode === 0) {
-					// Add the box2d behaviour to the ige
+					// Add the box2d behaviour to the taro
 					// console.log('starting box2d', this._entity.id(), this._entity._category);
 					this._entity.addBehaviour('box2dStep', this._behaviour);
 				} else {
 					// this._intervalTimer = setInterval(this._behaviour, 1000 / 60);
 					console.log('b2d start');
-					// this._intervalTimer = setInterval(this._behaviour, ige._tickDelta);
+					// this._intervalTimer = setInterval(this._behaviour, taro._tickDelta);
 				}
 			}
 		}
@@ -485,9 +485,9 @@ var PhysicsComponent = IgeEventingClass.extend({
 			this._active = false;
 
 			if (this._mode === 0) {
-				// Add the box2d behaviour to the ige
+				// Add the box2d behaviour to the taro
 				this._entity.removeBehaviour('box2dStep');
-				if (ige.isClient) {
+				if (taro.isClient) {
 					clearInterval(this._intervalTimer);
 				}
 			} else {
@@ -513,7 +513,7 @@ var PhysicsComponent = IgeEventingClass.extend({
 					var action = self._actionQueue.shift();
 					queueSize++;
 					if (queueSize > 1000) {
-						ige.devLog(`PhysicsComponent.js _behaviour queue looped over 1000 times. Currently processing action: ${action.type}`);
+						taro.devLog(`PhysicsComponent.js _behaviour queue looped over 1000 times. Currently processing action: ${action.type}`);
 					}
 
 					// console.log(action.type, "entity:", action.entity != null, (action.entity != null)?action.entity._category + " " + action.entity._stats.name:"null", " entityA:",  action.entityA != null, (action.entityA != null)?action.entityA._category + " " +action.entityA._stats.name:"null", " entityB:",  action.entityB != null, (action.entityB != null)?action.entityB._category + " " +action.entityB._stats.name:"null")
@@ -537,14 +537,14 @@ var PhysicsComponent = IgeEventingClass.extend({
 				}
 			}
 
-			let timeStart = ige.now;
+			let timeStart = taro.now;
 
 			// Loop the physics objects and move the entities they are assigned to
 			if (self.engine == 'crash') { // crash's engine step happens in dist.js
 				self._world.step(timeElapsedSinceLastStep);
 			} else {
 				self._world.step(timeElapsedSinceLastStep / 1000, 8, 3); // Call the world step; frame-rate, velocity iterations, position iterations
-				let nextFrameTime = ige._currentTime + (1000 / ige._physicsTickRate) - 10; // 10ms is to give extra buffer to prepare for the next frame
+				let nextFrameTime = taro._currentTime + (1000 / taro._physicsTickRate) - 10; // 10ms is to give extra buffer to prepare for the next frame
 				
 				var tempBod = self._world.getBodyList();
 
@@ -555,9 +555,9 @@ var PhysicsComponent = IgeEventingClass.extend({
 						entity = tempBod._entity;
 
 						if (entity) {
-							var mxfp = dists[ige.physics.engine].getmxfp(tempBod);
-							var x = mxfp.x * ige.physics._scaleRatio;
-							var y = mxfp.y * ige.physics._scaleRatio;
+							var mxfp = dists[taro.physics.engine].getmxfp(tempBod);
+							var x = mxfp.x * taro.physics._scaleRatio;
+							var y = mxfp.y * taro.physics._scaleRatio;
 
 							// make projectile auto-rotate toward its path. ideal for arrows or rockets that should point toward its direction
 							if (entity._category == 'projectile' &&
@@ -569,8 +569,8 @@ var PhysicsComponent = IgeEventingClass.extend({
 								var angle = tempBod.getAngle();
 							}
 
-							var tileWidth = ige.scaleMapDetails.tileWidth;
-							var tileHeight = ige.scaleMapDetails.tileHeight;
+							var tileWidth = taro.scaleMapDetails.tileWidth;
+							var tileHeight = taro.scaleMapDetails.tileHeight;
 
 							var skipBoundaryCheck = entity._stats && entity._stats.confinedWithinMapBoundaries === false;
 							var padding = tileWidth / 2;
@@ -580,37 +580,37 @@ var PhysicsComponent = IgeEventingClass.extend({
 								(entity._category == 'unit' || entity._category == 'item' || entity._category == 'projectile') &&
 								!skipBoundaryCheck &&
 								(
-									x < padding || x > (ige.map.data.width * tileWidth) - padding ||
-									y < padding || y > (ige.map.data.height * tileHeight) - padding
+									x < padding || x > (taro.map.data.width * tileWidth) - padding ||
+									y < padding || y > (taro.map.data.height * tileHeight) - padding
 								)
 							) {
 								// fire 'touchesWall' trigger when unit goes out of bounds for the first time
 								if (!entity.isOutOfBounds) {
 									if (entity._category == 'unit') {
 										// console.log("unitTouchesWall", entity.id());
-										ige.trigger.fire('unitTouchesWall', { unitId: entity.id() });
+										taro.trigger.fire('unitTouchesWall', { unitId: entity.id() });
 									} else if (entity._category == 'item') {
-										ige.trigger.fire('itemTouchesWall', { itemId: entity.id() });
+										taro.trigger.fire('itemTouchesWall', { itemId: entity.id() });
 									} else if (entity._category == 'projectile') {
-										ige.trigger.fire('projectileTouchesWall', { projectileId: entity.id() });
+										taro.trigger.fire('projectileTouchesWall', { projectileId: entity.id() });
 									}
 
 									entity.isOutOfBounds = true;
 								}
 
-								x = Math.max(Math.min(x, (ige.map.data.width * tileWidth) - padding), padding);
-								y = Math.max(Math.min(y, (ige.map.data.height * tileHeight) - padding), padding);
+								x = Math.max(Math.min(x, (taro.map.data.width * tileWidth) - padding), padding);
+								y = Math.max(Math.min(y, (taro.map.data.height * tileHeight) - padding), padding);
 							} else {
 								if (entity.isOutOfBounds) {
 									entity.isOutOfBounds = false;
 								}
 							}
 
-							if (ige.isServer) {
+							if (taro.isServer) {
 								/* server-side reconciliation */
 								// hard-correct client entity's position (teleport) if the distance between server & client is greater than 100px
 								// continuously for 10 frames in a row
-								if (ige.game.cspEnabled && entity.clientStreamedPosition) {
+								if (taro.game.cspEnabled && entity.clientStreamedPosition) {
 									var targetX = entity.clientStreamedPosition[0];
 									var targetY = entity.clientStreamedPosition[1];
 									var xDiff = targetX - x;
@@ -621,17 +621,17 @@ var PhysicsComponent = IgeEventingClass.extend({
 
 								entity.translateTo(x, y, 0);
 								entity.rotateTo(0, 0, angle);
-							} else if (ige.isClient) {
+							} else if (taro.isClient) {
 								
 								// if CSP is enabled, for my own unit, immediately move it while ignoring the server stream
-								// ige.physics must be enabled on client-side in order to simulate physics locally
-								if (ige.physics && ige.game.cspEnabled && ige.client.selectedUnit == entity) {
+								// taro.physics must be enabled on client-side in order to simulate physics locally
+								if (taro.physics && taro.game.cspEnabled && taro.client.selectedUnit == entity) {
 									if (entity.isOutOfBounds) {
 										entity.body.setPosition({ x: x / entity._b2dRef._scaleRatio, y: y / entity._b2dRef._scaleRatio });
 										entity.body.setAngle(angle);
 									}
 
-									if (entity.nextPhysicsFrame == undefined || ige._currentTime > entity.nextPhysicsFrame[0]) {
+									if (entity.nextPhysicsFrame == undefined || taro._currentTime > entity.nextPhysicsFrame[0]) {
 										entity.prevPhysicsFrame = entity.nextPhysicsFrame;
 										entity.nextPhysicsFrame = [nextFrameTime, [x, y, angle]];
 									}
@@ -654,13 +654,13 @@ var PhysicsComponent = IgeEventingClass.extend({
 							if (tempBod.asleep) {
 								// The tempBod was asleep last frame, fire an awake event
 								tempBod.asleep = false;
-								ige.physics.emit('afterAwake', entity);
+								taro.physics.emit('afterAwake', entity);
 							}
 						} else {
 							if (!tempBod.asleep) {
 								// The tempBod was awake last frame, fire an asleep event
 								tempBod.asleep = true;
-								ige.physics.emit('afterAsleep', entity);
+								taro.physics.emit('afterAsleep', entity);
 							}
 						}
 					}
@@ -668,7 +668,7 @@ var PhysicsComponent = IgeEventingClass.extend({
 					tempBod = tempBod.getNext();
 				}
 
-				ige._physicsFrames++;
+				taro._physicsFrames++;
 
 				// Clear forces because we have ended our physics simulation frame
 				self._world.clearForces();
@@ -678,7 +678,7 @@ var PhysicsComponent = IgeEventingClass.extend({
 				self.physicsTickDuration += timeEnd - timeStart;
 				if (timeEnd - self.lastSecondAt > 1000) {
 					self.lastSecondAt = timeEnd;
-					self.avgPhysicsTickDuration = self.physicsTickDuration / ige._fpsRate;
+					self.avgPhysicsTickDuration = self.physicsTickDuration / taro._fpsRate;
 					self.totalDisplacement = 0;
 					self.totalTimeElapsed = 0;
 					self.physicsTickDuration = 0;
@@ -694,7 +694,7 @@ var PhysicsComponent = IgeEventingClass.extend({
 	destroy: function () {
 		// Stop processing box2d steps
 		this._entity.removeBehaviour('box2dStep');
-		if (ige.isClient) {
+		if (taro.isClient) {
 			clearInterval(this._intervalTimer);
 		}
 		// Destroy all box2d world bodies

@@ -1,4 +1,4 @@
-declare class Item extends IgeEntityPhysics {
+declare class Item extends TaroEntityPhysics {
 
 	anchoredOffset: OffsetData;
 
