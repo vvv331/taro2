@@ -378,7 +378,7 @@ class DevModeTools extends Phaser.GameObjects.Container {
 	emptyTile(): void {
 		if (!this.modeButtons[3].active) {
 			this.tileEditor.lastSelectedTileArea = this.tileEditor.selectedTileArea;
-			this.tileEditor.selectedTileArea = { 0: { 0: -1 } };
+			this.tileEditor.selectedTileArea = { 0: { 0: 0 } };
 			this.tileEditor.activateMarkers(true);
 			this.entityEditor.activatePlacement(false);
 			this.scene.regionEditor.regionTool = false;
