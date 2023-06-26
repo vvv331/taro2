@@ -300,7 +300,6 @@ var VariableComponent = TaroEntity.extend({
 						}
 					}
 					break;
-					
 				case 'playerAttributeMin':
 					var attributeTypeId = self.getValue(text.attribute, vars);
 					if (entity && attributeTypeId) {
@@ -476,6 +475,7 @@ var VariableComponent = TaroEntity.extend({
 						}
 					}
 					break;
+					
 				case 'entityAttributeMin':
 					var attributeTypeId = self.getValue(text.attribute, vars);
 					if (entity && entity._stats.attributes && self._entity.script.action.entityCategories.indexOf(entity._category) > -1 && attributeTypeId) {
