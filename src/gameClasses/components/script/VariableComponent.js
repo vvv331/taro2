@@ -475,7 +475,7 @@ var VariableComponent = TaroEntity.extend({
 						}
 					}
 					break;
-					
+
 				case 'entityAttributeMin':
 					var attributeTypeId = self.getValue(text.attribute, vars);
 					if (entity && entity._stats.attributes && self._entity.script.action.entityCategories.indexOf(entity._category) > -1 && attributeTypeId) {
