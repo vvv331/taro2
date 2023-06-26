@@ -300,6 +300,17 @@ var VariableComponent = TaroEntity.extend({
 						}
 					}
 					break;
+
+				case 'playerAttributeRegen':
+					var attributeTypeId = self.getValue(text.attribute, vars);
+					if (entity && attributeTypeId) {
+						var attributeType = entity._stats.attributes[attributeTypeId];
+						if (attributeType) {
+							returnValue = attributeType.regenerateSpeed
+						}
+					}
+					break;
+					
 				case 'playerAttributeMin':
 					var attributeTypeId = self.getValue(text.attribute, vars);
 					if (entity && attributeTypeId) {
@@ -472,6 +483,16 @@ var VariableComponent = TaroEntity.extend({
 						var attributeType = entity._stats.attributes[attributeTypeId];
 						if (attributeType) {
 							returnValue = attributeType.max;
+						}
+					}
+					break;
+					
+				case 'entityAttributeRegen':
+					var attributeTypeId = self.getValue(text.attribute, vars);
+					if (entity && entity._stats.attributes && self._entity.script.action.entityCategories.indexOf(entity._category) > -1 && attributeTypeId) {
+						var attributeType = entity._stats.attributes[attributeTypeId];
+						if (attributeType) {
+							returnValue = attributeType.regenerateSpeed;
 						}
 					}
 					break;
